@@ -1,0 +1,37 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv
+venv
+env
+.env.local
+.env.*.local
+
+# Testing
+.pytest_cache
+.coverage
+htmlcov
+.tox
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Misc
+.DS_Store
+*.log
+*.md
+!README.md
+
+# Data and index (mounted at runtime)
+data/
+faiss_store/

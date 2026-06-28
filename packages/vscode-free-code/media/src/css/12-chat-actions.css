@@ -1,0 +1,359 @@
+/* === MODULE: chat-actions ===
+   Input textarea, action bar, icon buttons, send/stop, indicators, file chips, agent browser. */
+
+#input {
+	width: 100%;
+	resize: none;
+	line-height: 1.4;
+	overflow-x: hidden;
+	overflow-y: hidden;
+	background: var(--vscode-input-background);
+	color: var(--vscode-input-foreground);
+	border: 1px solid var(--vscode-input-border);
+	padding: 8px;
+}
+
+#input.input-drag-over {
+	outline: 1px dashed var(--vscode-focusBorder, var(--vscode-textLink-foreground));
+	background: color-mix(in srgb, var(--vscode-input-background) 85%, var(--vscode-focusBorder) 15%);
+}
+
+.chat-actions {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	min-width: 0;
+	width: 100%;
+}
+
+.chat-actions-context {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+	flex: 1;
+	min-width: 0;
+}
+
+.chat-actions-tools {
+	display: flex;
+	flex-shrink: 0;
+	align-items: center;
+	gap: 2px;
+}
+
+.chat-icon-btn {
+	box-sizing: border-box;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 6px;
+	border: 1px solid transparent;
+	background: transparent;
+	color: var(--vscode-descriptionForeground);
+	font-size: 14px;
+	line-height: 1;
+	cursor: pointer;
+	opacity: 0.88;
+}
+
+.chat-icon-btn:hover {
+	opacity: 1;
+	background: color-mix(in srgb, var(--vscode-button-background) 20%, transparent);
+	border-color: color-mix(in srgb, var(--vscode-input-border, #555) 80%, transparent);
+	color: var(--vscode-foreground);
+}
+
+.chat-actions-send {
+	box-sizing: border-box;
+	width: 30px;
+	height: 30px;
+	min-width: 30px;
+	padding: 0;
+	margin-left: 4px;
+	border-radius: 50%;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: 1px solid var(--vscode-button-border, transparent);
+	background: var(--vscode-button-background);
+	color: var(--vscode-button-foreground);
+	cursor: pointer;
+	box-shadow: 0 1px 2px color-mix(in srgb, var(--vscode-widget-shadow, #000) 25%, transparent);
+}
+
+.chat-actions-send:hover {
+	background: var(--vscode-button-hoverBackground);
+}
+
+.chat-actions-send-icon {
+	display: block;
+	font-size: 15px;
+	line-height: 1;
+	transform: translateY(-1px);
+}
+
+.chat-actions-send.chat-actions-send--stop {
+	background: color-mix(
+		in srgb,
+		var(--vscode-notificationsErrorIcon-foreground, var(--vscode-errorForeground)) 82%,
+		var(--vscode-button-background)
+	);
+	border-color: color-mix(in srgb, var(--vscode-errorForeground, #f48771) 40%, transparent);
+	color: var(--vscode-editor-background, var(--vscode-button-foreground));
+	box-shadow: 0 1px 2px color-mix(in srgb, var(--vscode-widget-shadow, #000) 30%, transparent);
+}
+
+.chat-actions-send.chat-actions-send--stop:hover {
+	background: color-mix(
+		in srgb,
+		var(--vscode-notificationsErrorIcon-foreground, var(--vscode-errorForeground)) 92%,
+		var(--vscode-button-hoverBackground, var(--vscode-button-background))
+	);
+}
+
+.chat-actions-send.chat-actions-send--stop .chat-actions-send-icon {
+	font-size: 11px;
+	transform: translateY(0);
+}
+
+#attach.chat-icon-btn {
+	font-size: 15px;
+}
+
+.model-indicator {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+	flex: 1 1 auto;
+	max-width: 100%;
+	padding: 4px 8px 4px 10px;
+	background: color-mix(in srgb, var(--vscode-editorWidget-background) 55%, transparent);
+	color: var(--vscode-descriptionForeground);
+	border: 1px solid color-mix(in srgb, var(--vscode-editorWidget-border) 70%, transparent);
+	border-radius: 999px;
+	font-size: 11px;
+	font-family: var(--vscode-editor-font-family, monospace);
+	line-height: 1.2;
+	cursor: pointer;
+}
+
+.model-indicator[hidden] {
+	display: none;
+}
+
+.profile-indicator {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+	flex: 1 1 auto;
+	max-width: 100%;
+	padding: 4px 8px 4px 10px;
+	background: color-mix(in srgb, var(--vscode-editorWidget-background) 55%, transparent);
+	color: var(--vscode-descriptionForeground);
+	border: 1px solid color-mix(in srgb, var(--vscode-editorWidget-border) 70%, transparent);
+	border-radius: 999px;
+	font-size: 11px;
+	font-family: var(--vscode-editor-font-family, monospace);
+	line-height: 1.2;
+	cursor: default;
+}
+
+.profile-indicator[hidden] {
+	display: none;
+}
+
+.profile-indicator-label {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.model-indicator:hover {
+	color: var(--vscode-foreground);
+	background: color-mix(in srgb, var(--vscode-button-background) 14%, transparent);
+	border-color: var(--vscode-focusBorder);
+}
+
+.model-indicator-dot {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--vscode-testing-iconPassed, var(--vscode-charts-green, #4caf50));
+	flex-shrink: 0;
+}
+
+.model-indicator-label {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.workspace-indicator {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+	flex: 1 1 auto;
+	max-width: 100%;
+	padding: 4px 8px 4px 10px;
+	background: color-mix(in srgb, var(--vscode-editorWidget-background) 55%, transparent);
+	color: var(--vscode-descriptionForeground);
+	border: 1px solid color-mix(in srgb, var(--vscode-editorWidget-border) 70%, transparent);
+	border-radius: 999px;
+	font-size: 11px;
+	font-family: var(--vscode-editor-font-family, monospace);
+	line-height: 1.2;
+	cursor: pointer;
+}
+
+.workspace-indicator[hidden] {
+	display: none;
+}
+
+.workspace-indicator:hover {
+	color: var(--vscode-foreground);
+	background: color-mix(in srgb, var(--vscode-button-background) 14%, transparent);
+	border-color: var(--vscode-focusBorder);
+}
+
+.workspace-indicator-icon {
+	font-size: 12px;
+	line-height: 1;
+	flex-shrink: 0;
+	opacity: 0.85;
+}
+
+.chat-actions-context .workspace-indicator,
+.chat-actions-context .profile-indicator,
+.chat-actions-context .model-indicator {
+	flex: 1 1 0;
+	min-width: 0;
+	max-width: min(260px, 100%);
+}
+
+.workspace-indicator::after,
+.model-indicator::after {
+	content: "▾";
+	font-size: 9px;
+	opacity: 0.45;
+	flex-shrink: 0;
+	margin-left: 1px;
+	line-height: 1;
+}
+
+.workspace-indicator-label {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.file-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	padding: 4px 0 2px;
+}
+
+.file-chips[hidden] {
+	display: none;
+}
+
+.agent-browser-panel {
+	display: grid;
+	gap: 6px;
+	padding: 8px;
+	border: 1px solid var(--vscode-editorWidget-border);
+	border-radius: 6px;
+	background: color-mix(in srgb, var(--vscode-editorWidget-background) 75%, transparent);
+}
+
+.agent-browser-title {
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.agent-browser-hint {
+	font-size: 11px;
+	line-height: 1.35;
+	color: var(--vscode-descriptionForeground);
+}
+
+.agent-browser-panel[hidden] {
+	display: none;
+}
+
+.agent-browser-input {
+	width: 100%;
+	padding: 6px 8px;
+	font-size: 12px;
+	background: var(--vscode-input-background);
+	color: var(--vscode-input-foreground);
+	border: 1px solid var(--vscode-input-border, transparent);
+	border-radius: 4px;
+	outline: none;
+}
+
+.agent-browser-input:focus {
+	border-color: var(--vscode-focusBorder);
+}
+
+.agent-browser-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 6px;
+}
+
+.file-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	padding: 2px 4px 2px 8px;
+	border-radius: 12px;
+	background: var(--vscode-badge-background, var(--vscode-button-secondaryBackground));
+	color: var(--vscode-badge-foreground, var(--vscode-button-secondaryForeground));
+	font-size: 11px;
+	max-width: 220px;
+	cursor: pointer;
+	border: none;
+}
+
+.file-chip:hover .file-chip-name {
+	text-decoration: underline;
+}
+
+.file-chip-name {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-family: var(--vscode-editor-font-family, monospace);
+}
+
+.file-chip-remove {
+	flex-shrink: 0;
+	background: transparent;
+	border: none;
+	color: inherit;
+	padding: 0 2px;
+	font-size: 14px;
+	line-height: 1;
+	cursor: pointer;
+	opacity: 0.6;
+	border-radius: 50%;
+}
+
+.file-chip-remove:hover {
+	opacity: 1;
+	background: color-mix(in srgb, currentColor 15%, transparent);
+}
+

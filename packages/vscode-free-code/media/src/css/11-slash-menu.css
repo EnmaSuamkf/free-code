@@ -1,0 +1,66 @@
+/* === MODULE: slash-menu ===
+   Slash command autocomplete dropdown. */
+
+.slash-menu {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 100%;
+	margin-bottom: 4px;
+	max-height: min(280px, 40vh);
+	overflow-y: auto;
+	z-index: 100;
+	border: 1px solid var(--vscode-editorWidget-border);
+	border-radius: 6px;
+	background: var(--vscode-editorWidget-background);
+	box-shadow: 0 4px 12px color-mix(in srgb, var(--vscode-widget-shadow) 40%, transparent);
+	font-size: 12px;
+}
+
+.slash-menu-heading {
+	padding: 6px 10px 4px;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--vscode-descriptionForeground);
+	border-bottom: 1px solid color-mix(in srgb, var(--vscode-editorWidget-border) 60%, transparent);
+}
+
+.slash-menu-heading:not(:first-child) {
+	margin-top: 4px;
+}
+
+.slash-menu-item {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 2px;
+	width: 100%;
+	text-align: left;
+	padding: 6px 10px;
+	border: none;
+	background: transparent;
+	color: var(--vscode-editor-foreground);
+	cursor: pointer;
+	font-family: inherit;
+	font-size: 12px;
+	line-height: 1.35;
+}
+
+.slash-menu-item:hover,
+.slash-menu-item.slash-menu-item-active {
+	background: color-mix(in srgb, var(--vscode-list-activeSelectionBackground) 60%, transparent);
+	color: var(--vscode-list-activeSelectionForeground, var(--vscode-editor-foreground));
+}
+
+.slash-menu-item .slash-menu-label {
+	font-weight: 600;
+	margin-right: 6px;
+}
+
+.slash-menu-item .slash-menu-desc {
+	color: var(--vscode-descriptionForeground);
+	font-weight: 400;
+}
+

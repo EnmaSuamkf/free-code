@@ -1,0 +1,12 @@
+
+{
+  "name": "pi-extension-mcp-atlassian",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "pi": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}

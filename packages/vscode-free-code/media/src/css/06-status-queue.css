@@ -1,0 +1,88 @@
+/* === MODULE: status-queue ===
+   Error/hint messages, empty-hint, status bar, busy spinner animation. */
+
+.message.error {
+	background: color-mix(in srgb, var(--vscode-inputValidation-errorBackground) 60%, transparent);
+	border: 1px solid var(--vscode-inputValidation-errorBorder);
+}
+
+.message.hint {
+	background: color-mix(in srgb, var(--vscode-inputValidation-warningBackground, #6b4c00) 40%, transparent);
+	border: 1px solid var(--vscode-inputValidation-warningBorder, #b07800);
+	color: var(--vscode-inputValidation-warningForeground, var(--vscode-editor-foreground));
+	font-size: 12px;
+}
+
+.message.mcp-loading {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: fit-content;
+	background: color-mix(in srgb, var(--vscode-inputValidation-warningBackground, #6b4c00) 40%, transparent);
+	border: 1px solid var(--vscode-inputValidation-warningBorder, #b07800);
+	color: var(--vscode-inputValidation-warningForeground, var(--vscode-editor-foreground));
+	font-size: 12px;
+	transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease;
+}
+
+.message.mcp-loading.done {
+	background: color-mix(in srgb, var(--vscode-testing-iconPassed, #73c991) 15%, transparent);
+	border-color: var(--vscode-testing-iconPassed, #73c991);
+	color: var(--vscode-testing-iconPassed, #73c991);
+}
+
+.mcp-loading-spinner {
+	width: 12px;
+	height: 12px;
+	border: 1.5px solid color-mix(in srgb, var(--vscode-inputValidation-warningBorder, #b07800) 40%, transparent);
+	border-top-color: var(--vscode-inputValidation-warningBorder, #b07800);
+	border-radius: 50%;
+	animation: free-code-spin 0.7s linear infinite;
+	flex-shrink: 0;
+}
+
+.mcp-loading-check {
+	flex-shrink: 0;
+	font-size: 13px;
+	line-height: 1;
+}
+
+#empty-hint {
+	padding: 10px 14px;
+	font-size: 12px;
+	color: var(--vscode-descriptionForeground);
+	background: color-mix(in srgb, var(--vscode-inputValidation-warningBackground, #6b4c00) 30%, transparent);
+	border: 1px solid var(--vscode-inputValidation-warningBorder, #b07800);
+	border-radius: 6px;
+	margin: 10px 12px 4px;
+}
+
+#messages:not(:empty) #empty-hint:not(:only-child) {
+	display: none;
+}
+
+#status {
+	min-height: 22px;
+	padding: 0 12px 8px;
+	font-size: 12px;
+	color: var(--vscode-descriptionForeground);
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+@keyframes free-code-spin {
+	to { transform: rotate(360deg); }
+}
+
+body.busy #status:not(:empty)::before {
+	content: "";
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	border: 1.5px solid color-mix(in srgb, var(--vscode-descriptionForeground) 30%, transparent);
+	border-top-color: var(--vscode-descriptionForeground);
+	border-radius: 50%;
+	animation: free-code-spin 0.7s linear infinite;
+	flex-shrink: 0;
+}

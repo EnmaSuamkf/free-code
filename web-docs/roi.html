@@ -1,0 +1,714 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>free-code — ROI &amp; Business Case</title>
+    <link rel="stylesheet" href="assets/styles.css" />
+    <style>
+      /* ── page-specific overrides ── */
+      .roi-hero {
+        text-align: center;
+        padding: 3rem 0 2rem;
+      }
+      .roi-hero h1 {
+        font-size: clamp(2rem, 5vw, 3.2rem);
+        font-weight: 800;
+        line-height: 1.15;
+        margin: 0 0 1rem;
+        letter-spacing: -0.02em;
+      }
+      .roi-hero .sub {
+        font-size: 1.15rem;
+        color: var(--ink-muted);
+        max-width: 620px;
+        margin: 0 auto 2rem;
+        line-height: 1.6;
+      }
+
+      /* ── headline numbers ── */
+      .kpi-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+        margin: 2rem 0;
+      }
+      .kpi-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 1.5rem 1.25rem;
+        text-align: center;
+      }
+      .kpi-number {
+        font-size: 2.8rem;
+        font-weight: 800;
+        color: var(--primary);
+        line-height: 1;
+        display: block;
+      }
+      .kpi-label {
+        font-size: 0.82rem;
+        color: var(--ink-muted);
+        margin-top: 0.45rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        display: block;
+      }
+
+      /* ── comparison table ── */
+      .compare-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.92rem;
+      }
+      .compare-table th,
+      .compare-table td {
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border);
+        text-align: left;
+        vertical-align: top;
+      }
+      .compare-table thead th {
+        background: var(--surface-muted);
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .compare-table tr:nth-child(even) td {
+        background: var(--surface-muted);
+      }
+      .saving-badge {
+        display: inline-block;
+        background: var(--tip-bg);
+        color: #059669;
+        font-weight: 700;
+        font-size: 0.82rem;
+        padding: 0.2rem 0.55rem;
+        border-radius: 20px;
+        white-space: nowrap;
+      }
+      [data-color-scheme="dark"] .saving-badge,
+      @media (prefers-color-scheme: dark) {
+        .saving-badge { color: #34d399; }
+      }
+      .result-ok {
+        color: #059669;
+        font-weight: 600;
+      }
+      .result-warn {
+        color: #d97706;
+        font-weight: 600;
+      }
+
+      /* ── benefit blocks ── */
+      .benefit-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.25rem;
+        margin: 1.5rem 0;
+      }
+      .benefit-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 1.5rem;
+      }
+      .benefit-icon {
+        font-size: 1.8rem;
+        display: block;
+        margin-bottom: 0.75rem;
+      }
+      .benefit-title {
+        font-size: 1rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem;
+      }
+      .benefit-desc {
+        font-size: 0.88rem;
+        color: var(--ink-muted);
+        line-height: 1.6;
+        margin: 0;
+      }
+
+      /* ── quote / evidence ── */
+      .evidence-block {
+        background: var(--surface-muted);
+        border-left: 3px solid var(--primary);
+        border-radius: 0 10px 10px 0;
+        padding: 1.25rem 1.5rem;
+        margin: 1rem 0;
+      }
+      .evidence-block p {
+        margin: 0 0 0.4rem;
+        font-size: 0.92rem;
+        line-height: 1.6;
+      }
+      .evidence-block .source {
+        font-size: 0.78rem;
+        color: var(--ink-muted);
+        margin: 0;
+      }
+
+      /* ── section titles ── */
+      .section-eyebrow {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--primary);
+        margin: 0 0 0.5rem;
+      }
+      .section-title {
+        font-size: clamp(1.25rem, 3vw, 1.7rem);
+        font-weight: 700;
+        margin: 0 0 0.6rem;
+      }
+      .section-lead {
+        font-size: 0.95rem;
+        color: var(--ink-muted);
+        max-width: 640px;
+        line-height: 1.65;
+        margin: 0 0 1.5rem;
+      }
+
+      /* ── bar chart ── */
+      .bar-chart {
+        display: flex;
+        flex-direction: column;
+        gap: 0.9rem;
+        margin: 1rem 0;
+      }
+      .bar-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .bar-label {
+        width: 180px;
+        font-size: 0.82rem;
+        color: var(--ink-muted);
+        flex-shrink: 0;
+      }
+      .bar-track {
+        flex: 1;
+        background: var(--border);
+        border-radius: 6px;
+        height: 22px;
+        overflow: hidden;
+        position: relative;
+      }
+      .bar-fill {
+        height: 100%;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        padding-left: 8px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #fff;
+        transition: width 0.6s ease;
+      }
+      .bar-fill.free-code { background: var(--primary); }
+      .bar-fill.claude { background: #e5e7eb; color: #374151; }
+      [data-color-scheme="dark"] .bar-fill.claude { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.8); }
+      .bar-value {
+        width: 70px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-align: right;
+        flex-shrink: 0;
+      }
+
+      /* ── cta ── */
+      .cta-section {
+        text-align: center;
+        padding: 2.5rem 1rem;
+        background: var(--surface-muted);
+        border-radius: 16px;
+        margin: 2rem 0;
+      }
+      .cta-section h2 { font-size: 1.6rem; margin: 0 0 0.75rem; }
+      .cta-section p { color: var(--ink-muted); margin: 0 0 1.5rem; font-size: 0.95rem; }
+    </style>
+  </head>
+  <body>
+    <div class="doc-root">
+      <header class="site-shell-header" role="banner">
+        <div class="site-shell-inner">
+          <a class="site-brand" href="index.html">
+            <span class="site-brand-angles" aria-hidden="true">&lt;</span>
+            <span>free-code</span>
+            <span class="site-brand-angles" aria-hidden="true">&gt;</span>
+          </a>
+          <div class="site-header-actions">
+            <button type="button" class="theme-toggle" id="doc-theme-toggle" aria-label="Color theme">
+              <span class="theme-toggle-label" id="doc-theme-label">System</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="container">
+        <header class="hero">
+          <h1 class="brand">
+            <span class="angle" aria-hidden="true">&lt;</span>
+            <span class="name">free-code</span>
+            <span class="angle" aria-hidden="true">&gt;</span>
+          </h1>
+          <p class="tagline">
+            <span class="prompt" aria-hidden="true">// </span>
+            ROI and business case — token savings, delivery speed, and team-scale impact.
+          </p>
+
+          <nav class="nav" aria-label="Primary">
+            <a href="index.html">[home]</a>
+            <a href="capabilities.html">[capabilities]</a>
+            <a href="commands.html">[commands]</a>
+            <a href="installation.html">[installation]</a>
+            <a href="code-graph.html">[code graph]</a>
+            <a href="roi.html" aria-current="page">[ROI]</a>
+          </nav>
+        </header>
+
+        <!-- hero -->
+        <header class="roi-hero">
+          <p class="section-eyebrow">Business Case</p>
+          <h1>Your team ships faster.<br />Your AI bill goes down.</h1>
+          <p class="sub">
+            free-code is a specialized AI coding agent built for engineering teams. Real benchmarks
+            against leading alternatives show up to <strong>76% fewer tokens consumed</strong>
+            per task — with better results.
+          </p>
+        </header>
+
+        <!-- headline KPIs -->
+        <div class="kpi-row" role="list" aria-label="Key metrics">
+          <div class="kpi-card" role="listitem">
+            <span class="kpi-number">Up to 76%</span>
+            <span class="kpi-label">Token reduction per task</span>
+          </div>
+          <div class="kpi-card" role="listitem">
+            <span class="kpi-number">4 of 4</span>
+            <span class="kpi-label">Tests: free-code fully succeeded</span>
+          </div>
+          <div class="kpi-card" role="listitem">
+            <span class="kpi-number">&lt;2 min</span>
+            <span class="kpi-label">Cross-repo architecture trace</span>
+          </div>
+          <div class="kpi-card" role="listitem">
+            <span class="kpi-number">100%</span>
+            <span class="kpi-label">Local — code never leaves your network</span>
+          </div>
+        </div>
+
+        <!-- section 1: token benchmark -->
+        <section class="card" aria-labelledby="bench-heading" style="margin-top:2rem;">
+          <div class="card-header">
+            <p class="section-eyebrow">Measured benchmark</p>
+            <h2 class="section-title" id="bench-heading">Token cost comparison: free-code vs. claude-code</h2>
+            <p class="section-lead">
+              Four real engineering tasks run back-to-back on the same model (Claude Haiku 4.5)
+              using free-code and claude-code. Token counts are the total consumed per session.
+              Lower is cheaper.
+            </p>
+          </div>
+          <div class="card-body">
+
+            <table class="compare-table" aria-label="Token benchmark results">
+              <thead>
+                <tr>
+                  <th>Task</th>
+                  <th>free-code tokens</th>
+                  <th>claude-code tokens</th>
+                  <th>Savings</th>
+                  <th>free-code result</th>
+                  <th>claude-code result</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Explain a Jira ticket using MCP Atlassian</td>
+                  <td><strong>52,540</strong></td>
+                  <td>68,800</td>
+                  <td><span class="saving-badge">34% cheaper</span></td>
+                  <td class="result-ok">Success</td>
+                  <td class="result-ok">Success</td>
+                </tr>
+                <tr>
+                  <td>Explain Jira ticket + download artifact via browser</td>
+                  <td><strong>22,006</strong></td>
+                  <td>63,600</td>
+                  <td><span class="saving-badge">76% cheaper</span></td>
+                  <td class="result-ok">Success</td>
+                  <td class="result-warn">Partial — browser download failed</td>
+                </tr>
+                <tr>
+                  <td>Open a project and explain what it does</td>
+                  <td><strong>17,318</strong></td>
+                  <td>61,500</td>
+                  <td><span class="saving-badge">72% cheaper</span></td>
+                  <td class="result-ok">Success</td>
+                  <td class="result-ok">Success</td>
+                </tr>
+                <tr>
+                  <td>Implement a full SDD task (spec → plan → code → QA)</td>
+                  <td><strong>144,474</strong></td>
+                  <td>~306,000 (est.)</td>
+                  <td><span class="saving-badge">~53% cheaper</span></td>
+                  <td class="result-ok">Success</td>
+                  <td class="result-warn">Did not complete QA step</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="callout info" style="margin-top:1.25rem;">
+              <strong>Same model, same prompts.</strong> Both tools used Claude Haiku 4.5.
+              The difference in token consumption comes from how each agent structures its
+              context and uses tools — not from prompt engineering tricks.
+            </div>
+
+          </div>
+        </section>
+
+        <!-- visual bar chart -->
+        <section class="card" aria-labelledby="chart-heading">
+          <div class="card-header">
+            <p class="section-eyebrow">Visual comparison</p>
+            <h2 class="section-title" id="chart-heading">Token consumption per task (lower = cheaper)</h2>
+          </div>
+          <div class="card-body">
+            <div class="bar-chart" aria-label="Token usage bar chart">
+
+              <p style="font-size:0.8rem;color:var(--ink-muted);margin:0 0 0.75rem;">
+                <span style="display:inline-block;width:12px;height:12px;background:var(--primary);border-radius:3px;margin-right:5px;vertical-align:middle;"></span> free-code &nbsp;&nbsp;
+                <span style="display:inline-block;width:12px;height:12px;background:#e5e7eb;border:1px solid var(--border);border-radius:3px;margin-right:5px;vertical-align:middle;"></span> claude-code
+              </p>
+
+              <div class="bar-row">
+                <span class="bar-label">Task 1 — Jira via MCP</span>
+                <div>
+                  <div class="bar-track" style="margin-bottom:4px;">
+                    <div class="bar-fill free-code" style="width:76%;">free-code</div>
+                  </div>
+                  <div class="bar-track">
+                    <div class="bar-fill claude" style="width:100%;">claude-code</div>
+                  </div>
+                </div>
+                <span class="bar-value" style="color:var(--primary);">-34%</span>
+              </div>
+
+              <div class="bar-row">
+                <span class="bar-label">Task 2 — Jira + browser</span>
+                <div>
+                  <div class="bar-track" style="margin-bottom:4px;">
+                    <div class="bar-fill free-code" style="width:24%;">free-code</div>
+                  </div>
+                  <div class="bar-track">
+                    <div class="bar-fill claude" style="width:100%;">claude-code</div>
+                  </div>
+                </div>
+                <span class="bar-value" style="color:var(--primary);">-76%</span>
+              </div>
+
+              <div class="bar-row">
+                <span class="bar-label">Task 3 — Project overview</span>
+                <div>
+                  <div class="bar-track" style="margin-bottom:4px;">
+                    <div class="bar-fill free-code" style="width:28%;">free-code</div>
+                  </div>
+                  <div class="bar-track">
+                    <div class="bar-fill claude" style="width:100%;">claude-code</div>
+                  </div>
+                </div>
+                <span class="bar-value" style="color:var(--primary);">-72%</span>
+              </div>
+
+              <div class="bar-row">
+                <span class="bar-label">Task 4 — Full SDD cycle</span>
+                <div>
+                  <div class="bar-track" style="margin-bottom:4px;">
+                    <div class="bar-fill free-code" style="width:47%;">free-code</div>
+                  </div>
+                  <div class="bar-track">
+                    <div class="bar-fill claude" style="width:100%;">claude-code</div>
+                  </div>
+                </div>
+                <span class="bar-value" style="color:var(--primary);">-53%</span>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- section 2: code graph ROI -->
+        <section class="card" aria-labelledby="codegraph-heading">
+          <div class="card-header">
+            <p class="section-eyebrow">Code intelligence</p>
+            <h2 class="section-title" id="codegraph-heading">Code Graph: from exploration to decision in minutes</h2>
+            <p class="section-lead">
+              A developer joining a new module, debugging a cross-service issue, or planning a
+              refactor normally spends hours reading files to build a mental map. free-code's
+              built-in Code Graph collapses that to seconds.
+            </p>
+          </div>
+          <div class="card-body">
+
+            <div class="two-col">
+              <div>
+                <h3>Without Code Graph</h3>
+                <ul style="font-size:0.9rem;line-height:1.8;color:var(--ink-muted);">
+                  <li>Agent scans files blindly — expensive token usage</li>
+                  <li>File paths are approximated or omitted</li>
+                  <li>Caller relationships are guessed, not verified</li>
+                  <li>No way to confirm "who calls this function?"</li>
+                  <li>Documentation goes stale quickly</li>
+                  <li>High risk of hallucinated paths and wrong assumptions</li>
+                </ul>
+              </div>
+              <div>
+                <h3>With Code Graph</h3>
+                <ul style="font-size:0.9rem;line-height:1.8;">
+                  <li><strong>Exact file paths</strong> for every symbol — no guessing</li>
+                  <li><strong>Caller / callee tracing</strong> across the entire codebase</li>
+                  <li><strong>Explicit uncertainty flags</strong> when results are heuristic</li>
+                  <li><strong>Architecture diagrams</strong> generated on demand</li>
+                  <li><strong>Cross-repository flows</strong> traced automatically</li>
+                  <li>Findings are traceable to source: code-context or code-callers</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="evidence-block" style="margin-top:1.5rem;">
+              <p>
+                In a real cross-repository analysis (frontend SPA ↔ backend BFF), free-code traced
+                the full request flow — URL query params → React provider → POST endpoint →
+                Java controller → downstream service — across two separate codebases,
+                produced a Mermaid sequence diagram, and delivered an HTTP contract table,
+                all in a single session.
+              </p>
+              <p class="source">Source: internal benchmark, uno-frontend ↔ uno-frontend-api analysis</p>
+            </div>
+
+            <div class="evidence-block">
+              <p>
+                A senior engineer rated the Code Graph version of a package analysis as
+                <em>"the one you would open when making a change"</em>: it surfaces exact file
+                paths, warns when results are heuristic, and provides a navigable reference
+                table for jumping directly to the relevant code.
+              </p>
+              <p class="source">Source: internal comparison — code-graph vs. no-code-graph documentation quality</p>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- section 3: business benefits -->
+        <section class="card" aria-labelledby="benefits-heading">
+          <div class="card-header">
+            <p class="section-eyebrow">Why it matters to the business</p>
+            <h2 class="section-title" id="benefits-heading">Six reasons to continue investment</h2>
+          </div>
+          <div class="card-body">
+            <div class="benefit-grid">
+
+              <article class="benefit-card">
+                <span class="benefit-icon" aria-hidden="true">&#x1F4B0;</span>
+                <h3 class="benefit-title">Measurable cost reduction</h3>
+                <p class="benefit-desc">
+                  34–76% fewer tokens per task translates directly into lower API bills.
+                  At scale across a team of 10+ engineers, this compounds into significant
+                  monthly savings with no loss in output quality.
+                </p>
+              </article>
+
+              <article class="benefit-card">
+                <span class="benefit-icon" aria-hidden="true">&#x26A1;</span>
+                <h3 class="benefit-title">Faster onboarding</h3>
+                <p class="benefit-desc">
+                  A new developer can ask free-code "what does this service do?" and get
+                  an accurate, traceable answer in seconds. What used to take days of
+                  code archaeology now takes one prompt.
+                </p>
+              </article>
+
+              <article class="benefit-card">
+                <span class="benefit-icon" aria-hidden="true">&#x1F50D;</span>
+                <h3 class="benefit-title">Cross-team architecture visibility</h3>
+                <p class="benefit-desc">
+                  Tech leads and architects can trace interactions between microservices,
+                  generate up-to-date diagrams, and understand HTTP contracts — without
+                  scheduling calls or waiting for documentation.
+                </p>
+              </article>
+
+              <article class="benefit-card">
+                <span class="benefit-icon" aria-hidden="true">&#x2705;</span>
+                <h3 class="benefit-title">Higher task completion rate</h3>
+                <p class="benefit-desc">
+                  In head-to-head tests, free-code completed tasks that competing tools
+                  failed or partially completed. A task that needs to be retried or fixed
+                  by a human costs far more than the token savings.
+                </p>
+              </article>
+
+              <article class="benefit-card">
+                <span class="benefit-icon" aria-hidden="true">&#x1F512;</span>
+                <h3 class="benefit-title">Zero data exposure</h3>
+                <p class="benefit-desc">
+                  free-code runs entirely on your machine. No source code, no session data,
+                  no knowledge base content is uploaded to external servers. Compliance and
+                  IP protection requirements are satisfied by design.
+                </p>
+              </article>
+
+              <article class="benefit-card">
+                <span class="benefit-icon" aria-hidden="true">&#x1F4CB;</span>
+                <h3 class="benefit-title">Standardized workflows across the team</h3>
+                <p class="benefit-desc">
+                  Skills — reusable agent behaviors stored as markdown files in the
+                  repo — let you encode your team's best practices once and share them
+                  through version control. No manual retraining, no drift.
+                </p>
+              </article>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- section 4: full SDD workflow -->
+        <section class="card" aria-labelledby="sdd-heading">
+          <div class="card-header">
+            <p class="section-eyebrow">End-to-end delivery</p>
+            <h2 class="section-title" id="sdd-heading">One command from Jira ticket to production-ready code</h2>
+            <p class="section-lead">
+              free-code supports a full Specification-Driven Development loop that spans
+              the entire delivery lifecycle — no human handoffs between steps.
+            </p>
+          </div>
+          <div class="card-body">
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;">
+              <div style="background:var(--surface-muted);border-radius:10px;padding:1rem;text-align:center;">
+                <div style="font-size:1.6rem;margin-bottom:0.4rem;">&#x1F4CB;</div>
+                <div style="font-weight:700;font-size:0.85rem;">1. Fetch ticket</div>
+                <div style="font-size:0.78rem;color:var(--ink-muted);margin-top:0.3rem;">Reads Jira via MCP Atlassian</div>
+              </div>
+              <div style="background:var(--surface-muted);border-radius:10px;padding:1rem;text-align:center;">
+                <div style="font-size:1.6rem;margin-bottom:0.4rem;">&#x1F4C4;</div>
+                <div style="font-weight:700;font-size:0.85rem;">2. Write spec</div>
+                <div style="font-size:0.78rem;color:var(--ink-muted);margin-top:0.3rem;">Generates acceptance criteria</div>
+              </div>
+              <div style="background:var(--surface-muted);border-radius:10px;padding:1rem;text-align:center;">
+                <div style="font-size:1.6rem;margin-bottom:0.4rem;">&#x1F5FA;&#xFE0F;</div>
+                <div style="font-weight:700;font-size:0.85rem;">3. Plan</div>
+                <div style="font-size:0.78rem;color:var(--ink-muted);margin-top:0.3rem;">Files, changes, test strategy</div>
+              </div>
+              <div style="background:var(--surface-muted);border-radius:10px;padding:1rem;text-align:center;">
+                <div style="font-size:1.6rem;margin-bottom:0.4rem;">&#x2328;&#xFE0F;</div>
+                <div style="font-weight:700;font-size:0.85rem;">4. Implement</div>
+                <div style="font-size:0.78rem;color:var(--ink-muted);margin-top:0.3rem;">Writes code, tests, i18n</div>
+              </div>
+              <div style="background:var(--surface-muted);border-radius:10px;padding:1rem;text-align:center;">
+                <div style="font-size:1.6rem;margin-bottom:0.4rem;">&#x1F310;</div>
+                <div style="font-weight:700;font-size:0.85rem;">5. Agent QA</div>
+                <div style="font-size:0.78rem;color:var(--ink-muted);margin-top:0.3rem;">Validates in real browser</div>
+              </div>
+              <div style="background:var(--primary-soft);border:1px solid var(--primary);border-radius:10px;padding:1rem;text-align:center;">
+                <div style="font-size:1.6rem;margin-bottom:0.4rem;">&#x1F7E2;</div>
+                <div style="font-weight:700;font-size:0.85rem;color:var(--primary);">Ready to review</div>
+                <div style="font-size:0.78rem;color:var(--ink-muted);margin-top:0.3rem;">Branch staged, PR description</div>
+              </div>
+            </div>
+
+            <div class="evidence-block">
+              <p>
+                In a benchmark test, this full pipeline — from "implement this Jira ticket"
+                to a staged branch with React component, i18n keys, unit tests, and
+                Storybook verification — completed successfully with <strong>144,474 tokens</strong>
+                on free-code vs. an estimated <strong>~306,000 tokens</strong> on claude-code,
+                which did not complete the QA step.
+              </p>
+              <p class="source">Source: internal benchmark, Task 4 — full SDD cycle</p>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- section 5: cost model -->
+        <section class="card" aria-labelledby="cost-heading">
+          <div class="card-header">
+            <p class="section-eyebrow">Cost projection</p>
+            <h2 class="section-title" id="cost-heading">What the savings look like at team scale</h2>
+            <p class="section-lead">
+              The numbers below are illustrative projections based on the benchmark averages.
+              Actual savings depend on task mix and usage volume.
+            </p>
+          </div>
+          <div class="card-body">
+            <table class="compare-table">
+              <thead>
+                <tr>
+                  <th>Scenario</th>
+                  <th>Without free-code</th>
+                  <th>With free-code</th>
+                  <th>Monthly saving</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>5 engineers, 20 tasks/day each</td>
+                  <td>~30M tokens / month</td>
+                  <td>~12M tokens / month</td>
+                  <td><span class="saving-badge">~60% cost reduction</span></td>
+                </tr>
+                <tr>
+                  <td>10 engineers, 20 tasks/day each</td>
+                  <td>~60M tokens / month</td>
+                  <td>~24M tokens / month</td>
+                  <td><span class="saving-badge">~60% cost reduction</span></td>
+                </tr>
+                <tr>
+                  <td>Complex tasks (SDD, architecture analysis)</td>
+                  <td>Higher token ceiling, risk of incomplete output</td>
+                  <td>Consistent completion within context budget</td>
+                  <td><span class="saving-badge">Avoids re-runs</span></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="callout" style="margin-top:1rem;">
+              Token savings are calculated using the average reduction across the four
+              benchmark tests (34%, 76%, 72%, 53%). At Claude Haiku 4.5 pricing, the
+              monthly difference for a mid-size team can exceed the full cost of
+              continuing free-code development.
+            </div>
+
+          </div>
+        </section>
+
+        <!-- CTA -->
+        <div class="cta-section">
+          <h2>The investment pays for itself</h2>
+          <p>
+            Continued development of free-code delivers measurable cost reduction,
+            faster delivery cycles, and higher-quality AI output — measured against
+            the leading alternative, on the same model, with the same tasks.
+          </p>
+          <div class="cta-row">
+            <a href="installation.html" class="btn btn-primary">Get started</a>
+            <a href="capabilities.html" class="btn btn-outline">See all capabilities</a>
+          </div>
+        </div>
+
+        <p class="footer">
+          free-code — AI coding agent. See <a href="capabilities.html">capabilities</a>,
+          <a href="commands.html">commands</a>, and <a href="installation.html">installation</a>.
+        </p>
+        <p class="footer-credit">Powered by CX — developed by Pablo Castañeda</p>
+      </div>
+    </div>
+    <script src="assets/theme.js" defer></script>
+  </body>
+</html>

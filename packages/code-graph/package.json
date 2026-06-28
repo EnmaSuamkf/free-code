@@ -1,0 +1,35 @@
+{
+	"name": "@free/code-graph",
+	"version": "0.1.0",
+	"description": "Code graph indexer and query tools for free-code agents",
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"files": ["dist"],
+	"scripts": {
+		"clean": "shx rm -rf dist",
+		"build": "tsgo -p tsconfig.build.json",
+		"dev": "tsgo -p tsconfig.build.json --watch --preserveWatchOutput",
+		"prepublishOnly": "npm run clean && npm run build"
+	},
+	"dependencies": {
+		"ignore": "^7.0.5",
+		"typescript": "^5.7.3"
+	},
+	"devDependencies": {
+		"@types/node": "^24.3.0",
+		"shx": "^0.4.0"
+	},
+	"keywords": ["code-graph", "ast", "indexer", "ai", "tools"],
+	"author": "pablo.castaneda",
+	"license": "MIT",
+	"engines": {
+		"node": ">=20.6.0"
+	}
+}

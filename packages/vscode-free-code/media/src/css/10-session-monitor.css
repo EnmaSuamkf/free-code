@@ -1,0 +1,200 @@
+/* === MODULE: session-monitor ===
+   Session statistics panel: context bar, token grid, details. */
+
+.session-monitor {
+	border-top: 1px solid var(--vscode-editorWidget-border);
+	background: var(--vscode-sideBar-background);
+	max-height: 36vh;
+	display: flex;
+	flex-direction: column;
+	min-height: 100px;
+}
+
+.session-monitor[hidden] {
+	display: none !important;
+}
+
+.session-monitor-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 6px 10px;
+	font-size: 12px;
+	font-weight: 600;
+	border-bottom: 1px solid var(--vscode-editorWidget-border);
+}
+
+.session-monitor-close {
+	background: transparent;
+	border: none;
+	color: var(--vscode-descriptionForeground);
+	cursor: pointer;
+	font-size: 16px;
+	line-height: 1;
+}
+
+.session-monitor-wait {
+	padding: 12px 14px;
+	border-radius: 6px;
+	background: color-mix(in srgb, var(--vscode-editorWidget-background) 85%, transparent);
+	border: 1px solid var(--vscode-editorWidget-border);
+	font-size: 12px;
+	color: var(--vscode-descriptionForeground);
+	line-height: 1.45;
+}
+
+.session-monitor-wait-text {
+	margin: 0 0 10px 0;
+}
+
+.session-monitor-load {
+	padding: 6px 14px;
+	font-size: 12px;
+	border-radius: 4px;
+	cursor: pointer;
+	border: 1px solid var(--vscode-button-border, transparent);
+	background: var(--vscode-button-background);
+	color: var(--vscode-button-foreground);
+}
+
+.session-monitor-load:disabled {
+	opacity: 0.55;
+	cursor: default;
+}
+
+.session-monitor-data[hidden],
+.session-monitor-wait[hidden] {
+	display: none !important;
+}
+
+.session-monitor-body {
+	padding: 10px 12px;
+	overflow: auto;
+	font-size: 12px;
+	color: var(--vscode-editor-foreground);
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.session-monitor-section {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 8px;
+	background: color-mix(in srgb, var(--vscode-editorWidget-background) 40%, transparent);
+	border-radius: 4px;
+	border: 1px solid var(--vscode-editorWidget-border);
+}
+
+.session-monitor-title-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 4px;
+}
+
+.session-monitor-section-title {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--vscode-editor-foreground);
+}
+
+.session-monitor-context-total {
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--vscode-descriptionForeground);
+}
+
+.session-monitor-bar-track {
+	height: 8px;
+	border-radius: 4px;
+	background: color-mix(in srgb, var(--vscode-scrollbarSlider-background) 60%, transparent);
+	overflow: hidden;
+	margin: 4px 0 6px 0;
+}
+
+.session-monitor-bar-fill {
+	height: 100%;
+	border-radius: 4px;
+	background: linear-gradient(90deg, #4caf50, #45a049);
+	transition: width 0.4s ease, background 0.4s ease;
+}
+
+.session-monitor-bar-fill.ctx-warn {
+	background: linear-gradient(90deg, #f9a825, #f39c12);
+}
+
+.session-monitor-bar-fill.ctx-danger {
+	background: linear-gradient(90deg, #e53935, #d32f2f);
+}
+
+.session-monitor-details {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+
+.session-monitor-detail-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 11px;
+	padding: 2px 0;
+	color: var(--vscode-editor-foreground);
+}
+
+.session-monitor-detail-label {
+	color: var(--vscode-descriptionForeground);
+	min-width: 0;
+}
+
+.session-monitor-detail-value {
+	text-align: right;
+	font-weight: 500;
+	color: var(--vscode-editor-foreground);
+}
+
+.session-monitor-grid {
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	gap: 6px;
+	margin-top: 4px;
+}
+
+@media (max-width: 500px) {
+	.session-monitor-grid {
+		grid-template-columns: 1fr 1fr 1fr;
+	}
+}
+
+.session-monitor-cell {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 3px;
+	padding: 6px 4px;
+	background: color-mix(in srgb, var(--vscode-editorWidget-background) 40%, transparent);
+	border: 1px solid var(--vscode-editorWidget-border);
+	border-radius: 4px;
+	text-align: center;
+	transition: all 0.2s ease;
+}
+
+.session-monitor-cell:hover {
+	background: color-mix(in srgb, var(--vscode-editorWidget-background) 60%, transparent);
+}
+
+.session-monitor-cell-label {
+	font-size: 10px;
+	color: var(--vscode-descriptionForeground);
+	white-space: nowrap;
+	font-weight: 500;
+}
+
+.session-monitor-cell-value {
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--vscode-editor-foreground);
+}

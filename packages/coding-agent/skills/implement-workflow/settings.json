@@ -1,0 +1,13 @@
+{
+  "requires": [
+    "mcp-atlassian",
+    "mcp-github"
+  ],
+  "owner": "CX",
+  "tags": [
+    "sdd",
+    "jira",
+    "implementation",
+    "workflow"
+  ]
+}

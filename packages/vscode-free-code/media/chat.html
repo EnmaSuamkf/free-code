@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="__FREE_CODE_CSP__" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="__FREE_CODE_STYLE_HREF__" />
+  <title>Free Code</title>
+  __FREE_CODE_EXTRA_HEAD__
+</head>
+<body>
+  <header class="chat-nav" role="banner">
+    <button type="button" id="chat-nav-toggle" class="chat-nav-toggle" aria-expanded="false" aria-controls="chat-list-panel" title="Conversations">&#9776;</button>
+    <span id="chat-nav-title" class="chat-nav-title">New chat</span>
+    <button type="button" id="theme-toggle" class="chat-nav-theme" title="Switch to light mode" aria-label="Switch to light mode">☀</button>
+    <button type="button" id="chat-nav-new" class="chat-nav-new" title="New chat">+</button>
+  </header>
+  <div class="chat-layout">
+    <div id="chat-list-backdrop" class="chat-list-backdrop"></div>
+    <div id="chat-list-panel" class="chat-list-panel" role="menu" aria-label="Conversations">
+      <div class="chat-list-header">
+        <span class="chat-list-header-title">Conversations <span id="chat-list-count" class="chat-list-count">0</span></span>
+        <button type="button" id="chat-list-pin-btn" class="chat-list-pin-btn" aria-pressed="false" title="Keep sidebar open">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189A5.921 5.921 0 0 1 5 6.708V2.277a2.77 2.77 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354z"/></svg>
+        </button>
+      </div>
+      <div id="chat-list-body" class="chat-list-body"></div>
+      <div class="chat-list-footer">
+        <button type="button" id="chat-list-new-btn" class="chat-list-new-btn">
+          <span class="chat-list-new-icon">+</span>
+          New chat
+        </button>
+      </div>
+    </div>
+    <div class="main-content" id="main-content">
+      <div id="messages"><div id="empty-hint">Use /profile to choose which profile (tools, skills, agents, theme, model) is active in this session.</div></div>
+      <div id="status"></div>
+      <div id="queue-panel" hidden>
+        <div class="queue-header">
+          <span class="queue-count">1 Queued</span>
+        </div>
+        <div class="queue-row">
+          <span class="queue-icon" aria-hidden="true">&#9675;</span>
+          <span id="queue-text" class="queue-text"></span>
+          <div class="queue-actions">
+            <button type="button" id="queue-edit" class="queue-btn" title="Edit queued message">&#9998;</button>
+            <button type="button" id="queue-delete" class="queue-btn" title="Cancel queued message">&#10005;</button>
+          </div>
+        </div>
+      </div>
+      <form id="chat-form">
+        <div id="file-chips" class="file-chips" hidden></div>
+        <div id="mode-indicator-bar" class="mode-indicator-bar" hidden>
+          <span class="mode-indicator-label">Mode</span>
+          <span id="mode-indicator-value" class="mode-indicator-value">agent</span>
+        </div>
+        <div id="agent-browser-panel" class="agent-browser-panel" hidden>
+          <div class="agent-browser-title">Open a visible browser window</div>
+          <div class="agent-browser-hint">The agent will launch a fresh headed browser and you can watch its clicks and typing live.</div>
+          <input type="url" id="agent-browser-url" class="agent-browser-input" placeholder="https://example.com" autocomplete="off" spellcheck="false" />
+          <input type="text" id="agent-browser-instruction" class="agent-browser-input" placeholder="Optional goal after the visible browser opens" autocomplete="off" spellcheck="true" />
+          <div class="agent-browser-actions">
+            <button type="button" id="agent-browser-cancel">Cancel</button>
+            <button type="button" id="agent-browser-open">Open visible browser</button>
+          </div>
+        </div>
+        <div class="input-wrap">
+          <div id="slash-menu" class="slash-menu" hidden></div>
+          <textarea id="input" rows="3" placeholder="Ask free-code… (Enter to send, Shift+Enter newline)"></textarea>
+        </div>
+        <div class="chat-actions">
+          <div class="chat-actions-context">
+            <button type="button" id="workspace-indicator" class="workspace-indicator" title="Workspace" aria-label="Workspace" hidden>
+              <span class="workspace-indicator-icon" aria-hidden="true">&#128193;</span>
+              <span id="workspace-indicator-label" class="workspace-indicator-label">—</span>
+            </button>
+            <button type="button" id="profile-indicator" class="profile-indicator" title="Active profile" aria-label="Active profile" hidden>
+              <span id="profile-indicator-label" class="profile-indicator-label">—</span>
+            </button>
+            <button type="button" id="model-indicator" class="model-indicator" title="Active model (click to change)" aria-label="Active model" hidden>
+              <span class="model-indicator-dot" aria-hidden="true"></span>
+              <span id="model-indicator-label" class="model-indicator-label">—</span>
+            </button>
+          </div>
+          <div class="chat-actions-tools">
+            <button type="button" id="attach" class="chat-icon-btn" title="Attach files" aria-label="Attach files">&#128206;</button>
+            <button type="button" id="export-chat" class="chat-icon-btn" title="Export conversation as Markdown" aria-label="Export conversation">&#128228;</button>
+            <button type="button" id="agent-browser-toggle" class="chat-icon-btn" title="Launch Chrome with remote debugging for the agent" aria-label="Browser for agent">&#127760;</button>
+            <button type="button" id="send-or-stop-button" class="chat-actions-send" title="Send (Enter)" aria-label="Send"><span class="chat-actions-send-icon" aria-hidden="true">&#8593;</span></button>
+          </div>
+        </div>
+      </form>
+      <div id="session-monitor" class="session-monitor" hidden>
+        <div class="session-monitor-header">
+          <span class="session-monitor-title">📊 Session</span>
+          <button type="button" id="session-monitor-close" class="session-monitor-close" title="Close">&times;</button>
+        </div>
+        <div class="session-monitor-body">
+          <div id="session-monitor-wait" class="session-monitor-wait" hidden>
+            <p id="session-monitor-wait-text" class="session-monitor-wait-text"></p>
+            <button type="button" id="session-monitor-load" class="session-monitor-load">
+              Load session
+            </button>
+          </div>
+          <div id="session-monitor-data" class="session-monitor-data">
+            <div class="session-monitor-section">
+              <div class="session-monitor-title-row">
+                <span class="session-monitor-section-title">📦 Context window</span>
+                <span id="session-ctx-total" class="session-monitor-context-total">0 / 200k</span>
+              </div>
+              <div class="session-monitor-bar-track">
+                <div id="session-ctx-bar" class="session-monitor-bar-fill" style="width:0%"></div>
+              </div>
+              <div id="session-ctx-details" class="session-monitor-details"></div>
+            </div>
+            <div class="session-monitor-grid">
+              <div class="session-monitor-cell">
+                <div class="session-monitor-cell-label">Messages</div>
+                <div id="session-msg-total" class="session-monitor-cell-value">0</div>
+              </div>
+              <div class="session-monitor-cell">
+                <div class="session-monitor-cell-label">Tool calls</div>
+                <div id="session-tool-calls" class="session-monitor-cell-value">0</div>
+              </div>
+              <div class="session-monitor-cell">
+                <div class="session-monitor-cell-label">MCP tools</div>
+                <div id="session-mcp-tools" class="session-monitor-cell-value">0</div>
+              </div>
+              <div class="session-monitor-cell">
+                <div class="session-monitor-cell-label">Skills</div>
+                <div id="session-skills" class="session-monitor-cell-value">0</div>
+              </div>
+              <div class="session-monitor-cell">
+                <div class="session-monitor-cell-label">Agents</div>
+                <div id="session-agents" class="session-monitor-cell-value">0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /.main-content -->
+  </div><!-- /.chat-layout -->
+  <div id="tool-picker-modal" class="tool-picker-modal" hidden aria-modal="true" role="dialog" aria-label="Select tool groups">
+    <div class="tool-picker-dialog">
+      <div class="tool-picker-title">Select tool groups</div>
+      <p class="tool-picker-hint">Built-in and always-on tools stay enabled. Toggle MCP / extension groups to change how many tool definitions are in context.</p>
+      <div id="tool-picker-body" class="tool-picker-body"></div>
+      <div class="tool-picker-actions">
+        <button type="button" id="tool-picker-cancel">Cancel</button>
+        <button type="button" id="tool-picker-apply">Apply</button>
+      </div>
+    </div>
+  </div>
+  <div id="model-picker-modal" class="tool-picker-modal" hidden aria-modal="true" role="dialog" aria-label="Select model">
+    <div class="tool-picker-dialog model-picker-dialog">
+      <div class="tool-picker-title">Select model</div>
+      <p class="tool-picker-hint">Only showing models with configured API keys (see README). Type to filter, click a row or press Enter to apply.</p>
+      <input type="text" id="model-picker-search" class="model-picker-search" placeholder="Filter models (provider, id, name)…" autocomplete="off" spellcheck="false" />
+      <div id="model-picker-body" class="tool-picker-body model-picker-body"></div>
+      <div class="model-picker-current" id="model-picker-current"></div>
+      <div class="tool-picker-actions">
+        <button type="button" id="model-picker-cancel">Cancel</button>
+        <button type="button" id="model-picker-apply">Apply</button>
+      </div>
+    </div>
+  </div>
+  <div id="skill-picker-modal" class="tool-picker-modal" hidden aria-modal="true" role="dialog" aria-label="Select skills">
+    <div class="tool-picker-dialog">
+      <div class="tool-picker-title">Select skills</div>
+      <p id="skill-picker-hint" class="tool-picker-hint"></p>
+      <div id="skill-picker-body" class="tool-picker-body"></div>
+      <div class="tool-picker-actions">
+        <button type="button" id="skill-picker-cancel">Cancel</button>
+        <button type="button" id="skill-picker-apply">Apply</button>
+      </div>
+    </div>
+  </div>
+  <div id="agent-picker-modal" class="tool-picker-modal" hidden aria-modal="true" role="dialog" aria-label="Select agents">
+    <div class="tool-picker-dialog">
+      <div class="tool-picker-title">Select agents</div>
+      <p class="tool-picker-hint">Enable/disable agent personas in the catalog. Active agents are included in the system prompt context.</p>
+      <div id="agent-picker-body" class="tool-picker-body"></div>
+      <div class="tool-picker-actions">
+        <button type="button" id="agent-picker-cancel">Cancel</button>
+        <button type="button" id="agent-picker-apply">Apply</button>
+      </div>
+    </div>
+  </div>
+  <script nonce="__FREE_CODE_SCRIPT_NONCE__" src="__FREE_CODE_SCRIPT_SRC__"></script>
+</body>
+</html>

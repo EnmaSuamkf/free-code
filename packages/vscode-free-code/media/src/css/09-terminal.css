@@ -1,0 +1,91 @@
+/* === MODULE: terminal ===
+   Docked terminal panel. */
+
+/* chat-mac.html: docked terminal + session monitor (inert when elements absent) */
+.terminal-panel {
+	border-top: 1px solid var(--vscode-editorWidget-border);
+	background: var(--vscode-sideBar-background);
+	max-height: 40vh;
+	display: flex;
+	flex-direction: column;
+	min-height: 120px;
+}
+
+.terminal-panel[hidden] {
+	display: none !important;
+}
+
+.terminal-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 6px 10px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--vscode-editor-foreground);
+	border-bottom: 1px solid var(--vscode-editorWidget-border);
+}
+
+.terminal-actions {
+	display: flex;
+	gap: 4px;
+}
+
+.terminal-header-btn {
+	background: transparent;
+	border: none;
+	color: var(--vscode-descriptionForeground);
+	cursor: pointer;
+	font-size: 14px;
+	line-height: 1;
+	padding: 2px 6px;
+	border-radius: 4px;
+}
+
+.terminal-header-btn:hover {
+	color: var(--vscode-editor-foreground);
+	background: color-mix(in srgb, var(--vscode-foreground) 8%, transparent);
+}
+
+.terminal-output {
+	flex: 1;
+	min-height: 0;
+	overflow: auto;
+	padding: 8px 10px;
+	font-family: var(--vscode-editor-font-family, monospace);
+	font-size: 12px;
+	line-height: 1.45;
+	white-space: pre-wrap;
+	word-break: break-word;
+	color: var(--vscode-editor-foreground);
+}
+
+.terminal-line.terminal-line-err {
+	color: var(--vscode-errorForeground, #f48771);
+}
+
+.terminal-input-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 10px;
+	border-top: 1px solid var(--vscode-editorWidget-border);
+	background: var(--vscode-editor-background);
+}
+
+.terminal-prompt {
+	color: var(--vscode-descriptionForeground);
+	font-family: var(--vscode-editor-font-family, monospace);
+}
+
+.terminal-input {
+	flex: 1;
+	min-width: 0;
+	padding: 6px 8px;
+	border: 1px solid var(--vscode-input-border);
+	border-radius: 4px;
+	background: var(--vscode-input-background);
+	color: var(--vscode-input-foreground);
+	font-family: var(--vscode-editor-font-family, monospace);
+	font-size: 12px;
+}

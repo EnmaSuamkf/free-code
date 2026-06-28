@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "*": ["./*"],
+      "@free/mini-lit": ["../free-mini-lit/dist/index.d.ts"],
+      "@free/mini-lit/dist/*": ["../free-mini-lit/dist/*"],
+      "@free/pi-agent-core": ["../agent/dist/index.d.ts"],
+      "@free/pi-ai": ["../ai/dist/index.d.ts"],
+      "@free/pi-ai/*": ["../ai/dist/*"],
+      "@free/pi-tui": ["../tui/dist/index.d.ts"]
+    }
+  },
+  "include": ["src/**/*"]
+}

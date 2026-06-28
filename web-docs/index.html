@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>free-code — AI Coding Agent</title>
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <div class="doc-root">
+      <header class="site-shell-header" role="banner">
+        <div class="site-shell-inner">
+          <a class="site-brand" href="index.html">
+            <span class="site-brand-angles" aria-hidden="true">&lt;</span>
+            <span>free-code</span>
+            <span class="site-brand-angles" aria-hidden="true">&gt;</span>
+          </a>
+          <div class="site-header-actions">
+            <button type="button" class="theme-toggle" id="doc-theme-toggle" aria-label="Color theme">
+              <span class="theme-toggle-label" id="doc-theme-label">System</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="container">
+        <header class="hero">
+          <h1 class="brand">
+            <span class="angle" aria-hidden="true">&lt;</span>
+            <span class="name">free-code</span>
+            <span class="angle" aria-hidden="true">&gt;</span>
+          </h1>
+          <p class="tagline">
+            <span class="prompt" aria-hidden="true">// </span>
+            Your AI coding agent. Runs natively on macOS, in VS Code, and in the terminal.
+          </p>
+          <p class="hero-lead">
+            A full-featured AI coding agent with deep code understanding, local knowledge bases,
+            browser automation, multi-provider AI, and layered security — local-first, cloud-ready.
+          </p>
+
+          <div class="platform-row" role="list" aria-label="Supported platforms">
+            <span class="platform-badge" role="listitem">macOS native app</span>
+            <span class="platform-badge" role="listitem">VS Code / Cursor plugin</span>
+            <span class="platform-badge" role="listitem">Terminal CLI</span>
+            <span class="platform-badge" role="listitem">Anthropic · Vertex · Ollama · LM Studio</span>
+          </div>
+
+          <nav class="nav" aria-label="Primary">
+            <a href="index.html" aria-current="page">[home]</a>
+            <a href="capabilities.html">[capabilities]</a>
+            <a href="commands.html">[commands]</a>
+            <a href="installation.html">[installation]</a>
+            <a href="code-graph.html">[code graph]</a>
+            <a href="roi.html">[ROI]</a>
+          </nav>
+        </header>
+
+        <!-- stat bar -->
+        <div class="stat-bar" role="list" aria-label="Key stats">
+          <div class="stat-item" role="listitem">
+            <span class="stat-value">3</span>
+            <span class="stat-label">Platforms</span>
+          </div>
+          <div class="stat-item" role="listitem">
+            <span class="stat-value">6+</span>
+            <span class="stat-label">AI Providers</span>
+          </div>
+          <div class="stat-item" role="listitem">
+            <span class="stat-value">40+</span>
+            <span class="stat-label">Editor Commands</span>
+          </div>
+          <div class="stat-item" role="listitem">
+            <span class="stat-value">100%</span>
+            <span class="stat-label">Local &amp; Private</span>
+          </div>
+        </div>
+
+        <!-- Qualities: why teams choose free-code -->
+        <section class="home-section home-section--qualities" aria-labelledby="qualities-heading">
+          <p class="home-section-label">Qualities</p>
+          <h2 id="qualities-heading" class="home-section-title">What makes free-code different</h2>
+          <p class="home-section-lead">
+            High-level principles — how the agent behaves, where it runs, and how teams trust it.
+          </p>
+          <div class="home-card-grid" role="list" aria-label="Qualities">
+            <article class="home-card" role="listitem">
+              <span class="home-card-icon" aria-hidden="true">&#x2699;&#xFE0F;</span>
+              <h3 class="home-card-title">Agentic</h3>
+              <p class="home-card-desc">
+                Real tools on your project: read and edit files, run shell commands, browse the web,
+                and call MCP servers — it acts, not only suggests.
+              </p>
+            </article>
+            <article class="home-card" role="listitem">
+              <span class="home-card-icon" aria-hidden="true">&#x1F4BB;</span>
+              <h3 class="home-card-title">Local-first</h3>
+              <p class="home-card-desc">
+                Sessions, code graph, and knowledge bases live on your machine. Your source stays
+                under your control by default.
+              </p>
+            </article>
+            <article class="home-card" role="listitem">
+              <span class="home-card-icon" aria-hidden="true">&#x1F527;</span>
+              <h3 class="home-card-title">Extensible</h3>
+              <p class="home-card-desc">
+                Skills, extensions, and MCP servers extend behavior without forking the agent.
+                Install once, share with the team via version control.
+              </p>
+            </article>
+            <article class="home-card" role="listitem">
+              <span class="home-card-icon" aria-hidden="true">&#x26A1;</span>
+              <h3 class="home-card-title">Efficient</h3>
+              <p class="home-card-desc">
+                Code graph and structured context cut wasted tokens. Benchmarks show up to 76% lower
+                cost per task versus generic assistants.
+              </p>
+              <a href="roi.html" class="home-card-link">See ROI benchmarks &rarr;</a>
+            </article>
+            <article class="home-card home-card--highlight" role="listitem">
+              <span class="home-card-icon" aria-hidden="true">&#x1F6E1;&#xFE0F;</span>
+              <h3 class="home-card-title">Secure</h3>
+              <p class="home-card-desc">
+                Layered guardrails: export conversations for audit, confirm risky bash commands in
+                real time, see which skills, MCPs, and agents are active, and deploy locally or in
+                the cloud with policies your team controls.
+              </p>
+              <a href="capabilities.html#cap-security" class="home-card-link">Security layers &rarr;</a>
+            </article>
+          </div>
+        </section>
+
+        <!-- Features: concrete capabilities -->
+        <section class="home-section home-section--features" aria-labelledby="features-heading">
+          <p class="home-section-label">Features</p>
+          <h2 id="features-heading" class="home-section-title">Built-in capabilities</h2>
+          <p class="home-section-lead">
+            Specific tools and integrations included with free-code — what you can use in a session.
+          </p>
+          <div class="home-card-grid" role="list" aria-label="Features">
+          <article class="home-card" role="listitem">
+            <span class="home-card-icon" aria-hidden="true">&#x2699;&#xFE0F;</span>
+            <h3 class="home-card-title">Multi-Provider AI</h3>
+            <p class="home-card-desc">
+              Anthropic, Google Vertex, Ollama, LM Studio, or any OpenAI-compatible endpoint.
+              Switch models mid-session with Ctrl+L or cycle a curated shortlist with Ctrl+P.
+            </p>
+          </article>
+
+          <article class="home-card" role="listitem">
+            <span class="home-card-icon" aria-hidden="true">&#x1F6E0;&#xFE0F;</span>
+            <h3 class="home-card-title">Full Tool Access</h3>
+            <p class="home-card-desc">
+              Read, edit, and write files. Run shell commands. Search with grep and find.
+              The agent works on your actual project — not a sandbox copy.
+            </p>
+          </article>
+
+          <article class="home-card" role="listitem">
+            <span class="home-card-icon" aria-hidden="true">&#x1F4DA;</span>
+            <h3 class="home-card-title">RAG Knowledge Base</h3>
+            <p class="home-card-desc">
+              Local vector search over your own documents. Index files, folders, or entire
+              GitHub repos. Multiple named knowledge bases. Auto-refresh on a schedule.
+            </p>
+          </article>
+
+          <article class="home-card" role="listitem">
+            <span class="home-card-icon" aria-hidden="true">&#x1F310;</span>
+            <h3 class="home-card-title">Browser Automation</h3>
+            <p class="home-card-desc">
+              Built-in browser control with CDP. Navigate pages, take screenshots, extract
+              content, and interact with web UIs. Gemini integration included.
+            </p>
+          </article>
+
+          <article class="home-card" role="listitem">
+            <span class="home-card-icon" aria-hidden="true">&#x1F527;</span>
+            <h3 class="home-card-title">MCP Servers</h3>
+            <p class="home-card-desc">
+              Connect any Model Context Protocol server — databases, APIs, CI systems, design
+              tools. One import command and the tools appear in the next session automatically.
+            </p>
+          </article>
+
+          <article class="home-card" role="listitem">
+            <span class="home-card-icon" aria-hidden="true">&#x1F916;</span>
+            <h3 class="home-card-title">Subagents</h3>
+            <p class="home-card-desc">
+              Spin up parallel subagents from within a session. Each runs independently
+              with its own context. Tackle large tasks without a single context window.
+            </p>
+          </article>
+
+          <article class="home-card" role="listitem">
+            <span class="home-card-icon" aria-hidden="true">&#x1F4E6;</span>
+            <h3 class="home-card-title">Skills &amp; Extensions</h3>
+            <p class="home-card-desc">
+              Commit reusable agent behaviors as markdown skills alongside your code.
+              Extensions add new tools and commands — install in one line, shared with the team.
+            </p>
+          </article>
+
+          <article class="home-card" role="listitem">
+            <span class="home-card-icon" aria-hidden="true">&#x1F4BE;</span>
+            <h3 class="home-card-title">Session Management</h3>
+            <p class="home-card-desc">
+              Resume, fork, compact, and branch sessions. Navigate history as a tree.
+              Export to HTML, Markdown, or JSONL for sharing or archiving.
+            </p>
+          </article>
+
+          <article class="home-card" role="listitem">
+            <span class="home-card-icon" aria-hidden="true">&#x1F9E0;</span>
+            <h3 class="home-card-title">Code Graph</h3>
+            <p class="home-card-desc">
+              Local symbol and call-edge index. Find any function by name, trace callers,
+              and read symbol source — without blindly scanning files.
+            </p>
+          </article>
+          </div>
+        </section>
+
+        <!-- interactive demo -->
+        <section class="card" aria-labelledby="ui-heading">
+          <div class="card-header">
+            <h2 id="ui-heading">See it in action</h2>
+            <p>Interactive mocks of both interfaces. Try typing <code>/</code> in the input to open the command menu.</p>
+          </div>
+          <div class="demo-tabs" role="tablist" aria-label="Platform demos">
+            <button class="demo-tab active" role="tab" aria-selected="true" aria-controls="tab-plugin" id="btn-plugin">VS Code / Cursor plugin</button>
+            <button class="demo-tab" role="tab" aria-selected="false" aria-controls="tab-macos" id="btn-macos">macOS native app</button>
+          </div>
+          <div id="tab-plugin" role="tabpanel" aria-labelledby="btn-plugin" style="overflow:hidden;border-radius:0 0 16px 16px;">
+            <iframe
+              src="plugin-demo.html"
+              title="free-code VS Code plugin interactive demo"
+              style="display:block;width:100%;height:520px;border:none;"
+              loading="lazy"
+            ></iframe>
+          </div>
+          <div id="tab-macos" role="tabpanel" aria-labelledby="btn-macos" style="overflow:hidden;border-radius:0 0 16px 16px;display:none;">
+            <iframe
+              src="macos-demo.html"
+              title="free-code macOS native app interactive demo"
+              style="display:block;width:100%;height:620px;border:none;"
+              loading="lazy"
+            ></iframe>
+          </div>
+        </section>
+
+        <!-- quick start -->
+        <section class="card" aria-labelledby="quickstart-heading">
+          <div class="card-header">
+            <h2 id="quickstart-heading">Quick start</h2>
+            <p>From zero to a running session in under two minutes.</p>
+          </div>
+          <div class="card-body">
+            <div class="callout info">
+              <strong>Recommended</strong><br />
+              Install the macOS native app or VS Code/Cursor plugin for the best experience.
+              The CLI works on any platform with Node.js 20+.
+            </div>
+
+            <h3>1. Fast Installation</h3>
+            <p><strong>Option A</strong> — Finder:</p>
+            <p>Open the <code>installation</code> folder in Finder and double-click <code>install-free-code-mac.command</code>.</p>
+
+            <p><strong>Option B</strong> — Terminal:</p>
+            <pre><code>bash ./installation/install-free-code-mac.command</code></pre>
+
+            <h3>2. Start a session</h3>
+            <pre><code>free-code</code></pre>
+
+            <div class="cta-row">
+              <a href="installation.html" class="btn btn-primary">Full Installation Guide (plugin - Mac app)</a>
+              <a href="capabilities.html" class="btn btn-outline">All capabilities</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- why free-code -->
+        <section class="card" aria-labelledby="why-heading">
+          <div class="card-header">
+            <h2 id="why-heading">Why free-code?</h2>
+            <p>What sets it apart from generic AI assistants.</p>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div>
+                <h3>An agent, not a chatbot</h3>
+                <p>
+                  free-code has real tools: it reads and edits files, runs shell commands,
+                  controls a browser, queries knowledge bases, and calls MCP servers.
+                  It doesn't just suggest — it acts.
+                </p>
+                <h3>Local-first, cloud-ready</h3>
+                <p>
+                  No cloud indexing of your repo by default. Sessions, knowledge bases, and the code
+                  graph are local files you control. Use cloud LLM providers when you want, or run in
+                  managed environments — with security layers such as Damage-Control and MCP
+                  authorization where your policy requires them.
+                </p>
+                <h3>Your AI provider, your choice</h3>
+                <p>
+                  Swap between Claude, Gemini, GPT, Llama, Mistral, or any local model without
+                  changing your workflow. One key binding cycles your personal shortlist.
+                </p>
+              </div>
+              <div>
+                <h3>Not just a chatbot</h3>
+                <p>
+                  The agent has full access to your filesystem, terminal, browser, and any MCP
+                  server you connect. It reads, edits, runs tests, checks CI, and follows up —
+                  without you babysitting it.
+                </p>
+                <h3>Built for teams</h3>
+                <p>
+                  Skills are plain markdown files you can commit alongside your code. Share
+                  domain knowledge, onboarding flows, and repeatable workflows with your team
+                  through version control.
+                </p>
+                <h3>Sessions that survive context limits</h3>
+                <p>
+                  Compact long conversations without losing thread. Fork sessions to explore
+                  alternatives. Resume after days. Navigate history as a tree and jump to any
+                  checkpoint.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <p class="footer">
+          free-code — AI coding agent. See <a href="capabilities.html">capabilities</a>,
+          <a href="commands.html">commands</a>, and <a href="installation.html">installation</a>.
+        </p>
+        <p class="footer-credit">Powered by CX — developed by Pablo Castañeda</p>
+      </div>
+    </div>
+    <script src="assets/theme.js" defer></script>
+    <script>
+      document.querySelectorAll(".demo-tab").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          document.querySelectorAll(".demo-tab").forEach(function(b) {
+            b.classList.remove("active");
+            b.setAttribute("aria-selected", "false");
+          });
+          btn.classList.add("active");
+          btn.setAttribute("aria-selected", "true");
+          var target = btn.getAttribute("aria-controls");
+          document.querySelectorAll("[role='tabpanel']").forEach(function(panel) {
+            panel.style.display = panel.id === target ? "" : "none";
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

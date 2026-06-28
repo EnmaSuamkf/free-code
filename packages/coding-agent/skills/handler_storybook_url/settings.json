@@ -1,0 +1,11 @@
+{
+  "requires": [],
+  "owner": "free-code",
+  "tags": [
+    "storybook",
+    "url",
+    "full-screen",
+    "browser",
+    "playwright"
+  ]
+}

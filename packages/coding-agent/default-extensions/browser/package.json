@@ -1,0 +1,61 @@
+{
+  "name": "free-code-agent-browser-native",
+  "version": "0.2.7",
+  "description": "free-code extension that exposes agent-browser as a native tool for browser automation",
+  "type": "module",
+  "author": "Mitch Fultz (https://github.com/fitchmultz)",
+  "keywords": [
+    "free-code-package",
+    "free-code",
+    "free-code-extension",
+    "extension",
+    "agent-browser",
+    "browser-automation",
+    "typescript",
+    "npm-package"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.6.0"
+  },
+  "files": [
+    "extensions",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "docs/ARCHITECTURE.md",
+    "docs/RELEASE.md",
+    "docs/REQUIREMENTS.md",
+    "docs/TOOL_CONTRACT.md"
+  ],
+  "free-code": {
+    "extensions": [
+      "./extensions/agent-browser/index.ts"
+    ]
+  },
+  "peerDependencies": {
+    "@sinclair/typebox": "*"
+  },
+  "devDependencies": {
+    "@free/pi-coding-agent": "file:../..",
+    "@sinclair/typebox": "^0.34.49",
+    "@types/node": "^25.6.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2"
+  },
+  "overrides": {
+    "basic-ftp": "5.2.2"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/**/*.test.ts",
+    "pack:dry-run": "npm pack --json --dry-run",
+    "verify": "npm run typecheck && npm run test",
+    "verify:package": "node ./scripts/verify-package.mjs",
+    "verify:release": "npm run verify && npm run verify:package"
+  },
+  "packageManager": "npm@10.9.8",
+  "dependencies": {
+    "agent-browser": "^0.26.0"
+  }
+}

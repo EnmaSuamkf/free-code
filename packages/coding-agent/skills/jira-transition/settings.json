@@ -1,0 +1,12 @@
+{
+  "requires": [
+    "mcp-atlassian"
+  ],
+  "owner": "CX",
+  "tags": [
+    "jira",
+    "workflow",
+    "atlassian",
+    "transitions"
+  ]
+}

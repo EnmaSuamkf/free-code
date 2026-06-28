@@ -1,0 +1,16 @@
+[
+  {"query": "Track SDD workflow usage for pablo.castaneda in the last 20 days", "should_trigger": true},
+  {"query": "SDD adoption for team SUMO last 30 days", "should_trigger": true},
+  {"query": "How many issues went through SDD phases for project OCTOPUS from 2026-03-01 to 2026-03-31?", "should_trigger": true},
+  {"query": "SDD funnel for pablo.castaneda", "should_trigger": true},
+  {"query": "Workflow tracker --assignee pablo.castaneda --project SUMO --days 20", "should_trigger": true},
+  {"query": "¿Cuántos tickets pasaron por spec, plan y dev en SUMO los últimos 15 días?", "should_trigger": true},
+  {"query": "SDD workflow usage report for my team OCTOPUS", "should_trigger": true},
+  {"query": "Who is using the SDD workflow in project CAT?", "should_trigger": true},
+  {"query": "Spec to review lead time for OCTOPUS-10820", "should_trigger": false},
+  {"query": "Run /plan for OCTOPUS-10820", "should_trigger": false},
+  {"query": "Handle the comment on PR https://github.com/owner/repo/pull/123", "should_trigger": false},
+  {"query": "Commit and push my changes", "should_trigger": false},
+  {"query": "What does bot-cx-ai-spec label mean?", "should_trigger": false},
+  {"query": "Transition OCTOPUS-10820 to In Progress", "should_trigger": false}
+]

@@ -1,0 +1,14 @@
+[
+  { "query": "escribe en gimini el mensaje Hola mundo", "should_trigger": true },
+  { "query": "escribe en gemini el mensaje Haz un resumen", "should_trigger": true },
+  { "query": "pon en Gemini el mensaje explica esta imagen", "should_trigger": true },
+  { "query": "envia le mensaje a gemini", "should_trigger": true },
+  { "query": "envia le mensaje a gemini \"el ecuadron epico de muertos vivientes es muy malvado?\"", "should_trigger": true },
+  { "query": "envia el mensaje a gemini", "should_trigger": true },
+  { "query": "send the Gemini message", "should_trigger": true },
+  { "query": "type in Gemini the message hello", "should_trigger": true },
+  { "query": "abre una ventana visible del browser", "should_trigger": false },
+  { "query": "busca informacion sobre Gemini en RAG", "should_trigger": false },
+  { "query": "implementa el plan del navegador visual", "should_trigger": false },
+  { "query": "run npm check", "should_trigger": false }
+]

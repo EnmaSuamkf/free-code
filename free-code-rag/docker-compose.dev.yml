@@ -1,0 +1,24 @@
+services:
+  rag-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      secrets:
+        - ca-cert
+    env_file:
+      - .env
+    environment:
+      SSL_CERT_FILE: "/etc/ssl/certs/netskope.pem"
+      REQUESTS_CA_BUNDLE: "/etc/ssl/certs/netskope.pem"
+      PORT: "8085"
+    volumes:
+      - ./faiss_store:/app/faiss_store
+      - ~/.free-code/knowledgeBase:/root/.free-code/knowledgeBase
+      - ${NODE_EXTRA_CA_CERTS:-/Users/pablo.castaneda/Documents/netskope-cert-bundle.pem}:/etc/ssl/certs/netskope.pem:ro
+    ports:
+      - "8085:8085"
+    command: python main.py
+
+secrets:
+  ca-cert:
+    file: ${NODE_EXTRA_CA_CERTS:-/Users/pablo.castaneda/Documents/netskope-cert-bundle.pem}

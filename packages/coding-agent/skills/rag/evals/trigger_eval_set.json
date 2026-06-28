@@ -1,0 +1,19 @@
+[
+  { "query": "Add handbook.pdf to the knowledge base", "should_trigger": true },
+  { "query": "Include ./docs/runbook.docx in my KB", "should_trigger": true },
+  { "query": "Remove manual.pdf from the knowledge base", "should_trigger": true },
+  { "query": "Delete report.pdf from the indexed documents", "should_trigger": true },
+  { "query": "List files in the knowledge base", "should_trigger": true },
+  { "query": "What documents are in the knowledge base?", "should_trigger": true },
+  { "query": "Find information about onboarding", "should_trigger": true },
+  { "query": "Look up our PTO policy", "should_trigger": true },
+  { "query": "Search for information about Pablo Castaneda", "should_trigger": true },
+  { "query": "Who is the lead engineer of OCTOPUS?", "should_trigger": true },
+  { "query": "Tell me about the vacation policy", "should_trigger": true },
+  { "query": "What do we know about the new hire process?", "should_trigger": true },
+  { "query": "Search the web for React 19 release notes", "should_trigger": false },
+  { "query": "Explain what RAG means in machine learning", "should_trigger": false },
+  { "query": "Run npm test in packages/ai", "should_trigger": false },
+  { "query": "Implement JIRA-123 from the plan", "should_trigger": false },
+  { "query": "Fix the bug in rag-manager.ts", "should_trigger": false }
+]

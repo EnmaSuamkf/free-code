@@ -1,0 +1,47 @@
+{
+  "skill_name": "gemini-browser",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "escribe en gimini el mensaje Hola desde free-code",
+      "expected_output": "Agent uses the native agent_browser tool, targets div[aria-label=\"Enter a prompt for Gemini\"], writes 'Hola desde free-code', and does not send the message unless asked.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "escribe en gemini el mensaje Resume esta pagina en tres puntos",
+      "expected_output": "Agent treats Gemini/Gimini equivalently, uses agent_browser eval --stdin or equivalent DOM interaction to write into div[aria-label=\"Enter a prompt for Gemini\"], and does not use shell/browser MCP tools.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "envia le mensaje a gemini",
+      "expected_output": "Agent uses agent_browser to snapshot the page, verifies div[aria-label=\"Enter a prompt for Gemini\"] is present, and only then clicks the component with aria-label=\"Send message\" via its ref or DOM fallback. If the input is missing, it reports an error and does not click send. After sending, it runs blocking bash sleep 10, snapshots for the answer, and repeats that cycle until Gemini answers or 10 attempts are reached.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "envia el mensaje a gemini",
+      "expected_output": "Agent recognizes the send intent despite Spanish wording, uses only agent_browser for browser actions, takes a snapshot first, verifies the Gemini input div is present, clicks aria-label=\"Send message\" only after that check, then uses blocking bash sleep 10 plus snapshot cycles until the answer appears or 10 attempts are reached.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "escribe en gimini el mensaje Que es RAG? y envialo",
+      "expected_output": "Agent first writes 'Que es RAG?' into div[aria-label=\"Enter a prompt for Gemini\"], then snapshots/verifies that input is present before clicking the component with aria-label=\"Send message\" using agent_browser. After sending, it uses blocking bash sleep 10 plus snapshot cycles until the answer appears or 10 attempts are reached.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "type in Gemini the message hello from the browser",
+      "expected_output": "Agent uses the gemini-browser skill for English phrasing too, writes the message into the Gemini prompt via agent_browser, and does not send unless requested.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "envia le mensaje a gemini \"el ecuadron epico de muertos vivientes es muy malvado?\"",
+      "expected_output": "Agent treats this as a combined write+send request: writes the quoted message into div[aria-label=\"Enter a prompt for Gemini\"], snapshots/verifies the input is present, clicks aria-label=\"Send message\", then uses blocking bash sleep 10 plus snapshot cycles until the answer appears or 10 attempts are reached.",
+      "files": []
+    }
+  ]
+}

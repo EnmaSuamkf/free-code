@@ -1,0 +1,161 @@
+/* === MODULE: modals ===
+   Tool picker and model picker modal dialogs. */
+
+.tool-picker-modal[hidden] {
+	display: none !important;
+}
+
+.tool-picker-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 200;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 16px;
+	background: color-mix(in srgb, var(--vscode-editor-background) 40%, rgba(0, 0, 0, 0.5));
+}
+
+.tool-picker-dialog {
+	width: 100%;
+	max-width: 480px;
+	max-height: min(70vh, 480px);
+	display: flex;
+	flex-direction: column;
+	background: var(--vscode-editorWidget-background);
+	border: 1px solid var(--vscode-editorWidget-border);
+	border-radius: 8px;
+	padding: 12px 14px;
+	box-shadow: 0 8px 24px color-mix(in srgb, var(--vscode-widget-shadow) 50%, transparent);
+}
+
+.tool-picker-title {
+	font-size: 14px;
+	font-weight: 600;
+	margin-bottom: 6px;
+}
+
+.tool-picker-hint {
+	font-size: 11px;
+	color: var(--vscode-descriptionForeground);
+	margin: 0 0 10px;
+	line-height: 1.4;
+}
+
+.tool-picker-body .tool-picker-empty {
+	color: var(--vscode-foreground);
+	margin: 0;
+}
+
+.tool-picker-body {
+	overflow-y: auto;
+	flex: 1;
+	min-height: 48px;
+	margin-bottom: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.tool-picker-row {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	font-size: 12px;
+	line-height: 1.35;
+}
+
+.tool-picker-row input {
+	margin-top: 2px;
+}
+
+.tool-picker-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+.model-picker-dialog {
+	max-width: 560px;
+	max-height: min(80vh, 560px);
+}
+
+.model-picker-search {
+	width: 100%;
+	margin-bottom: 8px;
+	padding: 6px 8px;
+	font-size: 12px;
+	background: var(--vscode-input-background);
+	color: var(--vscode-input-foreground);
+	border: 1px solid var(--vscode-input-border, transparent);
+	border-radius: 4px;
+	outline: none;
+}
+
+.model-picker-search:focus {
+	border-color: var(--vscode-focusBorder);
+}
+
+.model-picker-body {
+	gap: 0;
+	padding: 2px;
+	border: 1px solid color-mix(in srgb, var(--vscode-editorWidget-border) 70%, transparent);
+	border-radius: 4px;
+	background: color-mix(in srgb, var(--vscode-editor-background) 70%, transparent);
+}
+
+.model-picker-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	padding: 4px 8px;
+	font-size: 12px;
+	font-family: var(--vscode-editor-font-family, monospace);
+	background: transparent;
+	color: var(--vscode-editor-foreground);
+	border: none;
+	border-radius: 3px;
+	text-align: left;
+	cursor: pointer;
+	line-height: 1.4;
+}
+
+.model-picker-row:hover,
+.model-picker-row.model-picker-row-active {
+	background: color-mix(in srgb, var(--vscode-list-activeSelectionBackground) 60%, transparent);
+	color: var(--vscode-list-activeSelectionForeground, var(--vscode-editor-foreground));
+}
+
+.model-picker-row .model-picker-id {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.model-picker-row .model-picker-provider {
+	flex-shrink: 0;
+	color: var(--vscode-descriptionForeground);
+	font-size: 11px;
+}
+
+.model-picker-row.model-picker-row-active .model-picker-provider {
+	color: color-mix(in srgb, var(--vscode-list-activeSelectionForeground, var(--vscode-editor-foreground)) 70%, transparent);
+}
+
+.model-picker-row .model-picker-check {
+	flex-shrink: 0;
+	color: var(--vscode-testing-iconPassed, var(--vscode-charts-green, #4caf50));
+	font-weight: 600;
+}
+
+.model-picker-current {
+	margin-top: 8px;
+	margin-bottom: 8px;
+	font-size: 11px;
+	color: var(--vscode-descriptionForeground);
+	min-height: 16px;
+	font-family: var(--vscode-editor-font-family, monospace);
+}

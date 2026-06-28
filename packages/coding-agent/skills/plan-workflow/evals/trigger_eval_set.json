@@ -1,0 +1,22 @@
+[
+  {"query": "Create an implementation plan for OCTOPUS-10820. The spec already exists.", "should_trigger": true},
+  {"query": "Run the plan workflow for Jira ticket CAT-4045", "should_trigger": true},
+  {"query": "I need to generate plan-PROJ-123.md from the existing spec", "should_trigger": true},
+  {"query": "Generate plan for OCTOPUS-10821 - we have the spec in analysis folder", "should_trigger": true},
+  {"query": "Can you create the implementation plan? Spec is in analysis/spec-CX-456.md", "should_trigger": true},
+  {"query": "I want to create a plan document from the spec for this issue", "should_trigger": true},
+  {"query": "Necesito el plan de implementación para OCTOPUS-10820, ya tengo el spec", "should_trigger": true},
+  {"query": "What are the next steps for implementing OCTOPUS-10820? I have the spec ready.", "should_trigger": true},
+  {"query": "Implement the feature described in OCTOPUS-10820", "should_trigger": false},
+  {"query": "Commit my changes and create a PR for CAT-4045", "should_trigger": false},
+  {"query": "Move OCTOPUS-10820 to In Progress", "should_trigger": false},
+  {"query": "Create a spec for Jira ticket PROJ-123", "should_trigger": false},
+  {"query": "Run the specify workflow for OCTOPUS-10821", "should_trigger": false},
+  {"query": "What's in the constitution for this project?", "should_trigger": false},
+  {"query": "Get the details of Jira issue CAT-4045", "should_trigger": false},
+  {"query": "Review my implementation plan and suggest improvements", "should_trigger": false},
+  {"query": "What's the git command to create a branch?", "should_trigger": false},
+  {"query": "Add a comment to Jira issue OCTOPUS-10820", "should_trigger": false},
+  {"query": "Search for Jira issues in project OCTOPUS", "should_trigger": false},
+  {"query": "ok so i have the spec for OCTOPUS-10820, what do i do next?", "should_trigger": true}
+]

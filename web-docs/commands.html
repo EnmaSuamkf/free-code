@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Commands — free-code</title>
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <div class="doc-root">
+      <header class="site-shell-header" role="banner">
+        <div class="site-shell-inner">
+          <a class="site-brand" href="index.html">
+            <span class="site-brand-angles" aria-hidden="true">&lt;</span>
+            <span>free-code</span>
+            <span class="site-brand-angles" aria-hidden="true">&gt;</span>
+          </a>
+          <div class="site-header-actions">
+            <button type="button" class="theme-toggle" id="doc-theme-toggle" aria-label="Color theme">
+              <span class="theme-toggle-label" id="doc-theme-label">System</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="container">
+        <header class="hero">
+          <h1 class="brand">
+            <span class="angle" aria-hidden="true">&lt;</span>
+            <span class="name">free-code</span>
+            <span class="angle" aria-hidden="true">&gt;</span>
+          </h1>
+          <p class="tagline">
+            <span class="prompt" aria-hidden="true">// </span>
+            Command reference — every slash command, keyboard shortcut, and CLI flag.
+          </p>
+
+          <nav class="nav" aria-label="Primary">
+            <a href="index.html">[home]</a>
+            <a href="capabilities.html">[capabilities]</a>
+            <a href="commands.html" aria-current="page">[commands]</a>
+            <a href="installation.html">[installation]</a>
+            <a href="code-graph.html">[code graph]</a>
+            <a href="roi.html">[ROI]</a>
+          </nav>
+        </header>
+
+        <!-- Editor commands -->
+        <section class="card" aria-labelledby="editor-cmds">
+          <div class="card-header">
+            <h2 id="editor-cmds">Editor commands ( <code>/</code> )</h2>
+            <p>Type <code>/</code> in the input to open the command menu. Extensions and skills add more.</p>
+          </div>
+          <div class="card-body">
+
+            <h3>Session</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Command</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>/login</code> · <code>/logout</code></td><td>OAuth authentication</td></tr>
+                  <tr><td><code>/new</code></td><td>New session</td></tr>
+                  <tr><td><code>/resume</code></td><td>Browse and pick a previous session</td></tr>
+                  <tr><td><code>/name &lt;name&gt;</code></td><td>Set a visible name for the current session</td></tr>
+                  <tr><td><code>/session</code></td><td>Show session info: path, token count, cost</td></tr>
+                  <tr><td><code>/fork</code></td><td>Branch the current session into a new independent one</td></tr>
+                  <tr><td><code>/tree</code></td><td>Navigate history as a tree and jump to any checkpoint</td></tr>
+                  <tr><td><code>/compact [instructions]</code></td><td>Summarize context; optional instructions for the summary</td></tr>
+                  <tr><td><code>/copy</code></td><td>Copy the last assistant reply to clipboard</td></tr>
+                  <tr><td><code>/export [file]</code></td><td><code>.md</code> → Markdown; <code>.jsonl</code> → JSONL; other/none → interactive HTML</td></tr>
+                  <tr><td><code>/share</code></td><td>Upload as a private GitHub gist with an HTML link</td></tr>
+                  <tr><td><code>/quit</code></td><td>Quit the session</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Model &amp; settings</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Command</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>/model</code></td><td>Switch model interactively</td></tr>
+                  <tr><td><code>/scoped-models</code></td><td>Enable or disable models for the Ctrl+P cycle</td></tr>
+                  <tr><td><code>/settings</code></td><td>Reasoning level, theme, message delivery, transport</td></tr>
+                  <tr><td><code>/pick-theme</code></td><td>Switch the UI theme</td></tr>
+                  <tr><td><code>/reload</code></td><td>Reload shortcuts, extensions, skills, prompts, and context files</td></tr>
+                  <tr><td><code>/hotkeys</code></td><td>List all keyboard shortcuts</td></tr>
+                  <tr><td><code>/changelog</code></td><td>View version history</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Tools</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Command</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>/tools</code></td><td>List active tools</td></tr>
+                  <tr><td><code>/pick-tools</code></td><td>Enable or disable individual tools</td></tr>
+                  <tr><td><code>/files</code></td><td>Browse and attach files as context</td></tr>
+                  <tr><td><code>/pick-agent</code></td><td>Switch agent preset</td></tr>
+                  <tr><td><code>/pick-skill</code></td><td>Activate a skill interactively</td></tr>
+                  <tr><td><code>/commands</code></td><td>List all available slash commands</td></tr>
+                  <tr><td><code>/mcp-import</code></td><td>Import an MCP server configuration</td></tr>
+                  <tr><td><code>/damage-control [on|off|toggle|status]</code></td><td>Toggle Damage-Control firewall enforcement for bash, paths, and MCP (rules stay loaded)</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Subagents</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Command</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>/sub &lt;task&gt;</code></td><td>Start a new subagent with a task</td></tr>
+                  <tr><td><code>/subcont &lt;n&gt; &lt;prompt&gt;</code></td><td>Continue talking to subagent #n</td></tr>
+                  <tr><td><code>/subrm &lt;n&gt;</code></td><td>Remove subagent #n</td></tr>
+                  <tr><td><code>/subclear</code></td><td>Clear all subagent widgets</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>RAG — Knowledge base</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Command</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>/rag addFile &lt;path&gt;</code></td><td>Index a document</td></tr>
+                  <tr><td><code>/rag addGroup &lt;folder&gt;</code></td><td>Index all supported files in a folder</td></tr>
+                  <tr><td><code>/rag addGithubUrl &lt;url&gt; [subpath]</code></td><td>Clone a GitHub repo and index its files; optional subpath targets a subdirectory. Saved to <code>sources.json</code> for future refreshes.</td></tr>
+                  <tr><td><code>/rag addDrive &lt;google_drive_url&gt;</code></td><td>Download a Google Drive document via <code>agent_browser</code> and index it into the active knowledge base (PDF, DOCX, or TXT)</td></tr>
+                  <tr><td><code>/rag search &lt;query&gt;</code></td><td>Query the knowledge base and use the result as context</td></tr>
+                  <tr><td><code>/rag list</code></td><td>List indexed documents</td></tr>
+                  <tr><td><code>/rag remove &lt;file&gt;</code></td><td>Remove a document from the index</td></tr>
+                  <tr><td><code>/rag refresh</code></td><td>Re-fetch and re-index all sources registered via <code>addFile</code> and <code>addGithubUrl</code></td></tr>
+                  <tr><td><code>/rag schedule [daily|weekly]</code></td><td>Set up automatic recurring refresh (requires at least one GitHub source)</td></tr>
+                  <tr><td><code>/rag-kb create &lt;name&gt;</code></td><td>Create a named knowledge base</td></tr>
+                  <tr><td><code>/rag-kb delete &lt;name&gt;</code></td><td>Delete a knowledge base</td></tr>
+                  <tr><td><code>/rag-kb use &lt;name&gt;</code></td><td>Switch the active knowledge base</td></tr>
+                  <tr><td><code>/rag-kb list</code></td><td>List all knowledge bases</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Browser &amp; Gemini</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Command</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>/drive download &lt;url&gt;</code></td><td>Download a Google Drive document to the project directory via <code>agent_browser</code> (PDF, DOCX, or TXT)</td></tr>
+                  <tr><td><code>/browse [url] [goal]</code></td><td>Open URL in visible browser; defaults to Google if no URL</td></tr>
+                  <tr><td><code>/gemini ask &lt;message&gt;</code></td><td>Send a message to Gemini via CDP</td></tr>
+                  <tr><td><code>/gemini download &lt;file&gt;</code></td><td>Download a Gemini-generated artifact</td></tr>
+                  <tr><td><code>/gemini open [chat_id]</code></td><td>Open a Gemini conversation in the browser</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Code Graph</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Command</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>/code-index [--force]</code></td><td>Index or re-index the project. <code>--force</code> re-indexes all files.</td></tr>
+                  <tr><td><code>/code-symbols &lt;query&gt; [--kind &lt;type&gt;] [--limit &lt;n&gt;]</code></td><td>Search symbols by name. Kinds: function, class, method, interface, type, variable, enum.</td></tr>
+                  <tr><td><code>/code-callers &lt;name&gt; [--limit &lt;n&gt;]</code></td><td>Find all call sites for a function or method</td></tr>
+                  <tr><td><code>/code-context &lt;name&gt; [--file &lt;partial-path&gt;]</code></td><td>Full source and direct callees of a symbol</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p><a href="code-graph.html">Code graph full documentation →</a></p>
+          </div>
+        </section>
+
+        <!-- Keyboard shortcuts -->
+        <section class="card" aria-labelledby="keyboard">
+          <div class="card-header">
+            <h2 id="keyboard">Keyboard shortcuts</h2>
+            <p>Customizable via <code>keybindings.json</code>. Run <code>/reload</code> after editing.</p>
+          </div>
+          <div class="card-body">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Key</th><th>Action</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="kbd">Ctrl+C</span></td><td>Clear the editor</td></tr>
+                  <tr><td><span class="kbd">Ctrl+C</span> twice</td><td>Quit</td></tr>
+                  <tr><td><span class="kbd">Escape</span></td><td>Cancel / abort the current operation</td></tr>
+                  <tr><td><span class="kbd">Escape</span> twice</td><td>Open <code>/tree</code></td></tr>
+                  <tr><td><span class="kbd">Ctrl+L</span></td><td>Open model selector</td></tr>
+                  <tr><td><span class="kbd">Ctrl+P</span></td><td>Cycle scoped models forward</td></tr>
+                  <tr><td><span class="kbd">Shift+Ctrl+P</span></td><td>Cycle scoped models backward</td></tr>
+                  <tr><td><span class="kbd">Shift+Tab</span></td><td>Cycle reasoning level (off → minimal → … → xhigh)</td></tr>
+                  <tr><td><span class="kbd">Ctrl+O</span></td><td>Collapse / expand tool output</td></tr>
+                  <tr><td><span class="kbd">Ctrl+T</span></td><td>Collapse / expand thinking blocks</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="callout tip">
+              <strong>Editor shortcuts</strong><br />
+              In the input: type <code>@</code> to attach files, <code>!command</code> to run a shell command
+              inline, <code>!!command</code> to run and attach output as context.
+            </div>
+          </div>
+        </section>
+
+        <!-- CLI flags -->
+        <section class="card" aria-labelledby="cli-flags">
+          <div class="card-header">
+            <h2 id="cli-flags">CLI flags</h2>
+            <p><code>free-code [options] [@files...] [message...]</code></p>
+          </div>
+          <div class="card-body">
+
+            <h3>Sessions</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>-c</code>, <code>--continue</code></td><td>Continue the most recent session</td></tr>
+                  <tr><td><code>-r</code>, <code>--resume</code></td><td>Browse and pick a session</td></tr>
+                  <tr><td><code>--session &lt;path|id&gt;</code></td><td>Open a specific session by file path or partial UUID</td></tr>
+                  <tr><td><code>--fork &lt;path|id&gt;</code></td><td>Fork a session into a new one</td></tr>
+                  <tr><td><code>--session-dir &lt;dir&gt;</code></td><td>Custom session storage directory</td></tr>
+                  <tr><td><code>--no-session</code></td><td>Ephemeral mode — nothing is saved</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Model &amp; output</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>--provider &lt;name&gt;</code></td><td>Select provider</td></tr>
+                  <tr><td><code>--model &lt;pattern&gt;</code></td><td>Model ID or <code>provider/id</code>, optionally with <code>:&lt;thinking&gt;</code></td></tr>
+                  <tr><td><code>--api-key &lt;key&gt;</code></td><td>API key override</td></tr>
+                  <tr><td><code>--thinking &lt;level&gt;</code></td><td>Reasoning level: off, minimal, low, medium, high, xhigh</td></tr>
+                  <tr><td><code>--models &lt;patterns&gt;</code></td><td>Comma-separated list for Ctrl+P cycle</td></tr>
+                  <tr><td><code>--list-models [search]</code></td><td>List available models; optional search filter</td></tr>
+                  <tr><td><code>-p</code>, <code>--print</code></td><td>Single response and exit; reads piped stdin</td></tr>
+                  <tr><td><code>--mode json</code></td><td>JSON line-by-line output</td></tr>
+                  <tr><td><code>--mode rpc</code></td><td>RPC mode (used by VS Code plugin and macOS app)</td></tr>
+                  <tr><td><code>--export &lt;session&gt; [output]</code></td><td>Export session to HTML, Markdown, or JSONL without opening TUI</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Tools &amp; extensions</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>--tools &lt;list&gt;</code></td><td>Built-in tools to enable (default: read,bash,edit,write,grep,find,ls)</td></tr>
+                  <tr><td><code>--no-tools</code></td><td>Disable built-in tools (extension tools still load)</td></tr>
+                  <tr><td><code>-e &lt;source&gt;</code>, <code>--extension &lt;source&gt;</code></td><td>Load an extension (repeatable)</td></tr>
+                  <tr><td><code>--no-extensions</code></td><td>Disable extension auto-discovery</td></tr>
+                  <tr><td><code>--skill &lt;path&gt;</code></td><td>Load a skill file (repeatable)</td></tr>
+                  <tr><td><code>--no-skills</code></td><td>Disable skill loading</td></tr>
+                  <tr><td><code>--system-prompt &lt;text&gt;</code></td><td>Replace the default system prompt</td></tr>
+                  <tr><td><code>--append-system-prompt &lt;text&gt;</code></td><td>Append to the default system prompt</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Package management</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Command</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>free-code install &lt;source&gt; [-l]</code></td><td>Install a package. <code>-l</code> = project-local</td></tr>
+                  <tr><td><code>free-code remove &lt;source&gt;</code></td><td>Uninstall a package</td></tr>
+                  <tr><td><code>free-code update [source]</code></td><td>Update installed packages (skips pinned versions)</td></tr>
+                  <tr><td><code>free-code list</code></td><td>List installed packages</td></tr>
+                  <tr><td><code>free-code config</code></td><td>Enable or disable package resources</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Built-in tools -->
+        <section class="card" aria-labelledby="builtin-tools">
+          <div class="card-header">
+            <h2 id="builtin-tools">Built-in agent tools</h2>
+            <p>Available by default in every session. Enable or disable with <code>--tools</code>.</p>
+          </div>
+          <div class="card-body">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Tool</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>read</code></td><td>Read files from the filesystem</td></tr>
+                  <tr><td><code>bash</code></td><td>Run shell commands</td></tr>
+                  <tr><td><code>edit</code></td><td>Make exact string replacements in files</td></tr>
+                  <tr><td><code>write</code></td><td>Write or overwrite files</td></tr>
+                  <tr><td><code>grep</code></td><td>Search file contents with regex</td></tr>
+                  <tr><td><code>find</code></td><td>Find files by name or pattern</td></tr>
+                  <tr><td><code>ls</code></td><td>List directory contents</td></tr>
+                  <tr><td><code>code_index</code></td><td>Build or update the code graph index</td></tr>
+                  <tr><td><code>code_symbols</code></td><td>Search symbols in the code graph</td></tr>
+                  <tr><td><code>code_callers</code></td><td>Find callers of a function in the code graph</td></tr>
+                  <tr><td><code>code_context</code></td><td>Get symbol source and callees from the code graph</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <p class="footer">
+          <a href="capabilities.html">Full capabilities →</a> &nbsp;·&nbsp;
+          <a href="code-graph.html">Code graph →</a> &nbsp;·&nbsp;
+          <a href="installation.html">Installation →</a>
+        </p>
+        <p class="footer-credit">Powered by CX — developed by Pablo Castañeda</p>
+      </div>
+    </div>
+    <script src="assets/theme.js" defer></script>
+  </body>
+</html>

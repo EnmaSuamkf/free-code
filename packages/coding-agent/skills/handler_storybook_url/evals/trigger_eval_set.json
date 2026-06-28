@@ -1,0 +1,16 @@
+[
+  {"query": "go to https://host/?path=/story/docs-introduction--page", "should_trigger": true},
+  {"query": "open https://lb.frontend-support-area.gke-apps.edo.sv/?path=/story/components-button--primary", "should_trigger": true},
+  {"query": "go to http://localhost:6006/?path=/story/foo--bar", "should_trigger": true},
+  {"query": "https://host.example/?path=/story/foo--bar", "should_trigger": true},
+  {"query": "navigate to https://host/?path=/story/components-card--default&args=x:1", "should_trigger": true},
+  {"query": "open Storybook https://host/?path=/story/foo--bar", "should_trigger": true},
+  {"query": "Storybook URL: https://host/?path=/story/foo--bar", "should_trigger": true},
+  {"query": "open https://host/?path=/story/foo--bar&full=1", "should_trigger": true},
+  {"query": "open https://www.google.com", "should_trigger": false},
+  {"query": "entra a https://host/?path=/docs/introduction--page", "should_trigger": false},
+  {"query": "navigate to https://host/components/button", "should_trigger": false},
+  {"query": "take a screenshot of the page", "should_trigger": false},
+  {"query": "open http://localhost:6006/?path=/docs/components-button--primary", "should_trigger": false},
+  {"query": "go to the Storybook homepage", "should_trigger": false}
+]

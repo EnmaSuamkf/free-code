@@ -1,0 +1,14 @@
+{
+  "requires": [
+    "mcp-github",
+    "mcp-atlassian"
+  ],
+  "owner": "CX",
+  "tags": [
+    "git",
+    "github",
+    "jira",
+    "pull-requests",
+    "sdd"
+  ]
+}

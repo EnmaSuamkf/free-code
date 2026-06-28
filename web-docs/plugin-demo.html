@@ -1,0 +1,1680 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>free-code plugin — interactive demo</title>
+  <style>
+    /* ── VS Code theme variables (dark, matches real plugin defaults) ── */
+    :root {
+      --free-code-zoom: 1;
+      --vscode-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --vscode-editor-font-family: "SF Mono", Menlo, Monaco, "Courier New", monospace;
+      --vscode-editor-background: #1e1e1e;
+      --vscode-editor-foreground: #cccccc;
+      --vscode-foreground: #cccccc;
+      --vscode-descriptionForeground: #858585;
+      --vscode-focusBorder: #007fd4;
+      --vscode-textLink-foreground: #3794ff;
+      --vscode-sideBar-background: #252526;
+      --vscode-editorWidget-background: #252526;
+      --vscode-editorWidget-border: #454545;
+      --vscode-input-background: #3c3c3c;
+      --vscode-input-foreground: #cccccc;
+      --vscode-input-border: #555555;
+      --vscode-button-background: #0e639c;
+      --vscode-button-foreground: #ffffff;
+      --vscode-button-hoverBackground: #1177bb;
+      --vscode-button-border: transparent;
+      --vscode-button-secondaryBackground: #3a3d41;
+      --vscode-button-secondaryForeground: #cccccc;
+      --vscode-badge-background: #4d4d4d;
+      --vscode-badge-foreground: #cccccc;
+      --vscode-list-activeSelectionBackground: #094771;
+      --vscode-list-activeSelectionForeground: #ffffff;
+      --vscode-list-hoverBackground: #2a2d2e;
+      --vscode-panelTitle-activeForeground: #e7e7e7;
+      --vscode-panelTitle-inactiveForeground: #969696;
+      --vscode-textBlockQuote-background: #2a2a2a;
+      --vscode-textBlockQuote-border: #444444;
+      --vscode-errorForeground: #f48771;
+      --vscode-testing-iconPassed: #73c991;
+      --vscode-testing-iconFailed: #f48771;
+      --vscode-charts-green: #89d185;
+      --vscode-widget-shadow: rgba(0,0,0,0.36);
+      --drawer-width: 180px;
+    }
+
+    /* light theme */
+    html[data-theme="light"] {
+      --vscode-editor-background: #ffffff;
+      --vscode-editor-foreground: #1f1f1f;
+      --vscode-foreground: #3b3b3b;
+      --vscode-descriptionForeground: #717171;
+      --vscode-focusBorder: #0090f1;
+      --vscode-textLink-foreground: #006ab1;
+      --vscode-sideBar-background: #f3f3f3;
+      --vscode-editorWidget-background: #f3f3f3;
+      --vscode-editorWidget-border: #c8c8c8;
+      --vscode-input-background: #ffffff;
+      --vscode-input-foreground: #1f1f1f;
+      --vscode-input-border: #bebebe;
+      --vscode-button-background: #007acc;
+      --vscode-button-hoverBackground: #0062a3;
+      --vscode-button-secondaryBackground: #5f6a79;
+      --vscode-badge-background: #c4c4c4;
+      --vscode-badge-foreground: #333333;
+      --vscode-list-activeSelectionBackground: #0060c0;
+      --vscode-list-hoverBackground: #e8e8e8;
+      --vscode-panelTitle-activeForeground: #424242;
+      --vscode-panelTitle-inactiveForeground: #686868;
+      --vscode-textBlockQuote-background: #f2f2f2;
+      --vscode-textBlockQuote-border: #cccccc;
+      --vscode-errorForeground: #e51400;
+      --vscode-testing-iconPassed: #388a34;
+      --vscode-testing-iconFailed: #e51400;
+      --vscode-charts-green: #388a34;
+      --vscode-widget-shadow: rgba(0,0,0,0.16);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      font-family: var(--vscode-font-family);
+      background: var(--vscode-editor-background);
+      color: var(--vscode-editor-foreground);
+      font-size: 13px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── nav bar ── */
+    .chat-nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 8px;
+      border-bottom: 1px solid var(--vscode-editorWidget-border);
+      flex-shrink: 0;
+      background: var(--vscode-sideBar-background);
+    }
+    .chat-nav-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px; height: 26px;
+      padding: 0;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--vscode-descriptionForeground);
+      font-size: 14px;
+      line-height: 1;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+    }
+    .chat-nav-toggle:hover, .chat-nav-toggle[aria-expanded="true"] {
+      background: color-mix(in srgb, var(--vscode-button-background) 16%, transparent);
+      border-color: color-mix(in srgb, var(--vscode-input-border) 70%, transparent);
+      color: var(--vscode-foreground);
+    }
+    .chat-nav-title {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 12px;
+      color: var(--vscode-panelTitle-activeForeground);
+      font-weight: 500;
+    }
+    .chat-nav-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px; height: 26px;
+      padding: 0;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--vscode-descriptionForeground);
+      font-size: 16px;
+      font-weight: 300;
+      line-height: 1;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+    }
+    .chat-nav-btn:hover {
+      background: color-mix(in srgb, var(--vscode-button-background) 16%, transparent);
+      border-color: color-mix(in srgb, var(--vscode-input-border) 70%, transparent);
+      color: var(--vscode-foreground);
+    }
+
+    /* ── layout ── */
+    .chat-layout {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ── drawer ── */
+    .chat-list-panel {
+      position: absolute;
+      top: 0; bottom: 0; left: 0;
+      width: var(--drawer-width);
+      z-index: 50;
+      background: var(--vscode-sideBar-background);
+      border-right: 1px solid var(--vscode-editorWidget-border);
+      box-shadow: 4px 0 18px color-mix(in srgb, var(--vscode-widget-shadow) 45%, transparent);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(-100%);
+      transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .chat-list-panel.open { transform: translateX(0); }
+    .chat-list-header {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 6px 6px 12px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--vscode-descriptionForeground);
+      border-bottom: 1px solid color-mix(in srgb, var(--vscode-editorWidget-border) 60%, transparent);
+      flex-shrink: 0;
+    }
+    .chat-list-header-title { flex: 1; }
+    .chat-list-count {
+      font-weight: 400;
+      font-size: 10px;
+      color: color-mix(in srgb, var(--vscode-descriptionForeground) 60%, transparent);
+    }
+    .chat-list-pin-btn {
+      width: 24px; height: 24px;
+      padding: 0;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--vscode-descriptionForeground);
+      font-size: 13px;
+      line-height: 1;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.12s, color 0.12s, border-color 0.12s;
+      flex-shrink: 0;
+    }
+    .chat-list-pin-btn:hover,
+    .chat-list-pin-btn[aria-pressed="true"] {
+      background: color-mix(in srgb, var(--vscode-button-background) 16%, transparent);
+      border-color: color-mix(in srgb, var(--vscode-input-border) 70%, transparent);
+      color: var(--vscode-foreground);
+    }
+    .chat-list-pin-btn[aria-pressed="true"] {
+      color: var(--vscode-testing-iconPassed);
+    }
+    .chat-list-body { flex: 1; overflow-y: auto; padding: 4px 0; }
+    .chat-list-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 7px 8px 7px 12px;
+      background: transparent;
+      color: var(--vscode-editor-foreground);
+      font-family: var(--vscode-font-family);
+      font-size: 12px;
+      cursor: pointer;
+      line-height: 1.35;
+      transition: background 0.1s;
+      border: none;
+      text-align: left;
+      position: relative;
+    }
+    .chat-list-item:hover { background: var(--vscode-list-hoverBackground); }
+    .chat-list-item.active {
+      background: color-mix(in srgb, var(--vscode-list-activeSelectionBackground) 45%, transparent);
+    }
+    .chat-list-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 1.5px solid var(--vscode-descriptionForeground);
+      opacity: 0.4;
+    }
+    .chat-list-item.active .chat-list-dot {
+      background: var(--vscode-testing-iconPassed);
+      border-color: var(--vscode-testing-iconPassed);
+      opacity: 1;
+    }
+    .chat-list-label {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .chat-list-item.active .chat-list-label { font-weight: 500; }
+    .chat-list-actions {
+      display: none;
+      align-items: center;
+      gap: 1px;
+      flex-shrink: 0;
+    }
+    .chat-list-item:hover .chat-list-actions { display: flex; }
+    .chat-list-action-btn {
+      width: 22px; height: 22px;
+      padding: 0;
+      border: none;
+      border-radius: 3px;
+      background: transparent;
+      color: var(--vscode-descriptionForeground);
+      font-size: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.1s, color 0.1s;
+    }
+    .chat-list-action-btn:hover {
+      background: color-mix(in srgb, var(--vscode-button-background) 20%, transparent);
+      color: var(--vscode-foreground);
+    }
+    .chat-list-action-btn.danger:hover {
+      background: rgba(220, 38, 38, 0.15);
+      color: var(--vscode-errorForeground);
+    }
+    /* inline rename input */
+    .chat-list-item.renaming .chat-list-label { display: none; }
+    .chat-list-item.renaming .chat-list-actions { display: none; }
+    .chat-list-rename-input {
+      flex: 1;
+      min-width: 0;
+      background: var(--vscode-input-background);
+      color: var(--vscode-input-foreground);
+      border: 1px solid var(--vscode-focusBorder);
+      border-radius: 3px;
+      padding: 1px 4px;
+      font-family: var(--vscode-font-family);
+      font-size: 12px;
+      outline: none;
+      display: none;
+    }
+    .chat-list-item.renaming .chat-list-rename-input { display: block; }
+    .chat-list-footer {
+      padding: 6px 12px 10px;
+      border-top: 1px solid color-mix(in srgb, var(--vscode-editorWidget-border) 60%, transparent);
+      flex-shrink: 0;
+    }
+    .chat-list-new-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      padding: 6px 0;
+      border: none;
+      background: transparent;
+      color: var(--vscode-descriptionForeground);
+      font-family: var(--vscode-font-family);
+      font-size: 12px;
+      cursor: pointer;
+      text-align: left;
+      transition: color 0.1s;
+    }
+    .chat-list-new-btn:hover { color: var(--vscode-foreground); }
+
+    /* pinned sidebar shifts main content */
+    .chat-list-panel.pinned {
+      position: relative;
+      transform: none;
+      box-shadow: none;
+      flex-shrink: 0;
+    }
+
+    /* ── backdrop ── */
+    .chat-list-backdrop {
+      position: absolute;
+      inset: 0;
+      z-index: 49;
+      background: color-mix(in srgb, var(--vscode-editor-background) 30%, rgba(0,0,0,0.35));
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .chat-list-backdrop.open { opacity: 1; pointer-events: auto; }
+
+    /* ── main content ── */
+    .main-content {
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* ── messages ── */
+    #messages {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .message {
+      padding: 7px 10px;
+      border-radius: 8px;
+      white-space: pre-wrap;
+      line-height: 1.45;
+      font-size: 13px;
+    }
+    .message.user {
+      background: var(--vscode-button-background);
+      color: var(--vscode-button-foreground);
+      align-self: flex-end;
+      max-width: 90%;
+    }
+    .message.assistant {
+      background: color-mix(in srgb, var(--vscode-editorWidget-background) 80%, transparent);
+      border: 1px solid var(--vscode-editorWidget-border);
+      max-width: 95%;
+    }
+    .message.working {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      align-self: flex-start;
+      max-width: 95%;
+      padding: 5px 10px;
+      font-size: 12px;
+      color: var(--vscode-descriptionForeground);
+      background: color-mix(in srgb, var(--vscode-editorWidget-background) 55%, transparent);
+      border: 1px dashed var(--vscode-editorWidget-border);
+    }
+    .message.working::before {
+      content: "";
+      width: 10px; height: 10px;
+      border: 1.5px solid color-mix(in srgb, var(--vscode-descriptionForeground) 30%, transparent);
+      border-top-color: var(--vscode-descriptionForeground);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+    .message.session {
+      font-family: var(--vscode-editor-font-family);
+      font-size: 11px;
+      background: var(--vscode-textBlockQuote-background);
+      border: 1px solid var(--vscode-textBlockQuote-border);
+      max-width: 95%;
+      color: var(--vscode-descriptionForeground);
+    }
+    .message.tool-event {
+      font-family: var(--vscode-editor-font-family);
+      font-size: 12px;
+      background: var(--vscode-textBlockQuote-background);
+      border: 1px solid var(--vscode-textBlockQuote-border);
+      max-width: 95%;
+      padding: 5px 10px;
+    }
+    .message.tool-event.success {
+      border-color: color-mix(in srgb, var(--vscode-testing-iconPassed) 22%, var(--vscode-textBlockQuote-border));
+      background: color-mix(in srgb, var(--vscode-testing-iconPassed) 3%, var(--vscode-textBlockQuote-background));
+    }
+    .tool-head {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      color: var(--vscode-descriptionForeground);
+    }
+    .tool-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .tool-dot.running {
+      border: 1.5px solid color-mix(in srgb, var(--vscode-descriptionForeground) 30%, transparent);
+      border-top-color: var(--vscode-descriptionForeground);
+      animation: spin 0.7s linear infinite;
+    }
+    .tool-dot.success { background: var(--vscode-testing-iconPassed); }
+    .tool-result {
+      margin-top: 4px;
+      color: var(--vscode-descriptionForeground);
+      font-size: 11px;
+      padding-left: 14px;
+    }
+    .message.thinking {
+      background: color-mix(in srgb, var(--vscode-editorWidget-background) 50%, transparent);
+      border: 1px dashed var(--vscode-editorWidget-border);
+      max-width: 95%;
+      padding: 4px 10px;
+      font-size: 12px;
+      color: var(--vscode-descriptionForeground);
+    }
+    summary.thinking-summary {
+      cursor: pointer;
+      user-select: none;
+      font-weight: 600;
+      list-style: none;
+      outline: none;
+    }
+    summary.thinking-summary::before { content: "▸ "; }
+    details[open] summary.thinking-summary::before { content: "▾ "; }
+    .thinking-body {
+      margin: 5px 0 2px;
+      white-space: pre-wrap;
+      font-family: var(--vscode-editor-font-family);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── input area ── */
+    #chat-form {
+      padding: 8px 10px 10px;
+      border-top: 1px solid var(--vscode-editorWidget-border);
+      display: grid;
+      gap: 7px;
+      flex-shrink: 0;
+      position: relative;
+    }
+    #input {
+      width: 100%;
+      resize: none;
+      line-height: 1.4;
+      overflow-x: hidden;
+      overflow-y: hidden;
+      background: var(--vscode-input-background);
+      color: var(--vscode-input-foreground);
+      border: 1px solid var(--vscode-input-border);
+      border-radius: 4px;
+      padding: 7px 8px;
+      font-family: var(--vscode-font-family);
+      font-size: 13px;
+      outline: none;
+      min-height: 36px;
+      max-height: 120px;
+    }
+    #input:focus { border-color: var(--vscode-focusBorder); }
+    #input::placeholder { color: var(--vscode-descriptionForeground); opacity: 0.7; }
+
+    /* ── slash menu ── */
+    .slash-menu {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: calc(100% - 8px);
+      max-height: min(260px, 40vh);
+      overflow-y: auto;
+      z-index: 100;
+      border: 1px solid var(--vscode-editorWidget-border);
+      border-radius: 6px;
+      background: var(--vscode-editorWidget-background);
+      box-shadow: 0 4px 14px color-mix(in srgb, var(--vscode-widget-shadow) 50%, transparent);
+      font-size: 12px;
+      display: none;
+    }
+    .slash-menu.open { display: block; }
+    .slash-menu-heading {
+      padding: 6px 10px 4px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--vscode-descriptionForeground);
+      border-bottom: 1px solid color-mix(in srgb, var(--vscode-editorWidget-border) 60%, transparent);
+    }
+    .slash-menu-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      width: 100%;
+      text-align: left;
+      padding: 6px 10px;
+      border: none;
+      background: transparent;
+      color: var(--vscode-editor-foreground);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    .slash-menu-item:hover, .slash-menu-item.active {
+      background: color-mix(in srgb, var(--vscode-list-activeSelectionBackground) 60%, transparent);
+      color: var(--vscode-list-activeSelectionForeground, var(--vscode-editor-foreground));
+    }
+    .slash-menu-item:hover .slash-menu-desc, .slash-menu-item.active .slash-menu-desc {
+      color: color-mix(in srgb, var(--vscode-list-activeSelectionForeground, var(--vscode-editor-foreground)) 70%, transparent);
+    }
+    .slash-menu-label { font-weight: 600; }
+    .slash-menu-desc { color: var(--vscode-descriptionForeground); font-weight: 400; font-size: 11px; }
+
+    /* ── action bar ── */
+    .chat-actions {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .chat-actions-context {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+    }
+    .chat-actions-tools {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+    .indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px 3px 9px;
+      background: color-mix(in srgb, var(--vscode-editorWidget-background) 55%, transparent);
+      color: var(--vscode-descriptionForeground);
+      border: 1px solid color-mix(in srgb, var(--vscode-editorWidget-border) 70%, transparent);
+      border-radius: 999px;
+      font-size: 11px;
+      font-family: var(--vscode-editor-font-family);
+      line-height: 1.2;
+      cursor: pointer;
+      white-space: nowrap;
+      max-width: 160px;
+      overflow: hidden;
+    }
+    .indicator:hover {
+      color: var(--vscode-foreground);
+      background: color-mix(in srgb, var(--vscode-button-background) 14%, transparent);
+      border-color: var(--vscode-focusBorder);
+    }
+    .indicator-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .indicator-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--vscode-testing-iconPassed);
+      flex-shrink: 0;
+    }
+    .indicator::after {
+      content: "▾";
+      font-size: 8px;
+      opacity: 0.45;
+      flex-shrink: 0;
+    }
+    .indicator.no-arrow::after { content: ""; }
+    .chat-icon-btn {
+      width: 28px; height: 28px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--vscode-descriptionForeground);
+      font-size: 14px;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .chat-icon-btn:hover {
+      background: color-mix(in srgb, var(--vscode-button-background) 20%, transparent);
+      border-color: color-mix(in srgb, var(--vscode-input-border) 80%, transparent);
+      color: var(--vscode-foreground);
+    }
+    .chat-actions-send {
+      width: 28px; height: 28px;
+      min-width: 28px;
+      padding: 0;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid transparent;
+      background: var(--vscode-button-background);
+      color: var(--vscode-button-foreground);
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .chat-actions-send:hover { background: var(--vscode-button-hoverBackground); }
+
+    /* ── modal overlay ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      background: rgba(0,0,0,0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.14s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      background: var(--vscode-editorWidget-background);
+      border: 1px solid var(--vscode-editorWidget-border);
+      border-radius: 8px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.55);
+      display: flex;
+      flex-direction: column;
+      max-height: 82vh;
+      overflow: hidden;
+    }
+    .modal-header { padding: 16px 18px 6px; }
+    .modal-title { font-size: 14px; font-weight: 600; color: var(--vscode-foreground); margin: 0 0 5px; }
+    .modal-subtitle { font-size: 11px; color: var(--vscode-descriptionForeground); line-height: 1.45; margin: 0; }
+    .modal-search {
+      margin: 10px 18px 0;
+      padding: 7px 10px;
+      background: var(--vscode-input-background);
+      color: var(--vscode-input-foreground);
+      border: 1px solid var(--vscode-input-border);
+      border-radius: 4px;
+      font-family: var(--vscode-editor-font-family);
+      font-size: 12px;
+      outline: none;
+      width: calc(100% - 36px);
+    }
+    .modal-search:focus { border-color: var(--vscode-focusBorder); }
+    .modal-search::placeholder { color: var(--vscode-descriptionForeground); opacity: 0.7; }
+    .modal-list {
+      flex: 1;
+      overflow-y: auto;
+      margin-top: 10px;
+      border-top: 1px solid var(--vscode-editorWidget-border);
+    }
+    .modal-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 18px;
+      cursor: pointer;
+      font-family: var(--vscode-editor-font-family);
+      font-size: 12px;
+      color: var(--vscode-editor-foreground);
+      transition: background 0.09s;
+      user-select: none;
+    }
+    .modal-item:hover, .modal-item.hi {
+      background: color-mix(in srgb, var(--vscode-list-activeSelectionBackground) 55%, transparent);
+    }
+    .modal-item-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .modal-item-tag {
+      font-size: 11px;
+      color: var(--vscode-descriptionForeground);
+      white-space: nowrap;
+    }
+    .modal-item-check { width: 16px; text-align: center; flex-shrink: 0; color: var(--vscode-testing-iconPassed); font-size: 13px; }
+    /* workspace-specific two-line item */
+    .modal-item.ws-item { flex-direction: column; align-items: flex-start; gap: 2px; }
+    .modal-item.ws-item .ws-name { font-size: 12px; font-weight: 600; color: var(--vscode-editor-foreground); }
+    .modal-item.ws-item .ws-path { font-size: 10px; color: var(--vscode-descriptionForeground); }
+    .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 18px;
+      border-top: 1px solid var(--vscode-editorWidget-border);
+      gap: 8px;
+    }
+    .modal-footer-info {
+      font-size: 11px;
+      font-family: var(--vscode-editor-font-family);
+      color: var(--vscode-descriptionForeground);
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .modal-btn-row { display: flex; gap: 8px; flex-shrink: 0; }
+    .modal-btn {
+      padding: 6px 18px;
+      border-radius: 4px;
+      border: 1px solid var(--vscode-editorWidget-border);
+      font-family: var(--vscode-font-family);
+      font-size: 12px;
+      cursor: pointer;
+      background: var(--vscode-button-secondaryBackground);
+      color: var(--vscode-button-secondaryForeground, var(--vscode-foreground));
+      transition: opacity 0.1s;
+    }
+    .modal-btn:hover { opacity: 0.82; }
+    .modal-btn.primary {
+      background: var(--vscode-button-background);
+      color: var(--vscode-button-foreground);
+      border-color: transparent;
+    }
+    .modal-btn.primary:hover { background: var(--vscode-button-hoverBackground); opacity: 1; }
+
+    /* ── browser overlay ── */
+    .browser-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      background: var(--vscode-editor-background);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.14s;
+    }
+    .browser-overlay.open { opacity: 1; pointer-events: auto; }
+    .browser-bar {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--vscode-editorWidget-border);
+      background: var(--vscode-sideBar-background);
+      flex-shrink: 0;
+    }
+    .browser-nav-btn {
+      width: 26px; height: 26px;
+      padding: 0;
+      border: none;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--vscode-descriptionForeground);
+      font-size: 15px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.1s, color 0.1s;
+      flex-shrink: 0;
+    }
+    .browser-nav-btn:hover:not(:disabled) { background: var(--vscode-list-hoverBackground); color: var(--vscode-foreground); }
+    .browser-nav-btn:disabled { opacity: 0.3; cursor: default; }
+    .browser-url-bar {
+      flex: 1;
+      padding: 5px 10px;
+      background: var(--vscode-input-background);
+      color: var(--vscode-input-foreground);
+      border: 1px solid var(--vscode-input-border);
+      border-radius: 14px;
+      font-family: var(--vscode-editor-font-family);
+      font-size: 12px;
+      outline: none;
+    }
+    .browser-url-bar:focus { border-color: var(--vscode-focusBorder); }
+    .browser-content-wrap {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+      background: #fff;
+    }
+    .browser-spinner-overlay {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 12px;
+      background: #fff;
+    }
+    .browser-spinner-overlay.show { display: flex; }
+    .browser-spin {
+      width: 26px; height: 26px;
+      border: 3px solid rgba(0,0,0,0.1);
+      border-top-color: #1a73e8;
+      border-radius: 50%;
+      animation: spin 0.65s linear infinite;
+    }
+    .browser-page-frame {
+      position: absolute;
+      inset: 0;
+      overflow-y: auto;
+      background: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px;
+      color: #202124;
+    }
+    .bp-topbar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 20px;
+      border-bottom: 1px solid #e0e0e0;
+      background: #fff;
+    }
+    .bp-favicon {
+      width: 18px; height: 18px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .bp-title { font-size: 15px; font-weight: 600; color: #202124; }
+    .bp-url { font-size: 11px; color: #5f6368; margin-left: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+    .bp-body { padding: 18px 20px; line-height: 1.6; color: #3c4043; }
+    .bp-body h2 { font-size: 16px; margin: 0 0 8px; color: #202124; }
+    .bp-body p { margin: 0 0 10px; font-size: 13px; }
+    .bp-placeholder-row {
+      height: 12px;
+      background: #e8eaed;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- nav bar -->
+  <div class="chat-nav">
+    <button class="chat-nav-toggle" id="drawerToggle" aria-expanded="false" title="Conversations">☰</button>
+    <span class="chat-nav-title" id="sessionTitle">New chat</span>
+    <button class="chat-nav-btn" id="themeBtn" title="Toggle light/dark">◐</button>
+    <button class="chat-nav-btn" id="newChatBtn" title="New chat">＋</button>
+  </div>
+
+  <div class="chat-layout">
+
+    <!-- drawer -->
+    <div class="chat-list-panel" id="drawer">
+      <div class="chat-list-header">
+        <span class="chat-list-header-title">Conversations</span>
+        <span class="chat-list-count" id="drawerCount">3</span>
+        <button class="chat-list-pin-btn" id="pinBtn" aria-pressed="false" title="Keep sidebar open">📌</button>
+      </div>
+      <div class="chat-list-body" id="drawerList"></div>
+      <div class="chat-list-footer">
+        <button class="chat-list-new-btn" id="drawerNewBtn">
+          <span style="font-size:15px;font-weight:300;opacity:.8;">+</span>
+          New chat
+        </button>
+      </div>
+    </div>
+    <div class="chat-list-backdrop" id="backdrop"></div>
+
+    <!-- main -->
+    <div class="main-content">
+
+      <!-- browser overlay -->
+      <div class="browser-overlay" id="browserOverlay">
+        <div class="browser-bar">
+          <button class="browser-nav-btn" id="browserBack" disabled title="Back">&#8592;</button>
+          <button class="browser-nav-btn" id="browserFwd" disabled title="Forward">&#8594;</button>
+          <button class="browser-nav-btn" id="browserRefresh" title="Refresh">&#8635;</button>
+          <input class="browser-url-bar" id="browserUrl" value="" placeholder="Enter a URL and press Enter…" />
+          <button class="browser-nav-btn" id="browserClose" title="Close browser">&#x2715;</button>
+        </div>
+        <div class="browser-content-wrap">
+          <div class="browser-spinner-overlay" id="browserSpinner">
+            <div class="browser-spin"></div>
+            <span style="font-size:12px;color:#5f6368;">Loading…</span>
+          </div>
+          <div class="browser-page-frame" id="browserPage" style="display:none;"></div>
+        </div>
+      </div>
+
+      <div id="messages"></div>
+
+      <div id="chat-form">
+        <!-- slash menu -->
+        <div class="slash-menu" id="slashMenu"></div>
+        <textarea
+          id="input"
+          rows="1"
+          placeholder="Ask free-code… (Enter to send, Shift+Enter newline)"
+        ></textarea>
+        <div class="chat-actions">
+          <div class="chat-actions-context">
+            <div class="indicator" id="workspaceIndicator" title="Workspace">
+              <span style="font-size:11px;opacity:.85;">📁</span>
+              <span class="indicator-label">my-project</span>
+            </div>
+            <div class="indicator no-arrow" id="profileIndicator" title="Profile">
+              <span class="indicator-label">default</span>
+            </div>
+            <div class="indicator" id="modelIndicator" title="Model (Ctrl+L to switch)">
+              <span class="indicator-dot"></span>
+              <span class="indicator-label">gemini-2.5-pro</span>
+            </div>
+          </div>
+          <div class="chat-actions-tools">
+            <button class="chat-icon-btn" title="Attach file (@)">📎</button>
+            <button class="chat-icon-btn" id="browserBtn" title="Open browser">🌐</button>
+            <button class="chat-icon-btn" title="Tools (/tools)">⚙</button>
+            <button class="chat-actions-send" id="sendBtn" title="Send (Enter)">▲</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<!-- workspace picker modal -->
+<div class="modal-overlay" id="workspaceModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <p class="modal-title">Open Folder</p>
+      <p class="modal-subtitle">Select a workspace folder for this session.</p>
+    </div>
+    <input class="modal-search" id="wsSearch" placeholder="Filter folders…" autocomplete="off" />
+    <div class="modal-list" id="wsList"></div>
+    <div class="modal-footer">
+      <span class="modal-footer-info" id="wsFooter">~/Documents/my-project</span>
+      <div class="modal-btn-row">
+        <button class="modal-btn" id="wsCancelBtn">Cancel</button>
+        <button class="modal-btn primary" id="wsApplyBtn">Open</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- model picker modal -->
+<div class="modal-overlay" id="modelModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <p class="modal-title">Select model</p>
+      <p class="modal-subtitle">Only showing models with configured API keys (see README). Type to filter, click a row or press Enter to apply.</p>
+    </div>
+    <input class="modal-search" id="modelSearch" placeholder="Filter models (provider, id, name)…" autocomplete="off" />
+    <div class="modal-list" id="modelList"></div>
+    <div class="modal-footer">
+      <span class="modal-footer-info" id="modelFooter">Model Name: —</span>
+      <div class="modal-btn-row">
+        <button class="modal-btn" id="modelCancelBtn">Cancel</button>
+        <button class="modal-btn primary" id="modelApplyBtn">Apply</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  // ── slash commands ──────────────────────────────────────
+  const COMMANDS = [
+    { g: "Session", slash: "/session",   desc: "Show session info: path, tokens, cost" },
+    { g: "Session", slash: "/new",       desc: "Start a new session" },
+    { g: "Session", slash: "/resume",    desc: "Browse and pick a previous session" },
+    { g: "Session", slash: "/fork",      desc: "Branch this session into a new one" },
+    { g: "Session", slash: "/compact",   desc: "Summarize context (optional: instructions)" },
+    { g: "Session", slash: "/tree",      desc: "Navigate session history as a tree" },
+    { g: "Session", slash: "/export",    desc: "Export to HTML, Markdown, or JSONL" },
+    { g: "Session", slash: "/share",     desc: "Upload as a private GitHub gist" },
+    { g: "Model",   slash: "/model",     desc: "Switch model" },
+    { g: "Model",   slash: "/settings",  desc: "Reasoning level, theme, transport" },
+    { g: "Tools",   slash: "/tools",     desc: "List active tools" },
+    { g: "Tools",   slash: "/pick-tools",desc: "Enable or disable individual tools" },
+    { g: "Tools",   slash: "/files",     desc: "Browse and attach files as context" },
+    { g: "Tools",   slash: "/browse",    desc: "Open URL in the visible browser" },
+    { g: "Tools",   slash: "/mcp-import",desc: "Import an MCP server" },
+    { g: "RAG",     slash: "/rag",       desc: "addFile · addGroup · addGithubUrl · search · list · refresh · schedule" },
+    { g: "Subagents", slash: "/sub",     desc: "Start a subagent with a task" },
+    { g: "Subagents", slash: "/subcont", desc: "Continue talking to a subagent" },
+    { g: "Code Graph", slash: "/code-index",   desc: "Index the project (--force to re-index all)" },
+    { g: "Code Graph", slash: "/code-symbols", desc: "Search symbols by name" },
+    { g: "Code Graph", slash: "/code-callers", desc: "Find all callers of a function" },
+    { g: "Code Graph", slash: "/code-context", desc: "Source and callees of a symbol" },
+    { g: "Session", slash: "/quit",      desc: "Quit the agent" },
+  ];
+
+  // ── state ──────────────────────────────────────────────
+  const sessions = [
+    { id: 1, name: "auth-flow investigation" },
+    { id: 2, name: "/rag-kb use project-docs" },
+    { id: 3, name: "New chat", active: true },
+  ];
+  let activeSession = 3;
+  let slashActiveIdx = 0;
+  let filteredCmds = [];
+  let isDark = true;
+
+  // ── element refs ───────────────────────────────────────
+  const drawerEl    = document.getElementById("drawer");
+  const backdropEl  = document.getElementById("backdrop");
+  const toggleBtn   = document.getElementById("drawerToggle");
+  const drawerList  = document.getElementById("drawerList");
+  const drawerCount = document.getElementById("drawerCount");
+  const pinBtn      = document.getElementById("pinBtn");
+  const messagesEl  = document.getElementById("messages");
+  const inputEl     = document.getElementById("input");
+  const slashMenu   = document.getElementById("slashMenu");
+  const sendBtn     = document.getElementById("sendBtn");
+  const newChatBtn  = document.getElementById("newChatBtn");
+  const drawerNewBtn= document.getElementById("drawerNewBtn");
+  const themeBtn    = document.getElementById("themeBtn");
+  const sessionTitle= document.getElementById("sessionTitle");
+
+  let isPinned = false;
+
+  // ── drawer ──────────────────────────────────────────────
+  function openDrawer() {
+    if (isPinned) return;
+    drawerEl.classList.add("open");
+    backdropEl.classList.add("open");
+    toggleBtn.setAttribute("aria-expanded", "true");
+  }
+  function closeDrawer() {
+    if (isPinned) return;
+    drawerEl.classList.remove("open");
+    backdropEl.classList.remove("open");
+    toggleBtn.setAttribute("aria-expanded", "false");
+  }
+  function togglePin() {
+    isPinned = !isPinned;
+    pinBtn.setAttribute("aria-pressed", isPinned ? "true" : "false");
+    if (isPinned) {
+      drawerEl.classList.remove("open");
+      drawerEl.classList.add("pinned");
+      backdropEl.classList.remove("open");
+      toggleBtn.setAttribute("aria-expanded", "true");
+    } else {
+      drawerEl.classList.remove("pinned");
+      toggleBtn.setAttribute("aria-expanded", "false");
+    }
+  }
+  pinBtn.addEventListener("click", togglePin);
+  toggleBtn.addEventListener("click", () =>
+    isPinned ? togglePin() : (drawerEl.classList.contains("open") ? closeDrawer() : openDrawer())
+  );
+  backdropEl.addEventListener("click", closeDrawer);
+
+  function startRename(id, itemEl, labelEl) {
+    itemEl.classList.add("renaming");
+    const inp = itemEl.querySelector(".chat-list-rename-input");
+    const sess = sessions.find(s => s.id === id);
+    inp.value = sess.name;
+    inp.style.display = "block";
+    inp.focus();
+    inp.select();
+    function commit() {
+      const val = inp.value.trim();
+      if (val) {
+        sess.name = val;
+        if (id === activeSession) sessionTitle.textContent = val;
+      }
+      itemEl.classList.remove("renaming");
+      renderDrawer();
+    }
+    inp.addEventListener("blur", commit, { once: true });
+    inp.addEventListener("keydown", e => {
+      if (e.key === "Enter") { e.preventDefault(); inp.blur(); }
+      if (e.key === "Escape") { inp.value = sess.name; inp.blur(); }
+    });
+  }
+
+  function deleteSession(id) {
+    const idx = sessions.findIndex(s => s.id === id);
+    if (idx === -1) return;
+    sessions.splice(idx, 1);
+    if (activeSession === id) {
+      const next = sessions[Math.min(idx, sessions.length - 1)];
+      if (next) {
+        activeSession = next.id;
+        sessionTitle.textContent = next.name;
+        messagesEl.innerHTML = "";
+        if (next.id !== 3) seedConversation();
+      } else {
+        newChat();
+        return;
+      }
+    }
+    renderDrawer();
+  }
+
+  function renderDrawer() {
+    drawerList.innerHTML = "";
+    sessions.forEach(s => {
+      const row = document.createElement("div");
+      row.className = "chat-list-item" + (s.id === activeSession ? " active" : "");
+
+      const dot = document.createElement("span");
+      dot.className = "chat-list-dot";
+
+      const label = document.createElement("span");
+      label.className = "chat-list-label";
+      label.textContent = s.name;
+
+      const renameInput = document.createElement("input");
+      renameInput.type = "text";
+      renameInput.className = "chat-list-rename-input";
+
+      const actions = document.createElement("div");
+      actions.className = "chat-list-actions";
+
+      const editBtn = document.createElement("button");
+      editBtn.className = "chat-list-action-btn";
+      editBtn.title = "Rename";
+      editBtn.textContent = "✎";
+      editBtn.addEventListener("click", e => {
+        e.stopPropagation();
+        startRename(s.id, row, label);
+      });
+
+      const delBtn = document.createElement("button");
+      delBtn.className = "chat-list-action-btn danger";
+      delBtn.title = "Delete";
+      delBtn.textContent = "✕";
+      delBtn.addEventListener("click", e => {
+        e.stopPropagation();
+        deleteSession(s.id);
+      });
+
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+      row.appendChild(dot);
+      row.appendChild(label);
+      row.appendChild(renameInput);
+      row.appendChild(actions);
+
+      row.addEventListener("click", () => {
+        if (row.classList.contains("renaming")) return;
+        activeSession = s.id;
+        sessionTitle.textContent = s.name;
+        renderDrawer();
+        if (!isPinned) closeDrawer();
+      });
+
+      drawerList.appendChild(row);
+    });
+    drawerCount.textContent = sessions.length;
+  }
+
+  function newChat() {
+    const id = Date.now();
+    sessions.push({ id, name: "New chat" });
+    activeSession = id;
+    sessionTitle.textContent = "New chat";
+    messagesEl.innerHTML = "";
+    renderDrawer();
+    if (!isPinned) closeDrawer();
+    inputEl.focus();
+  }
+  newChatBtn.addEventListener("click", newChat);
+  drawerNewBtn.addEventListener("click", newChat);
+
+  // ── theme ───────────────────────────────────────────────
+  themeBtn.addEventListener("click", () => {
+    isDark = !isDark;
+    document.documentElement.setAttribute("data-theme", isDark ? "" : "light");
+    if (!isDark) document.documentElement.setAttribute("data-theme", "light");
+    else document.documentElement.removeAttribute("data-theme");
+  });
+
+  // ── messages ────────────────────────────────────────────
+  function addMessage(type, html, extra) {
+    const div = document.createElement(extra?.tag || "div");
+    div.className = "message " + type;
+    div.innerHTML = html;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    return div;
+  }
+
+  function addToolEvent(label, result, success) {
+    const cls = "tool-event" + (success ? " success" : "");
+    const dotCls = success ? "success" : "running";
+    const div = addMessage(cls, `
+      <div class="tool-head">
+        <span class="tool-dot ${dotCls}"></span>
+        <span>${label}</span>
+      </div>
+      ${result ? `<div class="tool-result">${result}</div>` : ""}
+    `);
+    return div;
+  }
+
+  function addWorking(text) {
+    return addMessage("working", text);
+  }
+
+  // ── seed conversation ───────────────────────────────────
+  function seedConversation() {
+    messagesEl.innerHTML = "";
+    addMessage("session", "Session started · gemini-2.5-pro · profile: default");
+    addMessage("user", "How does the authentication middleware work?");
+    addToolEvent("read  src/auth/middleware.ts", "304 lines · returned 304 lines", true);
+    addToolEvent("bash  grep -r \"authenticate\" src/ --include=\"*.ts\" -l", "src/auth/middleware.ts\nsrc/routes/api.ts\nsrc/services/user.ts", true);
+
+    const thinkingEl = document.createElement("details");
+    thinkingEl.className = "message thinking";
+    thinkingEl.innerHTML = `
+      <summary class="thinking-summary">Thinking (2s)</summary>
+      <div class="thinking-body">The middleware uses a JWT verification step before passing control to the route handler. I should explain the flow: extract token → verify signature → attach user to request → call next().</div>
+    `;
+    messagesEl.appendChild(thinkingEl);
+
+    addMessage("assistant",
+      `The authentication middleware lives in <code style="font-family:var(--vscode-editor-font-family);background:rgba(128,128,128,.15);padding:1px 4px;border-radius:3px;">src/auth/middleware.ts</code> and follows this flow:\n\n` +
+      `1. Extracts the Bearer token from the <code style="font-family:var(--vscode-editor-font-family);background:rgba(128,128,128,.15);padding:1px 4px;border-radius:3px;">Authorization</code> header\n` +
+      `2. Verifies the JWT signature using the secret from <code style="font-family:var(--vscode-editor-font-family);background:rgba(128,128,128,.15);padding:1px 4px;border-radius:3px;">process.env.JWT_SECRET</code>\n` +
+      `3. Attaches the decoded user payload to <code style="font-family:var(--vscode-editor-font-family);background:rgba(128,128,128,.15);padding:1px 4px;border-radius:3px;">req.user</code>\n` +
+      `4. Calls <code style="font-family:var(--vscode-editor-font-family);background:rgba(128,128,128,.15);padding:1px 4px;border-radius:3px;">next()</code> on success or returns 401 on failure\n\nIt's referenced in <code style="font-family:var(--vscode-editor-font-family);background:rgba(128,128,128,.15);padding:1px 4px;border-radius:3px;">src/routes/api.ts</code> and <code style="font-family:var(--vscode-editor-font-family);background:rgba(128,128,128,.15);padding:1px 4px;border-radius:3px;">src/services/user.ts</code>.`
+    );
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  // ── slash menu ──────────────────────────────────────────
+  function filterCommands(query) {
+    const q = query.toLowerCase();
+    return COMMANDS.filter(c => c.slash.includes(q) || c.desc.toLowerCase().includes(q));
+  }
+
+  function renderSlashMenu() {
+    slashMenu.innerHTML = "";
+    if (!filteredCmds.length) { slashMenu.classList.remove("open"); return; }
+
+    let lastGroup = "";
+    filteredCmds.forEach((cmd, i) => {
+      if (cmd.g !== lastGroup) {
+        const h = document.createElement("div");
+        h.className = "slash-menu-heading";
+        h.textContent = cmd.g;
+        slashMenu.appendChild(h);
+        lastGroup = cmd.g;
+      }
+      const btn = document.createElement("button");
+      btn.className = "slash-menu-item" + (i === slashActiveIdx ? " active" : "");
+      btn.innerHTML = `<span class="slash-menu-label">${cmd.slash}</span><span class="slash-menu-desc">${cmd.desc}</span>`;
+      btn.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        selectCommand(i);
+      });
+      slashMenu.appendChild(btn);
+    });
+    slashMenu.classList.add("open");
+  }
+
+  function selectCommand(idx) {
+    const cmd = filteredCmds[idx];
+    if (!cmd) return;
+    inputEl.value = cmd.slash + " ";
+    closeSlashMenu();
+    inputEl.focus();
+    autoResize();
+  }
+
+  function closeSlashMenu() {
+    slashMenu.classList.remove("open");
+    filteredCmds = [];
+    slashActiveIdx = 0;
+  }
+
+  // ── input ───────────────────────────────────────────────
+  function autoResize() {
+    inputEl.style.height = "auto";
+    inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + "px";
+  }
+
+  inputEl.addEventListener("input", () => {
+    autoResize();
+    const val = inputEl.value;
+    if (val.startsWith("/")) {
+      filteredCmds = filterCommands(val);
+      slashActiveIdx = 0;
+      renderSlashMenu();
+    } else {
+      closeSlashMenu();
+    }
+  });
+
+  inputEl.addEventListener("keydown", (e) => {
+    if (slashMenu.classList.contains("open")) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        slashActiveIdx = Math.min(slashActiveIdx + 1, filteredCmds.length - 1);
+        renderSlashMenu();
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        slashActiveIdx = Math.max(slashActiveIdx - 1, 0);
+        renderSlashMenu();
+        return;
+      }
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        selectCommand(slashActiveIdx);
+        return;
+      }
+      if (e.key === "Escape") { closeSlashMenu(); return; }
+    }
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  // ── send ─────────────────────────────────────────────────
+  function sendMessage() {
+    const text = inputEl.value.trim();
+    if (!text) return;
+    closeSlashMenu();
+    inputEl.value = "";
+    autoResize();
+
+    // update session name from first message
+    const sess = sessions.find(s => s.id === activeSession);
+    if (sess && sess.name === "New chat") {
+      sess.name = text.length > 32 ? text.slice(0, 32) + "…" : text;
+      sessionTitle.textContent = sess.name;
+      renderDrawer();
+    }
+
+    addMessage("user", escHtml(text));
+    const workingEl = addWorking("Agent working…");
+
+    // fake response after delay
+    setTimeout(() => {
+      workingEl.remove();
+      fakeResponse(text);
+    }, 1200);
+  }
+
+  sendBtn.addEventListener("click", sendMessage);
+
+  function fakeResponse(prompt) {
+    const p = prompt.toLowerCase();
+    if (p.startsWith("/code-index")) {
+      addToolEvent("code_index  (incremental)", "Indexed 3 files · 142 symbols · 87 edges · 0.4s", true);
+      addMessage("assistant", "✓ Code graph updated. 142 symbols and 87 call edges indexed across 3 changed files. You can now use `/code-symbols`, `/code-callers`, and `/code-context`.");
+    } else if (p.startsWith("/code-symbols")) {
+      const q = prompt.slice("/code-symbols".length).trim() || "handler";
+      addToolEvent(`code_symbols  "${q}"`, "", true);
+      addMessage("assistant",
+        `Found 4 symbols matching <code style="font-family:var(--vscode-editor-font-family);background:rgba(128,128,128,.15);padding:1px 4px;border-radius:3px;">${escHtml(q)}</code>:\n\n` +
+        `• <b>${escHtml(q)}Request</b>  function  src/routes/api.ts:14\n` +
+        `• <b>on${cap(q)}</b>  method  src/services/user.ts:88\n` +
+        `• <b>create${cap(q)}</b>  function  src/controllers/auth.ts:45\n` +
+        `• <b>${escHtml(q)}Error</b>  function  src/auth/middleware.ts:102`
+      );
+    } else if (p.startsWith("/code-callers")) {
+      const q = prompt.slice("/code-callers".length).trim() || "authenticate";
+      addToolEvent(`code_callers  "${q}"`, "", true);
+      addMessage("assistant",
+        `3 callers of <code style="font-family:var(--vscode-editor-font-family);background:rgba(128,128,128,.15);padding:1px 4px;border-radius:3px;">${escHtml(q)}</code>:\n\n` +
+        `• src/routes/api.ts:23  inside <b>setupRoutes</b>\n` +
+        `• src/routes/admin.ts:11  inside <b>adminRouter</b>\n` +
+        `• src/middleware/index.ts:8  inside <b>applyMiddleware</b>`
+      );
+    } else if (p.startsWith("/rag")) {
+      addToolEvent("rag_search  knowledge base", "3 relevant chunks found", true);
+      addMessage("assistant", "Retrieved 3 relevant chunks from the knowledge base and added them to context.");
+    } else if (p.startsWith("/browse")) {
+      addMessage("assistant", "Opening browser… Navigate to the URL you specified. I'll read the page content and summarize what I find.");
+    } else if (p.startsWith("/sub")) {
+      addMessage("assistant", "Subagent #1 started. It will work independently on the task and report back when done.");
+    } else {
+      addToolEvent("read  (relevant files)", "Returned file contents", true);
+      addMessage("assistant", `I'm working on: "${escHtml(prompt)}"\n\nBased on the codebase structure, here's my analysis and suggested approach. Feel free to ask follow-up questions or use /code-symbols to explore specific functions.`);
+    }
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+  function cap(s) {
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  // ── workspace picker ────────────────────────────────────
+  const WORKSPACES = [
+    { name: "my-project",     path: "~/Documents/my-project" },
+    { name: "api-service",    path: "~/Documents/repositories/api-service" },
+    { name: "frontend-app",   path: "~/Documents/repositories/frontend-app" },
+    { name: "free-code",       path: "~/Documents/repositories/free-code" },
+    { name: "scripts",        path: "~/Desktop/scripts" },
+  ];
+  let wsSelected = WORKSPACES[0];
+
+  const workspaceModal  = document.getElementById("workspaceModal");
+  const wsList          = document.getElementById("wsList");
+  const wsSearch        = document.getElementById("wsSearch");
+  const wsFooter        = document.getElementById("wsFooter");
+  const wsApplyBtn      = document.getElementById("wsApplyBtn");
+  const wsCancelBtn     = document.getElementById("wsCancelBtn");
+  const workspaceLabel  = workspaceIndicator.querySelector(".indicator-label");
+
+  function renderWsList(filter) {
+    wsList.innerHTML = "";
+    const q = (filter || "").toLowerCase();
+    WORKSPACES.filter(w => !q || w.name.includes(q) || w.path.includes(q)).forEach(w => {
+      const el = document.createElement("div");
+      el.className = "modal-item ws-item" + (w === wsSelected ? " hi" : "");
+      el.innerHTML = `<span class="ws-name">${w.name}</span><span class="ws-path">${w.path}</span>`;
+      el.addEventListener("click", () => {
+        wsSelected = w;
+        wsFooter.textContent = w.path;
+        renderWsList(wsSearch.value);
+      });
+      wsList.appendChild(el);
+    });
+    wsFooter.textContent = wsSelected.path;
+  }
+
+  workspaceIndicator.addEventListener("click", () => {
+    wsSearch.value = "";
+    renderWsList();
+    workspaceModal.classList.add("open");
+    wsSearch.focus();
+  });
+  wsSearch.addEventListener("input", () => renderWsList(wsSearch.value));
+  wsCancelBtn.addEventListener("click", () => workspaceModal.classList.remove("open"));
+  wsApplyBtn.addEventListener("click", () => {
+    workspaceLabel.textContent = wsSelected.name;
+    workspaceModal.classList.remove("open");
+  });
+  workspaceModal.addEventListener("click", e => { if (e.target === workspaceModal) workspaceModal.classList.remove("open"); });
+
+  // ── model picker ─────────────────────────────────────────
+  const MODELS = [
+    { id: "claude-haiku-4-5",            provider: "anthropic", name: "Claude Haiku 4.5" },
+    { id: "claude-3-5-haiku-20241022",   provider: "anthropic", name: "Claude 3.5 Haiku" },
+    { id: "claude-3-5-haiku-latest",     provider: "anthropic", name: "Claude 3.5 Haiku (latest)" },
+    { id: "claude-3-5-sonnet-20240620",  provider: "anthropic", name: "Claude 3.5 Sonnet" },
+    { id: "claude-3-5-sonnet-20241022",  provider: "anthropic", name: "Claude 3.5 Sonnet (Oct)" },
+    { id: "claude-3-7-sonnet-20250219",  provider: "anthropic", name: "Claude 3.7 Sonnet" },
+    { id: "claude-3-haiku-20240307",     provider: "anthropic", name: "Claude 3 Haiku" },
+    { id: "claude-3-opus-20240229",      provider: "anthropic", name: "Claude 3 Opus" },
+    { id: "claude-3-sonnet-20240229",    provider: "anthropic", name: "Claude 3 Sonnet" },
+    { id: "claude-haiku-4-5-20251001",   provider: "anthropic", name: "Claude Haiku 4.5 (Oct)" },
+    { id: "claude-opus-4-5",             provider: "anthropic", name: "Claude Opus 4.5" },
+    { id: "gemini-2.5-pro",              provider: "google",    name: "Gemini 2.5 Pro" },
+    { id: "gemini-2.5-flash",            provider: "google",    name: "Gemini 2.5 Flash" },
+    { id: "gemini-2.0-flash",            provider: "google",    name: "Gemini 2.0 Flash" },
+    { id: "gpt-4o",                      provider: "openai",    name: "GPT-4o" },
+    { id: "gpt-4o-mini",                 provider: "openai",    name: "GPT-4o mini" },
+    { id: "llama3.2",                    provider: "ollama",    name: "Llama 3.2" },
+    { id: "llama3.1:70b",               provider: "ollama",    name: "Llama 3.1 70B" },
+    { id: "mistral",                     provider: "ollama",    name: "Mistral" },
+  ];
+  let modelSelected = MODELS.find(m => m.id === "gemini-2.5-pro");
+  let modelHiIdx = 0;
+  let modelFiltered = MODELS.slice();
+
+  const modelModal    = document.getElementById("modelModal");
+  const modelListEl   = document.getElementById("modelList");
+  const modelSearchEl = document.getElementById("modelSearch");
+  const modelFooterEl = document.getElementById("modelFooter");
+  const modelApplyBtn = document.getElementById("modelApplyBtn");
+  const modelCancelBtn= document.getElementById("modelCancelBtn");
+  const modelLabel    = modelIndicator.querySelector(".indicator-label");
+  const modelDot      = modelIndicator.querySelector(".indicator-dot");
+
+  function renderModelList() {
+    modelListEl.innerHTML = "";
+    modelFiltered.forEach((m, i) => {
+      const el = document.createElement("div");
+      el.className = "modal-item" + (i === modelHiIdx ? " hi" : "");
+      el.dataset.idx = i;
+      const isCurrent = m === modelSelected;
+      el.innerHTML =
+        `<span class="modal-item-name">${m.id}</span>` +
+        `<span class="modal-item-tag">[${m.provider}]</span>` +
+        `<span class="modal-item-check">${isCurrent ? "✓" : ""}</span>`;
+      el.addEventListener("mouseenter", () => { modelHiIdx = i; renderModelList(); });
+      el.addEventListener("click", () => {
+        modelSelected = modelFiltered[i];
+        modelHiIdx = i;
+        modelFooterEl.textContent = "Model Name: " + modelSelected.name;
+        renderModelList();
+      });
+      modelListEl.appendChild(el);
+    });
+    if (modelFiltered[modelHiIdx]) {
+      modelFooterEl.textContent = "Model Name: " + modelFiltered[modelHiIdx].name;
+    }
+    // scroll highlighted item into view
+    const hi = modelListEl.querySelector(".modal-item.hi");
+    if (hi) hi.scrollIntoView({ block: "nearest" });
+  }
+
+  modelIndicator.addEventListener("click", () => {
+    modelSearchEl.value = "";
+    modelFiltered = MODELS.slice();
+    modelHiIdx = MODELS.indexOf(modelSelected);
+    modelModal.classList.add("open");
+    modelSearchEl.focus();
+    renderModelList();
+  });
+  modelSearchEl.addEventListener("input", () => {
+    const q = modelSearchEl.value.toLowerCase();
+    modelFiltered = q ? MODELS.filter(m => m.id.includes(q) || m.provider.includes(q) || m.name.toLowerCase().includes(q)) : MODELS.slice();
+    modelHiIdx = 0;
+    renderModelList();
+  });
+  modelSearchEl.addEventListener("keydown", e => {
+    if (e.key === "ArrowDown") { e.preventDefault(); modelHiIdx = Math.min(modelHiIdx + 1, modelFiltered.length - 1); renderModelList(); }
+    if (e.key === "ArrowUp")   { e.preventDefault(); modelHiIdx = Math.max(modelHiIdx - 1, 0); renderModelList(); }
+    if (e.key === "Enter") { if (modelFiltered[modelHiIdx]) { modelSelected = modelFiltered[modelHiIdx]; renderModelList(); } }
+    if (e.key === "Escape") modelModal.classList.remove("open");
+  });
+  modelCancelBtn.addEventListener("click", () => modelModal.classList.remove("open"));
+  modelApplyBtn.addEventListener("click", () => {
+    if (modelFiltered[modelHiIdx]) modelSelected = modelFiltered[modelHiIdx];
+    modelLabel.textContent = modelSelected.id;
+    modelModal.classList.remove("open");
+  });
+  modelModal.addEventListener("click", e => { if (e.target === modelModal) modelModal.classList.remove("open"); });
+
+  // ── browser ──────────────────────────────────────────────
+  const browserOverlay  = document.getElementById("browserOverlay");
+  const browserUrlEl    = document.getElementById("browserUrl");
+  const browserBackBtn  = document.getElementById("browserBack");
+  const browserFwdBtn   = document.getElementById("browserFwd");
+  const browserRefreshEl= document.getElementById("browserRefresh");
+  const browserCloseBtn = document.getElementById("browserClose");
+  const browserSpinner  = document.getElementById("browserSpinner");
+  const browserPage     = document.getElementById("browserPage");
+  const browserBtnEl    = document.getElementById("browserBtn");
+
+  let browserHistory = [];
+  let browserHistoryIdx = -1;
+
+  function browserNavBtns() {
+    browserBackBtn.disabled = browserHistoryIdx <= 0;
+    browserFwdBtn.disabled  = browserHistoryIdx >= browserHistory.length - 1;
+  }
+
+  function fakePage(url) {
+    let host = url;
+    try { host = new URL(url.startsWith("http") ? url : "https://" + url).hostname; } catch(e) {}
+    const domain = host.replace("www.", "");
+
+    const pages = {
+      "google.com":    { color:"#4285f4", letter:"G", title:"Google", body:"<h2>Search the web</h2><p>Google Search lets you find information about anything on the web. Start typing in the search box to find pages, images, videos, and more.</p>" },
+      "github.com":    { color:"#24292e", letter:"⌥", title:"GitHub · Build software", body:"<h2>Where the world builds software</h2><p>Millions of developers and companies build, ship, and maintain their software on GitHub. Browse repositories, open issues, and collaborate on pull requests.</p>" },
+      "stackoverflow.com": { color:"#f48024", letter:"S", title:"Stack Overflow", body:"<h2>Where Developers Learn &amp; Share</h2><p>Stack Overflow is the largest, most trusted online community for developers. Find answers to technical questions, share knowledge, and build your career.</p>" },
+      "npmjs.com":     { color:"#cb3837", letter:"n", title:"npm — Node Package Manager", body:"<h2>Build amazing things</h2><p>npm is the world's largest software registry. Open source developers from every continent use npm to share and borrow packages.</p>" },
+    };
+
+    const p = pages[domain] || { color:"#6366f1", letter:domain[0]?.toUpperCase()||"W", title:domain, body:`<h2>${escHtml(domain)}</h2><p>Page content from <code>${escHtml(url)}</code>.</p><p>In a real session, free-code reads this page's text, screenshots, and DOM to help answer your questions or complete tasks.</p>` };
+
+    return `
+      <div class="bp-topbar">
+        <div class="bp-favicon" style="background:${p.color};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;">${p.letter}</div>
+        <span class="bp-title">${p.title}</span>
+        <span class="bp-url">${escHtml(url)}</span>
+      </div>
+      <div class="bp-body">
+        ${p.body}
+        <div class="bp-placeholder-row" style="width:90%"></div>
+        <div class="bp-placeholder-row" style="width:75%"></div>
+        <div class="bp-placeholder-row" style="width:82%"></div>
+        <div class="bp-placeholder-row" style="width:60%;margin-top:14px;"></div>
+        <div class="bp-placeholder-row" style="width:88%"></div>
+      </div>`;
+  }
+
+  function browserLoad(url, pushHistory) {
+    if (!url || url === "https://") return;
+    browserUrlEl.value = url;
+    browserSpinner.classList.add("show");
+    browserPage.style.display = "none";
+    if (pushHistory) {
+      browserHistory = browserHistory.slice(0, browserHistoryIdx + 1);
+      browserHistory.push(url);
+      browserHistoryIdx = browserHistory.length - 1;
+    }
+    browserNavBtns();
+    setTimeout(() => {
+      browserSpinner.classList.remove("show");
+      browserPage.innerHTML = fakePage(url);
+      browserPage.style.display = "block";
+      browserPage.scrollTop = 0;
+    }, 900);
+  }
+
+  browserBtnEl.addEventListener("click", () => {
+    browserOverlay.classList.add("open");
+    if (browserHistory.length === 0) {
+      browserUrlEl.value = "https://";
+    }
+    browserUrlEl.focus();
+    browserUrlEl.select();
+  });
+  browserCloseBtn.addEventListener("click", () => browserOverlay.classList.remove("open"));
+  browserUrlEl.addEventListener("keydown", e => {
+    if (e.key === "Enter") { e.preventDefault(); browserLoad(browserUrlEl.value.trim(), true); }
+  });
+  browserBackBtn.addEventListener("click", () => {
+    if (browserHistoryIdx > 0) { browserHistoryIdx--; browserLoad(browserHistory[browserHistoryIdx], false); }
+  });
+  browserFwdBtn.addEventListener("click", () => {
+    if (browserHistoryIdx < browserHistory.length - 1) { browserHistoryIdx++; browserLoad(browserHistory[browserHistoryIdx], false); }
+  });
+  browserRefreshEl.addEventListener("click", () => {
+    if (browserHistory[browserHistoryIdx]) browserLoad(browserHistory[browserHistoryIdx], false);
+  });
+
+  // ── init ────────────────────────────────────────────────
+  renderDrawer();
+  seedConversation();
+  inputEl.focus();
+})();
+</script>
+</body>
+</html>

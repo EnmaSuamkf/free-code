@@ -1,0 +1,337 @@
+/* === MODULE: messages ===
+   All message types: user, assistant, working, session, tools, subagent, tool-event, thinking. */
+
+#messages {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	padding: 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.message {
+	padding: 8px 10px;
+	border-radius: 8px;
+	white-space: pre-wrap;
+	line-height: 1.4;
+}
+
+.message.user {
+	background: var(--vscode-button-background);
+	color: var(--vscode-button-foreground);
+	align-self: flex-end;
+	max-width: 90%;
+}
+
+.message.user .file-chips-inline {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin: 0 0 6px;
+	white-space: normal;
+}
+
+.message.user .file-chips-inline:last-child {
+	margin-bottom: 0;
+}
+
+.message.user .file-chip-link {
+	display: inline-flex;
+	align-items: center;
+	max-width: 220px;
+	padding: 2px 8px;
+	border-radius: 10px;
+	border: 1px solid color-mix(in srgb, var(--vscode-button-foreground) 35%, transparent);
+	background: color-mix(in srgb, var(--vscode-button-foreground) 12%, transparent);
+	color: inherit;
+	font-size: 11px;
+	font-family: var(--vscode-editor-font-family, monospace);
+	line-height: 1.2;
+	cursor: pointer;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.message.user .file-chip-link:hover {
+	background: color-mix(in srgb, var(--vscode-button-foreground) 22%, transparent);
+	border-color: var(--vscode-button-foreground);
+	text-decoration: underline;
+}
+
+.message.user .message-text {
+	white-space: pre-wrap;
+}
+
+.message.assistant {
+	background: color-mix(in srgb, var(--vscode-editorWidget-background) 80%, transparent);
+	border: 1px solid var(--vscode-editorWidget-border);
+	max-width: 95%;
+}
+
+.message.working {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	align-self: flex-start;
+	max-width: 95%;
+	padding: 6px 10px;
+	font-size: 12px;
+	color: var(--vscode-descriptionForeground);
+	background: color-mix(in srgb, var(--vscode-editorWidget-background) 55%, transparent);
+	border: 1px dashed var(--vscode-editorWidget-border);
+}
+
+.message.working::before {
+	content: "";
+	width: 10px;
+	height: 10px;
+	border: 1.5px solid color-mix(in srgb, var(--vscode-descriptionForeground) 30%, transparent);
+	border-top-color: var(--vscode-descriptionForeground);
+	border-radius: 50%;
+	animation: free-code-spin 0.7s linear infinite;
+	flex-shrink: 0;
+}
+
+.message.session {
+	font-family: var(--vscode-editor-font-family, monospace);
+	font-size: 12px;
+	background: var(--vscode-textBlockQuote-background);
+	border: 1px solid var(--vscode-textBlockQuote-border);
+	max-width: 95%;
+}
+
+.message.tools {
+	font-family: var(--vscode-editor-font-family, monospace);
+	font-size: 12px;
+	background: var(--vscode-textBlockQuote-background);
+	border: 1px solid var(--vscode-textBlockQuote-border);
+	max-width: 95%;
+}
+
+.message.custom {
+	font-family: var(--vscode-editor-font-family, monospace);
+	font-size: 12px;
+	background: var(--vscode-textBlockQuote-background);
+	border: 1px solid var(--vscode-textBlockQuote-border);
+	max-width: 95%;
+}
+
+.message.subagent-widget {
+	display: block;
+	width: 100%;
+	max-width: 95%;
+	padding: 7px 10px;
+	text-align: left;
+	font-family: var(--vscode-editor-font-family, monospace);
+	font-size: 12px;
+	line-height: 1.4;
+	white-space: pre-wrap;
+	color: var(--vscode-editor-foreground);
+	background: color-mix(in srgb, var(--vscode-editorWidget-background) 70%, transparent);
+	border: 1px solid var(--vscode-editorWidget-border);
+	border-radius: 8px;
+	cursor: pointer;
+}
+
+.message.subagent-widget:hover {
+	border-color: var(--vscode-focusBorder);
+	background: color-mix(in srgb, var(--vscode-button-background) 18%, var(--vscode-editorWidget-background));
+}
+
+.subagent-widget-header {
+	font-weight: 600;
+}
+
+.subagent-widget-body {
+	margin-top: 4px;
+	color: var(--vscode-descriptionForeground);
+}
+
+.message.subagent-widget-expanded {
+	cursor: default;
+}
+
+.message.subagent-widget-expanded:hover {
+	border-color: var(--vscode-editorWidget-border);
+	background: color-mix(in srgb, var(--vscode-editorWidget-background) 70%, transparent);
+}
+
+.subagent-widget-details {
+	margin-top: 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	color: var(--vscode-descriptionForeground);
+}
+
+.subagent-widget-detail-line {
+	padding-left: 10px;
+	border-left: 2px solid color-mix(in srgb, var(--vscode-descriptionForeground) 35%, transparent);
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.message.subagent-running .subagent-widget-header {
+	color: var(--vscode-textLink-foreground);
+}
+
+.message.subagent-done .subagent-widget-header {
+	color: var(--vscode-testing-iconPassed, var(--vscode-charts-green, #4caf50));
+}
+
+.message.subagent-error .subagent-widget-header {
+	color: var(--vscode-testing-iconFailed, var(--vscode-errorForeground));
+}
+
+.message.tool-event {
+	font-family: var(--vscode-editor-font-family, monospace);
+	font-size: 12px;
+	background: var(--vscode-textBlockQuote-background);
+	border: 1px solid var(--vscode-textBlockQuote-border);
+	max-width: 95%;
+	padding: 6px 10px;
+}
+
+.message.tool-event .tool-head {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-weight: 600;
+	color: var(--vscode-descriptionForeground);
+	margin-bottom: 0;
+	min-width: 0;
+}
+
+.message.tool-event .tool-label {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.message.tool-event .tool-status-dot {
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+.message.tool-event .tool-status-dot.tool-status-running {
+	border: 1.5px solid color-mix(in srgb, var(--vscode-descriptionForeground) 30%, transparent);
+	border-top-color: var(--vscode-descriptionForeground);
+	animation: free-code-spin 0.7s linear infinite;
+}
+
+.message.tool-event .tool-status-dot.tool-status-success {
+	background: var(--vscode-testing-iconPassed, var(--vscode-charts-green, #4caf50));
+}
+
+.message.tool-event .tool-status-dot.tool-status-error {
+	background: var(--vscode-testing-iconFailed, var(--vscode-errorForeground));
+}
+
+.message.tool-event.tool-event-success {
+	border-color: color-mix(
+		in srgb,
+		var(--vscode-testing-iconPassed, var(--vscode-charts-green, #4caf50)) 20%,
+		var(--vscode-textBlockQuote-border)
+	);
+	background: color-mix(
+		in srgb,
+		var(--vscode-testing-iconPassed, var(--vscode-charts-green, #4caf50)) 2.5%,
+		var(--vscode-textBlockQuote-background)
+	);
+}
+
+.message.tool-event.tool-event-error {
+	border-color: var(--vscode-inputValidation-errorBorder, var(--vscode-errorForeground));
+	background: color-mix(in srgb, var(--vscode-inputValidation-errorBackground) 40%, transparent);
+}
+
+.message.tool-event pre {
+	margin: 0;
+	white-space: pre-wrap;
+	word-break: break-word;
+	font-family: inherit;
+	font-size: inherit;
+	max-height: 320px;
+	overflow-y: auto;
+}
+
+details.message.collapsed-tool {
+	padding: 4px 10px;
+}
+
+details.message.collapsed-tool summary.tool-head {
+	cursor: pointer;
+	user-select: none;
+	list-style: none;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	margin-bottom: 0;
+}
+
+details.message.collapsed-tool summary.tool-head::before {
+	content: "▸";
+	font-size: 10px;
+	flex-shrink: 0;
+	opacity: 0.7;
+}
+
+details.message.collapsed-tool[open] summary.tool-head::before {
+	content: "▾";
+}
+
+details.message.collapsed-tool pre {
+	margin-top: 6px;
+}
+
+.tool-result-host:not(:empty) {
+	margin-top: 6px;
+}
+
+.message.tool-event.tool-has-payload .tool-result-host:not(:empty) {
+	padding-top: 8px;
+	border-top: 2px solid color-mix(in srgb, var(--vscode-editor-foreground) 22%, var(--vscode-textBlockQuote-border));
+}
+
+.message.thinking {
+	background: color-mix(in srgb, var(--vscode-editorWidget-background) 50%, transparent);
+	border: 1px dashed var(--vscode-editorWidget-border);
+	max-width: 95%;
+	padding: 4px 10px;
+	font-size: 12px;
+	color: var(--vscode-descriptionForeground);
+}
+
+.message.thinking .thinking-summary {
+	cursor: pointer;
+	user-select: none;
+	font-weight: 600;
+	outline: none;
+}
+
+.message.thinking .thinking-summary::before {
+	content: "▸ ";
+	display: inline-block;
+	transition: transform 120ms ease;
+}
+
+.message.thinking[open] .thinking-summary::before {
+	content: "▾ ";
+}
+
+.message.thinking .thinking-body {
+	margin: 6px 0 2px;
+	white-space: pre-wrap;
+	word-break: break-word;
+	font-family: var(--vscode-editor-font-family, monospace);
+	font-size: 12px;
+	max-height: 360px;
+	overflow-y: auto;
+	line-height: 1.4;
+}

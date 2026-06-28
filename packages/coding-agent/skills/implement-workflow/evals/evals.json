@@ -1,0 +1,17 @@
+{
+  "skill_name": "implement-workflow",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Run /implement for JIRA-123. The plan file already exists in /analysis/.",
+      "expected_output": "Agent loads plan-JIRA-123.md, runs pre_scripts, git sync, Jira to In Dev + bot-cx-ai-dev, branch, code, tests, post_scripts; leaves changes unstaged; does not commit or open PR.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Implement the Story JIRA-123 following the plan in analysis/plan-JIRA-123.md.",
+      "expected_output": "Agent follows implement-workflow mandatory sequence, respects Phase column /implement only, stops before git add/commit/push.",
+      "files": []
+    }
+  ]
+}

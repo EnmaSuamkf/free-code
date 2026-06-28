@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Installation — free-code</title>
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <div class="doc-root">
+      <header class="site-shell-header" role="banner">
+        <div class="site-shell-inner">
+          <a class="site-brand" href="index.html">
+            <span class="site-brand-angles" aria-hidden="true">&lt;</span>
+            <span>free-code</span>
+            <span class="site-brand-angles" aria-hidden="true">&gt;</span>
+          </a>
+          <div class="site-header-actions">
+            <button type="button" class="theme-toggle" id="doc-theme-toggle" aria-label="Color theme">
+              <span class="theme-toggle-label" id="doc-theme-label">System</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="container">
+        <header class="hero">
+          <h1 class="brand">
+            <span class="angle" aria-hidden="true">&lt;</span>
+            <span class="name">free-code</span>
+            <span class="angle" aria-hidden="true">&gt;</span>
+          </h1>
+          <p class="tagline">
+            <span class="prompt" aria-hidden="true">// </span>
+            Installation — macOS native app, VS Code / Cursor plugin, and CLI.
+          </p>
+
+          <nav class="nav" aria-label="Primary">
+            <a href="index.html">[home]</a>
+            <a href="capabilities.html">[capabilities]</a>
+            <a href="commands.html">[commands]</a>
+            <a href="installation.html" aria-current="page">[installation]</a>
+            <a href="code-graph.html">[code graph]</a>
+            <a href="roi.html">[ROI]</a>
+          </nav>
+        </header>
+
+        <!-- macOS -->
+        <section class="card" aria-labelledby="install-macos">
+          <div class="card-header">
+            <h2 id="install-macos">macOS — Full installation</h2>
+            <p>One script installs everything: Homebrew, Node.js, dependencies, CLI, native app.</p>
+          </div>
+          <div class="card-body">
+            <div class="callout warning">
+              <strong>Before you start</strong><br />
+              Close VS Code, Cursor, or any other IDE before running the script.
+            </div>
+
+            <h3>Step 1 — Run the install script</h3>
+            <p><strong>Option A</strong> — double-click in Finder:</p>
+            <pre><code>open /&lt;path/to/repo&gt;/installation</code></pre>
+            <p>Double-click <code>install-free-code-mac.command</code> in that folder.</p>
+
+            <p><strong>Option B</strong> — from the terminal:</p>
+            <pre><code>bash /&lt;path/to/repo&gt;/installation/install-free-code-mac.command</code></pre>
+
+            <p>The script handles everything automatically:</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Step</th><th>What it installs</th></tr></thead>
+                <tbody>
+                  <tr><td>Homebrew</td><td>Installs if not present</td></tr>
+                  <tr><td>Colima</td><td>Container runtime (via Homebrew)</td></tr>
+                  <tr><td>Node.js (LTS)</td><td>nvm + latest LTS; set as default</td></tr>
+                  <tr><td>Dependencies</td><td><code>npm install</code> at repo root</td></tr>
+                  <tr><td>free-code CLI</td><td><code>npm install -g ./packages/coding-agent</code></td></tr>
+                  <tr><td>agent-browser</td><td><code>npm install -g agent-browser</code></td></tr>
+                  <tr><td>FreeCodeMac.app</td><td>Copies the <code>.app</code> bundle to <code>/Applications</code></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Step 2 — Start Free-Code</h3>
+            <p>Open <strong>FreeCodeMac</strong> from <code>/Applications</code>, or run in the terminal:</p>
+            <pre><code>free-code</code></pre>
+
+            <h3>Step 3 — Configure your AI provider</h3>
+            <p>
+              Set the API key for your chosen provider. You only need one to get started.
+            </p>
+            <pre><code># Login (Claude, GitHub Copilot, Gemini, and others)
+/login
+
+# Google Vertex AI
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json
+
+</code></pre>
+
+            <div class="callout tip">
+              <strong>Tip</strong><br />
+              Add the export line to your <code>~/.zshrc</code> so it persists across terminal sessions.
+            </div>
+          </div>
+        </section>
+
+        <!-- VS Code / Cursor plugin -->
+        <section class="card" aria-labelledby="install-plugin">
+          <div class="card-header">
+            <h2 id="install-plugin">VS Code / Cursor plugin</h2>
+            <p>Use free-code directly from your editor as a chat panel.</p>
+          </div>
+          <div class="card-body">
+            <h3>Step 1 — Enable the editor command in your terminal</h3>
+
+            <h4>Cursor</h4>
+            <pre><code># Option A — symlink (recommended)
+sudo ln -s /Applications/Cursor.app/Contents/Resources/app/bin/cursor /usr/local/bin/cursor
+
+# Apple Silicon (M1/M2/M3) — if the path above doesn't work
+sudo ln -s /Applications/Cursor.app/Contents/MacOS/Cursor /usr/local/bin/cursor
+
+# Verify
+cursor --version</code></pre>
+
+            <h4>VS Code</h4>
+            <p>
+              Easiest: open VS Code, press <span class="kbd">Cmd+Shift+P</span>, and run:
+              <code>Shell Command: Install 'code' command in PATH</code>
+            </p>
+            <pre><code># Or manually
+sudo ln -s "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" /usr/local/bin/code
+
+# Verify
+code --version</code></pre>
+
+            <h3>Step 2 — Install the plugin</h3>
+            <p>
+              Open <strong>Terminal</strong> and go to the cloned <code>free-code</code> repository
+              (the same folder where you ran the macOS install script). The plugin ships as a
+              <code>.vsix</code> file inside that repo:
+            </p>
+            <pre><code>cd /path/to/free-code
+
+# Plugin file (relative to the repo root)
+packages/vscode-free-code/vscode-free-code-0.66.1.vsix</code></pre>
+            <p>From the repository root, install the extension with your editor&apos;s CLI:</p>
+            <pre><code># Cursor
+cursor --install-extension packages/vscode-free-code/vscode-free-code-0.66.1.vsix
+
+# VS Code
+code --install-extension packages/vscode-free-code/vscode-free-code-0.66.1.vsix</code></pre>
+
+            <p>Or install graphically:</p>
+            <ol>
+              <li>Open <strong>Extensions</strong> (<span class="kbd">Cmd+Shift+X</span>)</li>
+              <li>Click the <strong>&middot;&middot;&middot;</strong> menu → <strong>Install from VSIX…</strong></li>
+              <li>Select the <code>.vsix</code> file</li>
+            </ol>
+
+            <h3>Step 3 — Reload the editor</h3>
+            <pre><code>Cmd+Shift+P → Developer: Reload Window</code></pre>
+
+            <div class="callout info">
+              <strong>Slash commands in the plugin</strong><br />
+              All <code>/code-index</code>, <code>/code-symbols</code>, <code>/code-callers</code>, and
+              <code>/code-context</code> commands are available in the plugin UI. Type <code>/</code>
+              in the chat input to see the full list.
+            </div>
+          </div>
+        </section>
+
+        <!-- CLI only -->
+        <section class="card" aria-labelledby="install-cli">
+          <div class="card-header">
+            <h2 id="install-cli">CLI only (any platform)</h2>
+            <p>Node.js 20+ required. Works on macOS, Linux, and Windows.</p>
+          </div>
+          <div class="card-body">
+            <h3>1. Install Node.js 20+</h3>
+            <pre><code># via nvm (recommended)
+nvm install --lts
+nvm use --lts</code></pre>
+
+            <h3>2. Install the CLI</h3>
+            <pre><code>npm install -g ./packages/coding-agent</code></pre>
+
+            <h3>3. Verify</h3>
+            <pre><code>free-code --version</code></pre>
+
+            <h3>4. Start</h3>
+            <pre><code>free-code                              # interactive
+free-code "Summarize this project"     # one-shot
+cat README.md | free-code -p "Summarize"  # pipe input</code></pre>
+          </div>
+        </section>
+
+        <!-- Code graph -->
+        <section class="card" aria-labelledby="install-codegraph">
+          <div class="card-header">
+            <h2 id="install-codegraph">Code graph (optional)</h2>
+            <p>Adds symbol indexing and call graph navigation to the agent.</p>
+          </div>
+          <div class="card-body">
+            <pre><code># From the repository root
+npm install -g ./packages/code-graph</code></pre>
+
+            <p>
+              Once installed, the <code>code_index</code>, <code>code_symbols</code>,
+              <code>code_callers</code>, and <code>code_context</code> tools become available
+              automatically in every session.
+            </p>
+
+            <div class="callout info">
+              <strong>First use</strong><br />
+              Open a project and run <code>/code-index</code>. The agent will index all
+              <code>.ts</code> / <code>.js</code> files and store the result in
+              <code>.code-graph/</code> at the project root.
+            </div>
+
+            <p>Add <code>.code-graph/</code> to your <code>.gitignore</code> — the index is regenerated on demand and does not need to be committed.</p>
+
+            <p><a href="code-graph.html">Code graph full documentation →</a></p>
+          </div>
+        </section>
+
+        <p class="footer">
+          <a href="capabilities.html">All capabilities →</a> &nbsp;·&nbsp;
+          <a href="commands.html">Commands →</a> &nbsp;·&nbsp;
+          <a href="code-graph.html">Code graph →</a>
+        </p>
+        <p class="footer-credit">Powered by CX — developed by Pablo Castañeda</p>
+      </div>
+    </div>
+    <script src="assets/theme.js" defer></script>
+  </body>
+</html>

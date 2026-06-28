@@ -1,0 +1,88 @@
+/* === MODULE: input ===
+   Chat form, input textarea, and drag-to-resize handle. */
+
+#chat-form {
+	padding: 10px;
+	border-top: 1px solid var(--vscode-editorWidget-border);
+	display: grid;
+	gap: 8px;
+	position: relative;
+}
+
+.mode-indicator-bar {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	width: fit-content;
+	padding: 4px 8px;
+	border-radius: 999px;
+	border: 1px solid var(--vscode-editorWidget-border);
+	background: color-mix(in srgb, var(--vscode-editor-background) 92%, var(--vscode-focusBorder) 8%);
+	color: var(--vscode-descriptionForeground);
+	font-size: 11px;
+	line-height: 1;
+	position: absolute;
+	top: 0;
+	left: 12px;
+	transform: translateY(-50%);
+	z-index: 4;
+}
+
+.mode-indicator-label {
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	opacity: 0.8;
+}
+
+.mode-indicator-value {
+	font-family: var(--vscode-editor-font-family, monospace);
+	font-weight: 600;
+	color: var(--vscode-editor-foreground);
+}
+
+.mode-indicator-bar[data-mode="plan"] {
+	border-color: color-mix(in srgb, var(--vscode-focusBorder) 65%, transparent);
+	background: color-mix(in srgb, var(--vscode-focusBorder) 18%, var(--vscode-editor-background) 82%);
+}
+
+.input-wrap {
+	position: relative;
+	display: block;
+	padding-top: 14px;
+}
+
+/* chat-mac.html: vertical resize grip (no-op in VS Code webview when absent) */
+.input-drag-handle {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	height: 10px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 3;
+	cursor: ns-resize;
+	user-select: none;
+	padding: 2px 0;
+}
+
+.input-drag-handle:hover .input-drag-bar,
+.input-drag-handle.dragging .input-drag-bar {
+	background: var(--vscode-focusBorder);
+	opacity: 1;
+}
+
+.input-drag-dots {
+	display: none;
+}
+
+.input-drag-bar {
+	width: 36px;
+	height: 3px;
+	border-radius: 2px;
+	background: var(--vscode-scrollbarSlider-background);
+	opacity: 0.5;
+	transition: background 0.15s, opacity 0.15s;
+}
+

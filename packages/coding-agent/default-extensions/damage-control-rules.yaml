@@ -1,0 +1,28 @@
+# Sample rules for the damage-control extension.
+# Shipped and read from this directory next to damage-control.ts (also copied under dist/default-extensions on build).
+
+# Regex patterns matched against the full bash command string.
+bashToolPatterns:
+  - pattern: "\\brm\\s+-rf\\s+/"
+    reason: "rm -rf from filesystem root is too dangerous"
+    ask: true
+  - pattern: "curl\\s+[^|]+\\s*\\|\\s*bash"
+    reason: "Do not pipe remote curl output directly into bash"
+  - pattern: ":\\s*\\{\\s*mkfs"
+    reason: "Block shell constructs that may invoke disk formatting"
+
+# No read/write/grep/find/ls access under these paths (resolved against cwd).
+zeroAccessPaths:
+  - "~/.ssh/"
+  - "/etc/"
+  - "secrets/"
+
+# write/edit blocked; bash uses heuristics for likely modifications.
+readOnlyPaths:
+  - "package-lock.json"
+  - "dist/"
+
+# Bash only: block rm/mv that reference these paths.
+noDeletePaths:
+  - "node_modules/"
+  - "*.env"

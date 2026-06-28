@@ -1,0 +1,125 @@
+/* === MODULE: base ===
+   CSS variables, zoom, html/body reset. */
+
+/* Zoom (macOS app Window menu); inert when unset */
+:root {
+	--free-code-zoom: 1;
+}
+
+/* WKWebView: VS Code does not inject theme variables */
+:root {
+	--vscode-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
+	--vscode-editor-font-family: "SF Mono", Menlo, Monaco, "Courier New", monospace;
+	--vscode-editor-background: #1e1e1e;
+	--vscode-editor-foreground: #cccccc;
+	--vscode-foreground: #cccccc;
+	--vscode-descriptionForeground: #858585;
+	--vscode-focusBorder: #007fd4;
+	--vscode-textLink-foreground: #3794ff;
+	--vscode-sideBar-background: #252526;
+	--vscode-sideBarSectionHeader-background: #333333;
+	--vscode-editorWidget-background: #252526;
+	--vscode-editorWidget-border: #454545;
+	--vscode-input-background: #3c3c3c;
+	--vscode-input-foreground: #cccccc;
+	--vscode-input-border: #555555;
+	--vscode-button-background: #0e639c;
+	--vscode-button-foreground: #ffffff;
+	--vscode-button-hoverBackground: #1177bb;
+	--vscode-button-border: transparent;
+	--vscode-button-secondaryBackground: #3a3d41;
+	--vscode-button-secondaryForeground: #cccccc;
+	--vscode-badge-background: #4d4d4d;
+	--vscode-badge-foreground: #cccccc;
+	--vscode-list-activeSelectionBackground: #094771;
+	--vscode-list-activeSelectionForeground: #ffffff;
+	--vscode-list-hoverBackground: #2a2d2e;
+	--vscode-panelTitle-activeForeground: #e7e7e7;
+	--vscode-panelTitle-inactiveForeground: #969696;
+	--vscode-textBlockQuote-background: #2a2a2a;
+	--vscode-textBlockQuote-border: #444444;
+	--vscode-errorForeground: #f48771;
+	--vscode-notificationsErrorIcon-foreground: #f48771;
+	--vscode-inputValidation-errorBackground: #5a1d1d;
+	--vscode-inputValidation-errorBorder: #be1100;
+	--vscode-inputValidation-warningBackground: #352a05;
+	--vscode-inputValidation-warningBorder: #9c6d03;
+	--vscode-inputValidation-warningForeground: #cccccc;
+	--vscode-testing-iconPassed: #73c991;
+	--vscode-testing-iconFailed: #f48771;
+	--vscode-charts-green: #89d185;
+	--vscode-gitDecoration-addedResourceForeground: #81b88b;
+	--vscode-gitDecoration-deletedResourceForeground: #c74e39;
+	--vscode-diffEditor-insertedLineBackground: rgba(40, 167, 69, 0.13);
+	--vscode-diffEditor-removedLineBackground: rgba(255, 0, 0, 0.13);
+	--vscode-widget-shadow: rgba(0, 0, 0, 0.36);
+}
+
+/* Light theme — activated when html[data-theme="light"] is set.
+   Uses higher specificity than :root so it wins over VSCode's injected :root variables. */
+html[data-theme="light"] {
+	--vscode-editor-background: #ffffff;
+	--vscode-editor-foreground: #1f1f1f;
+	--vscode-foreground: #3b3b3b;
+	--vscode-descriptionForeground: #717171;
+	--vscode-focusBorder: #0090f1;
+	--vscode-textLink-foreground: #006ab1;
+	--vscode-sideBar-background: #f3f3f3;
+	--vscode-sideBarSectionHeader-background: #e8e8e8;
+	--vscode-editorWidget-background: #f3f3f3;
+	--vscode-editorWidget-border: #c8c8c8;
+	--vscode-input-background: #ffffff;
+	--vscode-input-foreground: #1f1f1f;
+	--vscode-input-border: #bebebe;
+	--vscode-button-background: #007acc;
+	--vscode-button-foreground: #ffffff;
+	--vscode-button-hoverBackground: #0062a3;
+	--vscode-button-border: transparent;
+	--vscode-button-secondaryBackground: #5f6a79;
+	--vscode-button-secondaryForeground: #ffffff;
+	--vscode-badge-background: #c4c4c4;
+	--vscode-badge-foreground: #333333;
+	--vscode-list-activeSelectionBackground: #0060c0;
+	--vscode-list-activeSelectionForeground: #ffffff;
+	--vscode-list-hoverBackground: #e8e8e8;
+	--vscode-panelTitle-activeForeground: #424242;
+	--vscode-panelTitle-inactiveForeground: #686868;
+	--vscode-textBlockQuote-background: #f2f2f2;
+	--vscode-textBlockQuote-border: #cccccc;
+	--vscode-errorForeground: #e51400;
+	--vscode-notificationsErrorIcon-foreground: #e51400;
+	--vscode-inputValidation-errorBackground: #f2dede;
+	--vscode-inputValidation-errorBorder: #be1100;
+	--vscode-inputValidation-warningBackground: #f6f5d2;
+	--vscode-inputValidation-warningBorder: #b89500;
+	--vscode-inputValidation-warningForeground: #3b3b3b;
+	--vscode-testing-iconPassed: #388a34;
+	--vscode-testing-iconFailed: #e51400;
+	--vscode-charts-green: #388a34;
+	--vscode-gitDecoration-addedResourceForeground: #587c0c;
+	--vscode-gitDecoration-deletedResourceForeground: #ad0707;
+	--vscode-diffEditor-insertedLineBackground: rgba(40, 167, 69, 0.12);
+	--vscode-diffEditor-removedLineBackground: rgba(255, 0, 0, 0.12);
+	--vscode-widget-shadow: rgba(0, 0, 0, 0.16);
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	height: 100%;
+	overflow: hidden;
+}
+
+body {
+	font-family: var(--vscode-font-family);
+	background: var(--vscode-editor-background);
+	color: var(--vscode-editor-foreground);
+	font-size: calc(14px * var(--free-code-zoom, 1));
+	display: flex;
+	flex-direction: column;
+}
+

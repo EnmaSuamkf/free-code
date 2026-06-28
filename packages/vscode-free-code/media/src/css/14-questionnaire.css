@@ -1,0 +1,169 @@
+/* === MODULE: questionnaire ===
+   Inline questionnaire card for AskQuestion tool responses. */
+
+/* ===== Inline questionnaire (extension_ui_request method=questionnaire) ===== */
+
+.message.questionnaire-card {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	max-width: 95%;
+	padding: 10px 12px;
+	border: 1px solid var(--vscode-focusBorder, var(--vscode-textBlockQuote-border));
+	background: var(--vscode-editorWidget-background, var(--vscode-textBlockQuote-background));
+	border-radius: 4px;
+}
+
+.questionnaire-header {
+	font-size: 12px;
+	color: var(--vscode-descriptionForeground);
+	border-bottom: 1px solid var(--vscode-editorWidget-border, var(--vscode-textBlockQuote-border));
+	padding-bottom: 6px;
+}
+
+.questionnaire-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+}
+
+.questionnaire-tab {
+	border: 1px solid var(--vscode-editorWidget-border, transparent);
+	background: transparent;
+	color: var(--vscode-foreground);
+	padding: 2px 8px;
+	font-size: 11px;
+	border-radius: 3px;
+	cursor: pointer;
+}
+
+.questionnaire-tab:hover {
+	background: var(--vscode-list-hoverBackground);
+}
+
+.questionnaire-tab.active {
+	background: var(--vscode-list-activeSelectionBackground);
+	color: var(--vscode-list-activeSelectionForeground);
+	border-color: var(--vscode-focusBorder, transparent);
+}
+
+.questionnaire-tab.answered .questionnaire-tab-marker {
+	color: var(--vscode-testing-iconPassed, var(--vscode-charts-green, #4caf50));
+}
+
+.questionnaire-tab-marker {
+	font-family: var(--vscode-editor-font-family, monospace);
+	margin-right: 2px;
+}
+
+.questionnaire-prompt {
+	margin: 0 0 4px 0;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--vscode-foreground);
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.questionnaire-options {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.questionnaire-option {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	column-gap: 8px;
+	row-gap: 2px;
+	align-items: start;
+	padding: 6px 8px;
+	border: 1px solid transparent;
+	border-radius: 3px;
+	cursor: pointer;
+}
+
+.questionnaire-option:hover {
+	background: var(--vscode-list-hoverBackground);
+}
+
+.questionnaire-option input[type="radio"] {
+	margin-top: 2px;
+	accent-color: var(--vscode-focusBorder, var(--vscode-button-background));
+}
+
+.questionnaire-option-label {
+	font-size: 13px;
+	color: var(--vscode-foreground);
+	word-break: break-word;
+}
+
+.questionnaire-option-desc {
+	grid-column: 2;
+	font-size: 11px;
+	color: var(--vscode-descriptionForeground);
+	margin-top: 1px;
+}
+
+.questionnaire-option:has(input:checked) {
+	border-color: var(--vscode-focusBorder, var(--vscode-button-background));
+	background: color-mix(in srgb, var(--vscode-list-activeSelectionBackground) 25%, transparent);
+}
+
+.questionnaire-option-other .questionnaire-other-input {
+	grid-column: 2;
+	margin-top: 4px;
+	width: 100%;
+	box-sizing: border-box;
+	background: var(--vscode-input-background);
+	color: var(--vscode-input-foreground);
+	border: 1px solid var(--vscode-input-border, transparent);
+	font-family: inherit;
+	font-size: 12px;
+	padding: 4px 6px;
+	resize: vertical;
+}
+
+.questionnaire-option-other .questionnaire-other-input:focus {
+	outline: 1px solid var(--vscode-focusBorder);
+	outline-offset: -1px;
+}
+
+.questionnaire-footer {
+	display: flex;
+	justify-content: flex-end;
+	gap: 6px;
+}
+
+.questionnaire-btn {
+	font-size: 12px;
+	padding: 4px 12px;
+}
+
+.questionnaire-cancel {
+	background: transparent;
+	color: var(--vscode-foreground);
+	border: 1px solid var(--vscode-editorWidget-border, var(--vscode-button-border, transparent));
+}
+
+.questionnaire-cancel:hover {
+	background: var(--vscode-list-hoverBackground);
+}
+
+.questionnaire-submit:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.questionnaire-summary {
+	margin: 0;
+	white-space: pre-wrap;
+	font-size: 12px;
+	color: var(--vscode-descriptionForeground);
+	border-top: 1px dashed var(--vscode-editorWidget-border, var(--vscode-textBlockQuote-border));
+	padding-top: 6px;
+}
+
+.questionnaire-disabled {
+	opacity: 0.85;
+}

@@ -1,0 +1,47 @@
+{
+  "skill_name": "rag",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Add ./policies/handbook.pdf to my knowledge base so free-code can use it.",
+      "expected_output": "Agent ensures a KB is selected first (or asks to select one), copies the file to ~/.free-code/knowledgeBase/<KB>/, and calls POST /addkb with filename+kb. Does NOT run '/rag add' in a shell.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Remove report.pdf from the knowledge base.",
+      "expected_output": "Agent ensures a KB is selected first (or asks to select one), deletes ~/.free-code/knowledgeBase/<KB>/report.pdf and calls POST /removekb with filename+kb. Does NOT run '/rag remove' in a shell.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "What documents are currently in my knowledge base?",
+      "expected_output": "Agent ensures a KB is selected first (or asks to select one), then lists files in ~/.free-code/knowledgeBase/<KB>/ using ls or equivalent. Does NOT run '/rag list' in a shell.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Find information about our remote work policy.",
+      "expected_output": "Agent decides 1-3 relevant queries (e.g. 'remote work policy'), runs GET /query for each, collects chunks, and answers grounded in them with citations. Does NOT run '/rag search' in a shell.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Index this file notes.txt into the RAG knowledge base.",
+      "expected_output": "Agent states .txt is not supported by rag-manager; suggests .pdf/.doc/.docx or conversion.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "Search for information about Pablo Castaneda.",
+      "expected_output": "Agent decides relevant queries (e.g. 'Pablo Castaneda', possibly 'OCTOPUS team'), runs 1-3 GET /query calls, collects all chunks, and synthesizes a grounded answer with citations. Does NOT ask for clarification first.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "Tell me about the OCTOPUS team: who is the lead and what engineers are in it?",
+      "expected_output": "Agent breaks this into multiple queries (e.g. 'OCTOPUS lead engineer', 'OCTOPUS team members'), runs up to 3 GET /query calls, combines results, and answers with citations.",
+      "files": []
+    }
+  ]
+}

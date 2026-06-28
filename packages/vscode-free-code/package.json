@@ -1,0 +1,96 @@
+{
+	"name": "vscode-free-code",
+	"displayName": "Free Code",
+	"description": "Sidebar chat for VS Code and Cursor backed by free-code RPC mode",
+	"version": "0.66.1",
+	"private": true,
+	"type": "module",
+	"publisher": "free-code",
+	"engines": {
+		"vscode": "^1.90.0"
+	},
+	"categories": ["Other"],
+	"main": "./dist/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "free-code.attachFiles",
+				"title": "Free Code: Insert file paths in chat"
+			},
+		{
+			"command": "free-code.openAgentBrowser",
+			"title": "Free Code: Open visible browser with agent"
+		},
+		{
+			"command": "free-code.exportChat",
+			"title": "Free Code: Export conversation to Markdown"
+		}
+		],
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "freeCode",
+					"title": "Free Code",
+					"icon": "media/icon.svg"
+				}
+			]
+		},
+		"views": {
+			"freeCode": [
+				{
+					"id": "freeCode.chatView",
+					"name": "Chat",
+					"type": "webview"
+				}
+			]
+		},
+		"configuration": {
+			"title": "Free Code",
+			"properties": {
+				"free-code.executablePath": {
+					"type": "string",
+					"default": "free-code",
+					"description": "Path to the free-code executable. Default `free-code` uses PATH; if the workspace root contains `packages/coding-agent/dist/cli.js` (after `npm run build` in the monorepo), that file is used automatically so the RPC agent matches a local build."
+				},
+				"free-code.cwd": {
+					"type": "string",
+					"default": "",
+					"description": "Optional working directory for the agent. If empty, uses the first workspace folder."
+				},
+				"free-code.provider": {
+					"type": "string",
+					"default": "",
+					"description": "Optional provider passed to free-code --provider."
+				},
+				"free-code.model": {
+					"type": "string",
+					"default": "",
+					"description": "Optional model passed to free-code --model."
+				},
+				"free-code.env": {
+					"type": "object",
+					"default": {},
+					"description": "Extra environment variables for the free-code child process (merged over the extension host env). Use for Vertex: GOOGLE_CLOUD_PROJECT, GOOGLE_CLOUD_LOCATION, or GOOGLE_APPLICATION_CREDENTIALS. The GUI app does not inherit shell exports from a terminal session.",
+					"additionalProperties": { "type": "string" }
+				},
+				"free-code.noExtensions": {
+					"type": "boolean",
+					"default": false,
+					"description": "If true, spawns `free-code --no-extensions` (faster, no agent extensions or MCP tool discovery). If false (default), matches the terminal CLI: extensions and MCP load so `/tools` and `/pick-tools` can list the same groups as the TUI (requires a current `free-code` build)."
+				}
+			}
+		}
+	},
+	"scripts": {
+		"build:webview": "node scripts/build-webview.cjs",
+		"build": "node scripts/build-webview.cjs && esbuild src/extension-entry.mjs --bundle --platform=node --external:vscode --format=esm --outfile=dist/extension.js",
+		"package": "npm run build && npx @vscode/vsce package --no-dependencies --allow-package-secrets slack"
+	},
+	"dependencies": {
+		"@free/free-desktop-host": "file:../free-desktop-host"
+	},
+	"devDependencies": {
+		"@vscode/vsce": "^3.6.1",
+		"esbuild": "^0.25.0"
+	}
+}

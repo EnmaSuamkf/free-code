@@ -1,0 +1,53 @@
+/* === MODULE: diff ===
+   Diff block display for edit/write tool results. */
+
+.diff-block {
+	margin-top: 6px;
+	font-family: var(--vscode-editor-font-family, monospace);
+	font-size: 12px;
+	line-height: 1.45;
+	overflow-x: auto;
+	overflow-y: auto;
+	max-height: 400px;
+	border-radius: 4px;
+	border: 1px solid color-mix(in srgb, var(--vscode-editorWidget-border) 60%, transparent);
+}
+
+.diff-line {
+	display: block;
+	white-space: pre;
+	padding: 0 8px;
+}
+
+.diff-line-add {
+	background: color-mix(in srgb, var(--vscode-diffEditor-insertedLineBackground, #28a74520) 60%, transparent);
+	color: var(--vscode-gitDecoration-addedResourceForeground, #81b88b);
+}
+
+.diff-line-del {
+	background: color-mix(in srgb, var(--vscode-diffEditor-removedLineBackground, #ff000020) 60%, transparent);
+	color: var(--vscode-gitDecoration-deletedResourceForeground, #c74e39);
+}
+
+.diff-line-ctx {
+	color: var(--vscode-editor-foreground);
+	opacity: 0.65;
+}
+
+.diff-line-ellipsis {
+	color: var(--vscode-descriptionForeground);
+	opacity: 0.5;
+	user-select: none;
+}
+
+button {
+	border: 1px solid var(--vscode-button-border, transparent);
+	background: var(--vscode-button-background);
+	color: var(--vscode-button-foreground);
+	padding: 4px 10px;
+	cursor: pointer;
+}
+
+button:hover {
+	background: var(--vscode-button-hoverBackground);
+}

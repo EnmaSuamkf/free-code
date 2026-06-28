@@ -1,0 +1,23 @@
+{
+  "skill_name": "sdd-workflow-tracker",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Track SDD workflow usage for pablo.castaneda in the last 20 days",
+      "expected_output": "Agent builds JQL with assignee=pablo.castaneda and date range for last 20 days, queries Jira, returns markdown report with phase adoption, funnel conversion, and issues detail table.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "SDD adoption for team SUMO from 2026-03-01 to 2026-03-31 in JSON",
+      "expected_output": "Agent builds JQL with project=SUMO and date range, queries Jira, returns JSON with total_issues, phase_counts, funnel, and per-issue detail.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "How many issues went through SDD phases for project OCTOPUS last 30 days?",
+      "expected_output": "Agent uses --project OCTOPUS --days 30, returns phase adoption counts and conversion funnel between spec/plan/dev/code-review.",
+      "files": []
+    }
+  ]
+}

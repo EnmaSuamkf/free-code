@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Capabilities — free-code</title>
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <div class="doc-root">
+      <header class="site-shell-header" role="banner">
+        <div class="site-shell-inner">
+          <a class="site-brand" href="index.html">
+            <span class="site-brand-angles" aria-hidden="true">&lt;</span>
+            <span>free-code</span>
+            <span class="site-brand-angles" aria-hidden="true">&gt;</span>
+          </a>
+          <div class="site-header-actions">
+            <button type="button" class="theme-toggle" id="doc-theme-toggle" aria-label="Color theme">
+              <span class="theme-toggle-label" id="doc-theme-label">System</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="container">
+        <header class="hero">
+          <h1 class="brand">
+            <span class="angle" aria-hidden="true">&lt;</span>
+            <span class="name">free-code</span>
+            <span class="angle" aria-hidden="true">&gt;</span>
+          </h1>
+          <p class="tagline">
+            <span class="prompt" aria-hidden="true">// </span>
+            Every capability, explained.
+          </p>
+
+          <nav class="nav" aria-label="Primary">
+            <a href="index.html">[home]</a>
+            <a href="capabilities.html" aria-current="page">[capabilities]</a>
+            <a href="commands.html">[commands]</a>
+            <a href="installation.html">[installation]</a>
+            <a href="code-graph.html">[code graph]</a>
+            <a href="roi.html">[ROI]</a>
+          </nav>
+        </header>
+
+        <!-- Code Graph -->
+        <section class="card" aria-labelledby="cap-codegraph">
+          <div class="card-header">
+            <h2 id="cap-codegraph">Code Graph — Symbol index &amp; navigation</h2>
+            <p>Local structural index of your entire codebase. No cloud. No upload. Sub-second lookups.</p>
+          </div>
+          <div class="card-body">
+            <p>
+              The code graph indexes every TypeScript and JavaScript file in your project, building
+              a queryable map of symbols (functions, classes, methods, interfaces, types, enums) and
+              the call edges between them. The result is stored in <code>.code-graph/</code> at the
+              project root — a set of JSON files the agent reads in milliseconds.
+            </p>
+
+            <h3>What this means in practice</h3>
+            <ul>
+              <li>The agent never has to read a 2,000-line file to find a 10-line function.</li>
+              <li>It can answer "who calls <code>parseArgs</code>?" across 500 files instantly.</li>
+              <li>It sees the exact call tree: which functions a symbol delegates to.</li>
+              <li>Incremental re-indexing — only changed files are re-parsed.</li>
+            </ul>
+
+            <h3>Four agent tools</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Tool</th><th>What it does</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>code_index</code></td>
+                    <td>Build or incrementally update the index. Runs automatically when stale.</td>
+                  </tr>
+                  <tr>
+                    <td><code>code_symbols</code></td>
+                    <td>Case-insensitive substring search by name or qualified name, with optional kind filter.</td>
+                  </tr>
+                  <tr>
+                    <td><code>code_callers</code></td>
+                    <td>Returns every call site that invokes a named function or method, with file and line.</td>
+                  </tr>
+                  <tr>
+                    <td><code>code_context</code></td>
+                    <td>Full source of a symbol plus its direct callees. Validates freshness against the index.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Stale index detection</h3>
+            <p>
+              On every session startup, free-code checks whether any <code>.ts</code> / <code>.js</code>
+              files have been modified since the last index run. If they have, it displays a warning
+              and suggests running <code>code_index</code> before using the other tools.
+            </p>
+
+            <div class="callout tip">
+              <strong>Tip</strong><br />
+              Run <code>/code-index</code> once after cloning a repo, then <code>/code-index --force</code>
+              after large refactors. Day-to-day incremental updates happen automatically.
+            </div>
+
+            <p><a href="code-graph.html">Full code graph documentation →</a></p>
+          </div>
+        </section>
+
+        <!-- RAG -->
+        <section class="card" aria-labelledby="cap-rag">
+          <div class="card-header">
+            <h2 id="cap-rag">RAG — Local knowledge base</h2>
+            <p>Add any document as permanent project context. Vector search, no cloud required.</p>
+          </div>
+          <div class="card-body">
+            <p>
+              The RAG (Retrieval-Augmented Generation) extension provides a local vector knowledge
+              base served on port 8085. Index documentation, runbooks, architecture notes, or any
+              text file. The agent retrieves the most relevant chunks automatically during a session.
+            </p>
+
+            <h3>Key commands</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Command</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>/rag addFile &lt;path&gt;</code></td><td>Index a single document</td></tr>
+                  <tr><td><code>/rag addGroup &lt;folder&gt;</code></td><td>Index all supported files in a folder</td></tr>
+                  <tr><td><code>/rag addGithubUrl &lt;url&gt; [subpath]</code></td><td>Clone a GitHub repo and index its files. Optionally target a subdirectory. Source is saved to <code>sources.json</code> for future refreshes.</td></tr>
+                  <tr><td><code>/rag search &lt;query&gt;</code></td><td>Query the knowledge base and inject as context</td></tr>
+                  <tr><td><code>/rag list</code></td><td>List all indexed documents</td></tr>
+                  <tr><td><code>/rag remove &lt;file&gt;</code></td><td>Remove a document from the index</td></tr>
+                  <tr><td><code>/rag refresh</code></td><td>Re-fetch and re-index all sources registered via <code>addFile</code> and <code>addGithubUrl</code></td></tr>
+                  <tr><td><code>/rag schedule [daily|weekly]</code></td><td>Set up automatic recurring refresh (requires at least one GitHub source)</td></tr>
+                  <tr><td><code>/rag-kb create &lt;name&gt;</code></td><td>Create a named knowledge base</td></tr>
+                  <tr><td><code>/rag-kb use &lt;name&gt;</code></td><td>Switch the active knowledge base</td></tr>
+                  <tr><td><code>/rag-kb list</code></td><td>List all knowledge bases</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="callout info">
+              <strong>Use case</strong><br />
+              Index your team's ADRs, internal API docs, or a third-party library's documentation.
+              The agent will cite from your knowledge base instead of hallucinating about it.
+            </div>
+          </div>
+        </section>
+
+        <!-- Browser -->
+        <section class="card" aria-labelledby="cap-browser">
+          <div class="card-header">
+            <h2 id="cap-browser">Browser automation</h2>
+            <p>The agent controls a real browser. No Selenium. No mocks.</p>
+          </div>
+          <div class="card-body">
+            <p>
+              free-code ships with a built-in browser tool backed by Chrome DevTools Protocol (CDP).
+              The agent can navigate pages, click, fill forms, take screenshots, and extract
+              structured content — treating web UIs like any other tool.
+            </p>
+
+            <h3>Browser commands</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Command / tool</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>/browse [url] [goal]</code></td><td>Open a URL in the visible browser and describe the goal</td></tr>
+                  <tr><td><code>agent_browser</code> tool</td><td>Full programmatic control: navigate, screenshot, interact</td></tr>
+                  <tr><td><code>/gemini ask &lt;message&gt;</code></td><td>Send a message to Gemini via browser CDP flow</td></tr>
+                  <tr><td><code>/gemini download &lt;file&gt;</code></td><td>Download a Gemini-generated artifact</td></tr>
+                  <tr><td><code>/gemini open [chat_id]</code></td><td>Open a Gemini conversation in the browser</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="callout info">
+              <strong>Use case</strong><br />
+              Ask the agent to research a competitor's API, scrape documentation that has no
+              official download, or walk through a multi-step web form on your behalf.
+            </div>
+          </div>
+        </section>
+
+        <!-- MCP -->
+        <section class="card" aria-labelledby="cap-mcp">
+          <div class="card-header">
+            <h2 id="cap-mcp">MCP Servers — Unlimited extensibility</h2>
+            <p>Connect any Model Context Protocol server and its tools appear automatically.</p>
+          </div>
+          <div class="card-body">
+            <p>
+              Model Context Protocol (MCP) is an open standard for connecting AI agents to external
+              tools and services. free-code supports any MCP-compatible server: databases, APIs,
+              design tools, monitoring dashboards, CI systems — if it speaks MCP, it works.
+            </p>
+
+            <h3>Adding an MCP server</h3>
+            <pre><code>/mcp-import                     # guided import from a URL or file
+# or edit directly:
+~/.free-code/agent/mcp.json</code></pre>
+
+            <p>
+              After import, restart the session. The new tools appear in the agent's tool list
+              automatically — no code changes required.
+            </p>
+
+            <div class="callout tip">
+              <strong>Examples</strong><br />
+              Connect a Postgres MCP server to let the agent query your database. Add a Figma
+              MCP to read design tokens. Wire up a GitHub MCP to manage PRs and issues.
+            </div>
+          </div>
+        </section>
+
+        <!-- Security -->
+        <section class="card" aria-labelledby="cap-security">
+          <div class="card-header">
+            <h2 id="cap-security">Security — Layered guardrails for the agent</h2>
+            <p>Audit sessions, approve risky actions, and control what the agent can reach — locally or in the cloud.</p>
+          </div>
+          <div class="card-body">
+            <p>
+              free-code is built for environments where an agent has real power over files, shells, and
+              external systems. Security is not a single switch: it is a stack of visibility, policy,
+              and user confirmation you can tune for your team.
+            </p>
+
+            <h3>Report and export conversations</h3>
+            <p>
+              Every session is persisted under <code>~/.free-code/</code>. Export or share transcripts
+              for review, compliance, or handoff:
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Command</th><th>Use</th></tr></thead>
+                <tbody>
+                  <tr><td><code>/export [file]</code></td><td>HTML, Markdown, or JSONL archive of the session</td></tr>
+                  <tr><td><code>/share</code></td><td>Upload as a private GitHub gist and get a link</td></tr>
+                  <tr><td><code>/session</code></td><td>Path, token usage, and cost for the active session</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Damage-Control — bash and file firewall</h3>
+            <p>
+              The bundled <strong>Damage-Control</strong> extension enforces YAML rules before the agent
+              runs bash commands or touches sensitive paths. Dangerous patterns (for example
+              <code>rm -rf /</code> or piping <code>curl</code> into <code>bash</code>) can be
+              <strong>blocked</strong> or require an explicit confirmation dialog in real time — so
+              the user decides before a potentially harmful command runs.
+            </p>
+            <ul>
+              <li><strong>Bash patterns</strong> — regex rules with a human-readable reason</li>
+              <li><strong>Path policies</strong> — zero-access, read-only, and no-delete paths</li>
+              <li><strong>MCP authorization</strong> — first MCP tool call per session prompts allow/deny for the rest of the session</li>
+              <li><strong>Audit log</strong> — blocks and denials are recorded in the session as <code>damage-control-log</code> entries</li>
+            </ul>
+            <pre><code># Toggle enforcement for the current session
+/damage-control [on|off|toggle|status]
+
+# Customize rules (copy the sample next to your extension, or edit the bundled file)
+damage-control-rules.yaml</code></pre>
+            <p>
+              Sample rules ship with the agent (blocking <code>~/.ssh/</code>, <code>/etc/</code>,
+              and common destructive bash idioms). Teams can extend the file for their own policies.
+            </p>
+
+            <h3>Visibility — skills, MCP, and agents in use</h3>
+            <p>
+              Before trusting what the agent can do, you need to see what is loaded on the machine:
+            </p>
+            <ul>
+              <li><code>/tools</code> and <code>/commands</code> — active tools and slash commands for this session</li>
+              <li><code>/reload</code> — refresh extensions, skills, prompts, and context files after install changes</li>
+              <li><strong>Session monitor</strong> (VS Code / Cursor plugin and macOS app) — live counts of messages, tool calls, MCP tools, skills, and subagents, plus context usage</li>
+              <li><code>~/.free-code/agent/mcp.json</code> — MCP servers configured for the user</li>
+            </ul>
+            <p>
+              This makes it clear which external systems (Jira, GitHub, databases, etc.) the agent
+              can reach through MCP, and which reusable skills shape its behavior.
+            </p>
+
+            <h3>Local-first with cloud deployment</h3>
+            <p>
+              Run entirely on a developer laptop with local or API-based models. When your organization
+              requires it, use the same agent with cloud LLM providers (Anthropic, Vertex, OpenAI-compatible
+              endpoints) or host sessions in managed environments — always with the same Damage-Control
+              and MCP policies available in the CLI, plugin, and macOS app.
+            </p>
+
+            <div class="callout tip">
+              <strong>Tip</strong><br />
+              Start with the bundled <code>damage-control-rules.yaml</code>, turn enforcement on with
+              <code>/damage-control on</code>, and export a test session with <code>/export</code> to
+              validate your audit workflow before rolling out to the team.
+            </div>
+          </div>
+        </section>
+
+        <!-- Subagents -->
+        <section class="card" aria-labelledby="cap-subagents">
+          <div class="card-header">
+            <h2 id="cap-subagents">Subagents — Multi-agent workflows</h2>
+            <p>Delegate tasks to parallel agents from within a single session.</p>
+          </div>
+          <div class="card-body">
+            <p>
+              A subagent is a full agent session running alongside your main session. Spin up as
+              many as you need. Each has its own context window, tool access, and conversation
+              thread. Coordinate them to work on independent subtasks in parallel.
+            </p>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Command</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>/sub &lt;task&gt;</code></td><td>Start a new subagent with a task description</td></tr>
+                  <tr><td><code>/subcont &lt;n&gt; &lt;prompt&gt;</code></td><td>Continue talking to subagent #n</td></tr>
+                  <tr><td><code>/subrm &lt;n&gt;</code></td><td>Remove subagent #n</td></tr>
+                  <tr><td><code>/subclear</code></td><td>Clear all subagent widgets</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="callout info">
+              <strong>Use case</strong><br />
+              Run a security audit in one subagent while a second writes tests and a third
+              drafts the changelog. All three run in parallel, each with full tool access.
+            </div>
+          </div>
+        </section>
+
+        <!-- Project context files -->
+        <section class="card" aria-labelledby="cap-context-files">
+          <div class="card-header">
+            <h2 id="cap-context-files">Project context files</h2>
+            <p>Drop a file at the repo root and the agent picks it up automatically — no configuration needed.</p>
+          </div>
+          <div class="card-body">
+            <p>
+              On every session start, free-code walks the project directory and its parents looking
+              for context files. Any file it finds is injected into the agent's system prompt,
+              giving the agent standing instructions specific to that project.
+            </p>
+
+            <p>Supported filenames (in discovery order):</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>File</th><th>Typical use</th></tr></thead>
+                <tbody>
+                  <tr><td><code>FREE_CODE.md</code></td><td>free-code-specific project guidance (architecture notes, agent workflow rules, file conventions)</td></tr>
+                  <tr><td><code>CLAUDE.md</code></td><td>Compatible with Claude Code projects — same file, picked up automatically</td></tr>
+                  <tr><td><code>AGENTS.md</code></td><td>Compatible with OpenAI Codex / other agent tooling that uses this convention</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>What to put in a context file</h3>
+            <ul>
+              <li>Architecture decisions the agent should be aware of</li>
+              <li>Coding conventions and style rules for the project</li>
+              <li>Which commands to run before committing (<code>npm run check</code>, etc.)</li>
+              <li>Agent workflow rules (e.g. use subagents for broad exploration, always update <code>web-docs/</code> alongside <code>docs/</code>)</li>
+              <li>Paths the agent should not touch</li>
+            </ul>
+
+            <div class="callout tip">
+              <strong>Compatibility</strong><br />
+              If your team already uses <code>CLAUDE.md</code> for Claude Code or <code>AGENTS.md</code>
+              for another tool, free-code reads those files as-is. No migration needed.
+            </div>
+          </div>
+        </section>
+
+        <!-- Skills & Extensions -->
+        <section class="card" aria-labelledby="cap-skills">
+          <div class="card-header">
+            <h2 id="cap-skills">Skills &amp; Extensions — Reusable agent behaviors</h2>
+            <p>Commit domain knowledge alongside your code. Share workflows with your team.</p>
+          </div>
+          <div class="card-body">
+            <p>
+              <strong>Skills</strong> are markdown files with YAML frontmatter. They inject
+              instructions, context, and personality into the agent for a specific task.
+              A skill can describe how to run your CI pipeline, how to write commit messages,
+              or how to follow your team's code review guidelines.
+            </p>
+            <pre><code>---
+name: code-review
+description: Follow our team's code review conventions
+---
+When reviewing code, always check for...
+</code></pre>
+
+            <p>
+              <strong>Extensions</strong> are TypeScript modules that add new tools, slash commands,
+              and integrations. Extensions are auto-discovered from
+              <code>~/.free-code/agent/extensions/</code> and loaded on every session start.
+            </p>
+
+            <h3>Install a package</h3>
+            <pre><code>free-code install npm:@scope/package       # from npm
+free-code install git:github.com/org/pkg   # from a git repo
+free-code install https://example.com/pkg  # from a URL</code></pre>
+
+            <div class="callout tip">
+              <strong>Tip</strong><br />
+              Skills are version-controlled markdown files. Ship them in your monorepo and
+              every engineer on the team gets the same agent behavior automatically.
+            </div>
+          </div>
+        </section>
+
+        <!-- Multi-provider -->
+        <section class="card" aria-labelledby="cap-providers">
+          <div class="card-header">
+            <h2 id="cap-providers">Multi-provider AI</h2>
+            <p>One agent, every model. Switch without changing your workflow.</p>
+          </div>
+          <div class="card-body">
+            <p>
+              free-code is model-agnostic. Configure as many providers as you need. Cycle your
+              curated shortlist with a single key binding. Switch to a different model mid-session
+              at any time.
+            </p>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Provider</th><th>Models</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Anthropic</td><td>Claude 3 Opus, Sonnet, Haiku and newer</td></tr>
+                  <tr><td>Google Vertex AI</td><td>Gemini 2.0 Flash, Pro, Ultra</td></tr>
+                  <tr><td>Ollama</td><td>Llama 3, Mistral, Phi, Qwen, and any locally served model</td></tr>
+                  <tr><td>LM Studio</td><td>Any GGUF model served via LM Studio</td></tr>
+                  <tr><td>OpenAI-compatible</td><td>Any endpoint that follows the OpenAI chat completions API</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Switching models</h3>
+            <ul>
+              <li><span class="kbd">Ctrl+L</span> — open model selector</li>
+              <li><span class="kbd">Ctrl+P</span> / <span class="kbd">Shift+Ctrl+P</span> — cycle your scoped shortlist forward / backward</li>
+              <li><code>/model</code> — switch via command</li>
+              <li><span class="kbd">Shift+Tab</span> — cycle reasoning level (off → minimal → low → medium → high → xhigh)</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Session management -->
+        <section class="card" aria-labelledby="cap-sessions">
+          <div class="card-header">
+            <h2 id="cap-sessions">Session management</h2>
+            <p>Sessions that survive context limits, restarts, and long pauses.</p>
+          </div>
+          <div class="card-body">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Command / flag</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>/resume</code></td><td>Browse and pick a previous session</td></tr>
+                  <tr><td><code>/fork</code></td><td>Branch the current session into a new independent one</td></tr>
+                  <tr><td><code>/compact [instructions]</code></td><td>Summarize context to free up the context window</td></tr>
+                  <tr><td><code>/tree</code></td><td>Navigate session history as a branching tree; jump to any checkpoint</td></tr>
+                  <tr><td><code>/name &lt;name&gt;</code></td><td>Give the session a human-readable name</td></tr>
+                  <tr><td><code>/export [file]</code></td><td>Export to HTML, Markdown (.md), or JSONL</td></tr>
+                  <tr><td><code>/share</code></td><td>Upload as a private GitHub gist and get a link</td></tr>
+                  <tr><td><code>free-code -c</code></td><td>CLI: continue the most recent session</td></tr>
+                  <tr><td><code>free-code --fork &lt;id&gt;</code></td><td>CLI: fork a specific session</td></tr>
+                  <tr><td><code>free-code --no-session</code></td><td>CLI: ephemeral mode, nothing is saved</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <p class="footer">
+          <a href="commands.html">Full command reference →</a> &nbsp;·&nbsp;
+          <a href="code-graph.html">Code graph →</a> &nbsp;·&nbsp;
+          <a href="index.html#qualities-heading">Product qualities</a> &nbsp;·&nbsp;
+          <a href="installation.html">Installation →</a>
+        </p>
+        <p class="footer-credit">Powered by CX — developed by Pablo Castañeda</p>
+      </div>
+    </div>
+    <script src="assets/theme.js" defer></script>
+  </body>
+</html>

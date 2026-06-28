@@ -1,0 +1,23 @@
+{
+  "skill_name": "plan-workflow",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create an implementation plan for OCTOPUS-10820. The spec already exists in analysis/spec-OCTOPUS-10820.md.",
+      "expected_output": "Agent reads spec, creates plan-OCTOPUS-10820.md in analysis/ with Execution_Phases, Issue_labels, Target_Repository, Step_by_step_task_plan, etc.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Run the plan workflow for Jira ticket JIRA-123. I have the spec ready.",
+      "expected_output": "Agent validates spec exists, removes plan label, generates plan-JIRA-123.md.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I need to generate plan-JIRA-123.md from the existing spec. Can you create the implementation plan?",
+      "expected_output": "Agent triggers plan-workflow skill, produces plan document with all required sections.",
+      "files": []
+    }
+  ]
+}

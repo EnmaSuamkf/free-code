@@ -1,0 +1,50 @@
+{
+	"name": "@free/jiti",
+	"version": "0.66.1",
+	"private": true,
+	"description": "Runtime TypeScript/ESM loader (jiti fork with virtualModules for Bun binaries; vendored for free-code)",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/badlogic/jiti.git"
+	},
+	"license": "MIT",
+	"type": "module",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./lib/jiti.d.mts",
+				"default": "./lib/jiti.mjs"
+			},
+			"require": {
+				"types": "./lib/jiti.d.cts",
+				"default": "./lib/jiti.cjs"
+			}
+		},
+		"./register": {
+			"types": "./lib/jiti-register.d.mts",
+			"import": "./lib/jiti-register.mjs"
+		},
+		"./native": {
+			"types": "./lib/jiti.d.mts",
+			"import": "./lib/jiti-native.mjs"
+		},
+		"./package.json": "./package.json"
+	},
+	"main": "./lib/jiti.cjs",
+	"module": "./lib/jiti.mjs",
+	"types": "./lib/jiti.d.cts",
+	"typesVersions": {
+		"*": {
+			"register": ["./lib/jiti-register.d.mts"],
+			"native": ["./lib/jiti.d.mts"]
+		}
+	},
+	"bin": {
+		"jiti": "./lib/jiti-cli.mjs"
+	},
+	"files": ["lib", "dist", "register.cjs"],
+	"dependencies": {
+		"std-env": "^3.10.0",
+		"yoctocolors": "^2.1.2"
+	}
+}

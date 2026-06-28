@@ -1,0 +1,18 @@
+{
+	"name": "@free/free-desktop-host",
+	"version": "0.66.1",
+	"private": true,
+	"type": "module",
+	"description": "Shared chat host for VS Code extension (bundled) and macOS stdio bridge",
+	"main": "./src/host.mjs",
+	"exports": {
+		".": "./src/host.mjs",
+		"./vscode-api-binding": "./src/vscode-api-binding.mjs",
+		"./activate-vscode": "./src/activate-vscode.mjs",
+		"./stdio-mac": "./src/stdio-mac.mjs"
+	},
+	"scripts": {
+		"build": "node -e \"process.exit(0)\""
+	},
+	"files": ["src"]
+}
