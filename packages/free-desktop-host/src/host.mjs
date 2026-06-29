@@ -118,6 +118,7 @@ const RPC_WEBVIEW_SLASH_ALLOWLIST = new Set([
   "sub",
   "login",
   "logout",
+  "mcp",
   "codeGraph-index",
   "codeGraph-symbols",
   "codeGraph-callers",
@@ -1885,6 +1886,140 @@ function parseModeCommand(trimmed) {
     return { ok: false, error: "Usage: /mode plan | /mode agent" };
   }
   return { ok: true, subcommand };
+}
+
+/**
+ * Read MCP enable/disable state, mirroring
+ * packages/coding-agent/default-extensions/lib/mcp-status.ts. Merges mcp.json
+ * (global + project-local) and the mcp-status.json activation file, defaulting any
+ * newly seen server to "disabled" and pruning servers no longer configured.
+ * @param {string} cwd project working directory
+ * @returns {{ names: string[], status: Record<string, "enabled" | "disabled"> }}
+ */
+function readMcpServersAndStatus(cwd) {
+  const agentRoot = resolveCodingAgentAgentRoot();
+  const readServers = (p) => {
+    try {
+      const raw = JSON.parse(readFileSync(p, "utf8"));
+      const servers = raw?.mcpServers;
+      return servers && typeof servers === "object" ? servers : {};
+    } catch {
+      return {};
+    }
+  };
+  const merged = {
+    ...readServers(path.join(agentRoot, "mcp.json")),
+    ...(cwd ? readServers(path.join(cwd, ".free-code", "mcp.json")) : {}),
+  };
+  const names = Object.keys(merged);
+
+  const statusPath = path.join(agentRoot, "mcp-status.json");
+  /** @type {Record<string, "enabled" | "disabled">} */
+  let current = {};
+  try {
+    const raw = JSON.parse(readFileSync(statusPath, "utf8"));
+    if (raw?.servers && typeof raw.servers === "object") {
+      for (const [n, v] of Object.entries(raw.servers)) {
+        if (v === "enabled" || v === "disabled") current[n] = v;
+      }
+    }
+  } catch {
+    current = {};
+  }
+
+  /** @type {Record<string, "enabled" | "disabled">} */
+  const status = {};
+  let changed = false;
+  for (const n of names) {
+    if (current[n] === "enabled" || current[n] === "disabled") {
+      status[n] = current[n];
+    } else {
+      status[n] = "disabled";
+      changed = true;
+    }
+  }
+  if (!changed) {
+    for (const n of Object.keys(current)) {
+      if (!(n in status)) {
+        changed = true;
+        break;
+      }
+    }
+  }
+  if (changed) {
+    try {
+      mkdirSync(agentRoot, { recursive: true });
+      writeFileSync(
+        statusPath,
+        JSON.stringify({ servers: status }, null, 2) + "\n",
+        "utf8",
+      );
+    } catch {
+      // best effort; reconciliation re-runs next time
+    }
+  }
+  return { names, status };
+}
+
+/**
+ * @param {string} name
+ * @param {"enabled" | "disabled"} value
+ */
+function setMcpServerStatusOnDisk(name, value) {
+  const agentRoot = resolveCodingAgentAgentRoot();
+  const statusPath = path.join(agentRoot, "mcp-status.json");
+  /** @type {Record<string, "enabled" | "disabled">} */
+  let servers = {};
+  try {
+    const raw = JSON.parse(readFileSync(statusPath, "utf8"));
+    if (raw?.servers && typeof raw.servers === "object") {
+      for (const [n, v] of Object.entries(raw.servers)) {
+        if (v === "enabled" || v === "disabled") servers[n] = v;
+      }
+    }
+  } catch {
+    servers = {};
+  }
+  servers[name] = value;
+  mkdirSync(agentRoot, { recursive: true });
+  writeFileSync(
+    statusPath,
+    JSON.stringify({ servers }, null, 2) + "\n",
+    "utf8",
+  );
+}
+
+/**
+ * @param {string} trimmed
+ * @returns {{ ok: true, subcommand: "list" | "enable" | "disable", value: string } | { ok: false, error: string }}
+ */
+function parseMcpCommand(trimmed) {
+  const rawArgs = trimmed.slice("/mcp".length).trim();
+  if (!rawArgs) {
+    return {
+      ok: false,
+      error: "Usage: /mcp list | /mcp enable <name> | /mcp disable <name>",
+    };
+  }
+  const firstWhitespace = rawArgs.search(/\s/);
+  const sub =
+    firstWhitespace === -1 ? rawArgs : rawArgs.slice(0, firstWhitespace);
+  const value =
+    firstWhitespace === -1 ? "" : rawArgs.slice(firstWhitespace + 1).trim();
+  if (sub !== "list" && sub !== "enable" && sub !== "disable") {
+    return {
+      ok: false,
+      error: `Unknown subcommand: ${sub}. Try: list, enable, disable`,
+    };
+  }
+  if ((sub === "enable" || sub === "disable") && !value) {
+    return { ok: false, error: `Usage: /mcp ${sub} <name>` };
+  }
+  return {
+    ok: true,
+    subcommand: /** @type {"list" | "enable" | "disable"} */ (sub),
+    value,
+  };
 }
 
 /**
@@ -4945,6 +5080,65 @@ export class FreeCodeChatViewProvider {
     }
 
     if (
+      trimmed === "/mcp" ||
+      trimmed.startsWith("/mcp ") ||
+      trimmed.startsWith("/mcp\t")
+    ) {
+      const parsedMcp = parseMcpCommand(trimmed);
+      if (!parsedMcp.ok) {
+        const errText = parsedMcp.error;
+        this.pushHistory("error", errText, undefined, promptTabId);
+        this.postToWebviewForTab(promptTabId, { type: "error", text: errText });
+        this.postToWebviewForTab(promptTabId, { type: "busy", busy: false });
+        return;
+      }
+      try {
+        const mcpCwd = this.getFreeCodeSpawnCwd();
+        const { names, status } = readMcpServersAndStatus(mcpCwd);
+        let body;
+        if (parsedMcp.subcommand === "list") {
+          if (names.length === 0) {
+            body =
+              "No MCP servers configured. Add them to ~/.free-code/agent/mcp.json or run /mcp-import.";
+          } else {
+            const lines = names
+              .slice()
+              .sort()
+              .map((n) => `  ${status[n] === "enabled" ? "[on] " : "[off]"} ${n}`);
+            body = `MCP servers:\n${lines.join("\n")}\n\nEnabled servers start automatically. Restart the session to apply changes.`;
+          }
+        } else {
+          const name = parsedMcp.value;
+          if (!names.includes(name)) {
+            const known = names.length > 0 ? names.join(", ") : "(none configured)";
+            const errText = `Unknown MCP server "${name}". Configured servers: ${known}`;
+            this.pushHistory("error", errText, undefined, promptTabId);
+            this.postToWebviewForTab(promptTabId, { type: "error", text: errText });
+            this.postToWebviewForTab(promptTabId, { type: "busy", busy: false });
+            return;
+          }
+          const target = parsedMcp.subcommand === "enable" ? "enabled" : "disabled";
+          if (status[name] === target) {
+            body = `MCP "${name}" is already ${target}.`;
+          } else {
+            setMcpServerStatusOnDisk(name, target);
+            body = `MCP "${name}" ${target}. Restart the session to apply.`;
+          }
+        }
+        this.pushHistory("tools", body, undefined, promptTabId);
+        this.postToWebviewForTab(promptTabId, { type: "tools_info", text: body });
+        this.postToWebviewForTab(promptTabId, { type: "status", text: "" });
+        this.postToWebviewForTab(promptTabId, { type: "busy", busy: false });
+      } catch (error) {
+        const errText = toErrorMessage(error);
+        this.pushHistory("error", errText, undefined, promptTabId);
+        this.postToWebviewForTab(promptTabId, { type: "error", text: errText });
+        this.postToWebviewForTab(promptTabId, { type: "busy", busy: false });
+      }
+      return;
+    }
+
+    if (
       trimmed === "/rag-kb" ||
       trimmed.startsWith("/rag-kb ") ||
       trimmed.startsWith("/rag-kb\t")
@@ -5720,20 +5914,18 @@ export class FreeCodeChatViewProvider {
       this.handleEvent(runtime, event),
     );
 
-    // Count MCPs to estimate loading time and show a progress message while they initialize.
+    // Count enabled MCPs to estimate loading time and show a progress message while
+    // they initialize. Disabled servers don't start, so they don't add to the wait.
     let mcpLoadingMs = 0;
     try {
-      const mcpConfigPath = path.join(resolveCodingAgentAgentRoot(), "mcp.json");
-      const mcpJson = JSON.parse(readFileSync(mcpConfigPath, "utf8"));
-      if (mcpJson?.mcpServers && typeof mcpJson.mcpServers === "object") {
-        const mcpCount = Object.keys(mcpJson.mcpServers).length;
-        if (mcpCount > 0) {
-          mcpLoadingMs = mcpCount * 5 * 1000;
-          this.postToWebviewForTab(tabId, {
-            type: "mcp_loading_start",
-            seconds: mcpCount * 5,
-          });
-        }
+      const { names, status } = readMcpServersAndStatus(cwd);
+      const mcpCount = names.filter((n) => status[n] === "enabled").length;
+      if (mcpCount > 0) {
+        mcpLoadingMs = mcpCount * 5 * 1000;
+        this.postToWebviewForTab(tabId, {
+          type: "mcp_loading_start",
+          seconds: mcpCount * 5,
+        });
       }
     } catch {
       // mcp.json absent or malformed — skip loading indicator

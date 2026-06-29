@@ -58,6 +58,7 @@ const RPC_GET_COMMANDS_ALLOWLIST = new Set([
 	"sub",
 	"login",
 	"logout",
+	"mcp",
 	"mcp-import",
 	"codeGraph-index",
 	"codeGraph-symbols",

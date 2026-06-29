@@ -7,6 +7,7 @@ import { promisify } from "node:util";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import { dirname, join } from "path";
+import { CONFIG_DIR, loadMcpConfig, type McpServerConfig, reconcileMcpStatus } from "./lib/mcp-status.ts";
 
 const execFileAsync = promisify(execFile);
 const MCP_LABEL_KEY = "free-code-pid";
@@ -77,18 +78,6 @@ async function killOrphanedContainers(notify: (msg: string, level: "info" | "war
 	}
 }
 
-interface McpServerConfig {
-	command?: string;
-	args?: string[];
-	env?: Record<string, string>;
-	url?: string;
-	type?: string;
-}
-
-interface McpConfig {
-	mcpServers: Record<string, McpServerConfig>;
-}
-
 interface ConnectedServer {
 	name: string;
 	client: Client;
@@ -107,41 +96,8 @@ interface ToolsCacheFile {
 	entries: Record<string, CachedEntry>;
 }
 
-const CONFIG_DIR = ".free-code";
-const MCP_CONFIG_FILE = "mcp.json";
 const TOOLS_CACHE_FILE = "mcp-tools-cache.json";
 const TOOLS_CACHE_VERSION = 1;
-
-function loadMcpConfig(cwd: string): McpConfig {
-	const globalPath = join(homedir(), CONFIG_DIR, "agent", MCP_CONFIG_FILE);
-	const localPath = join(cwd, CONFIG_DIR, MCP_CONFIG_FILE);
-
-	let globalConfig: McpConfig = { mcpServers: {} };
-	let localConfig: McpConfig = { mcpServers: {} };
-
-	if (existsSync(globalPath)) {
-		try {
-			globalConfig = JSON.parse(readFileSync(globalPath, "utf-8")) as McpConfig;
-		} catch {
-			// Ignore malformed config
-		}
-	}
-
-	if (existsSync(localPath)) {
-		try {
-			localConfig = JSON.parse(readFileSync(localPath, "utf-8")) as McpConfig;
-		} catch {
-			// Ignore malformed config
-		}
-	}
-
-	return {
-		mcpServers: {
-			...(globalConfig.mcpServers ?? {}),
-			...(localConfig.mcpServers ?? {}),
-		},
-	};
-}
 
 function getToolsCachePath(): string {
 	return join(homedir(), CONFIG_DIR, "agent", TOOLS_CACHE_FILE);
@@ -218,7 +174,86 @@ function saveToolsCache(cache: ToolsCacheFile): void {
 	}
 }
 
-async function connectStdio(name: string, config: McpServerConfig): Promise<ConnectedServer> {
+type NotifyFn = (msg: string, level: "info" | "warning") => void;
+
+/** Parse a simple KEY=VALUE `.env` file (skips blanks/comments, strips surrounding quotes). */
+function parseEnvFile(path: string): Record<string, string> {
+	const result: Record<string, string> = {};
+	if (!existsSync(path)) return result;
+	let content: string;
+	try {
+		content = readFileSync(path, "utf-8");
+	} catch {
+		return result;
+	}
+	for (const rawLine of content.split("\n")) {
+		const line = rawLine.trim();
+		if (!line || line.startsWith("#")) continue;
+		const eq = line.indexOf("=");
+		if (eq === -1) continue;
+		const key = line.slice(0, eq).trim();
+		if (!key) continue;
+		let value = line.slice(eq + 1).trim();
+		if (
+			value.length >= 2 &&
+			((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'")))
+		) {
+			value = value.slice(1, -1);
+		}
+		result[key] = value;
+	}
+	return result;
+}
+
+/**
+ * Load MCP env vars from the global (`~/.free-code/agent/.env`) and project-local
+ * (`<cwd>/.free-code/.env`) env files, with local overriding global. These are injected
+ * into stdio MCP subprocesses so Docker/`-e VAR` servers get their credentials without
+ * listing each var in mcp.json.
+ */
+function loadMcpDotEnv(cwd: string): Record<string, string> {
+	const globalEnv = parseEnvFile(join(homedir(), CONFIG_DIR, "agent", ".env"));
+	const localEnv = parseEnvFile(join(cwd, CONFIG_DIR, ".env"));
+	return { ...globalEnv, ...localEnv };
+}
+
+/**
+ * Forward an MCP subprocess's stderr to the UI. OAuth-based servers (e.g. `mcp-remote`)
+ * print their login URL here while `connect()` waits; without this it stays invisible.
+ * Only authentication-looking URL lines are surfaced, so normal log chatter isn't noisy.
+ */
+function attachStderrListener(name: string, transport: StdioClientTransport, notify: NotifyFn): void {
+	const stream = transport.stderr;
+	if (!stream) return;
+	const seenUrls = new Set<string>();
+	let buffer = "";
+	stream.on("data", (chunk: Buffer) => {
+		buffer += chunk.toString();
+		const lines = buffer.split("\n");
+		buffer = lines.pop() ?? "";
+		for (const line of lines) {
+			const text = line.trim();
+			if (!text) continue;
+			const urlMatch = text.match(/https?:\/\/\S+/);
+			if (urlMatch && /auth|authoriz|login|sign|visit|oauth|verif|token|code/i.test(text)) {
+				const url = urlMatch[0];
+				if (seenUrls.has(url)) continue;
+				seenUrls.add(url);
+				notify(
+					`MCP "${name}" needs authentication. Open this URL to sign in:\n${url}\nAfter signing in, run /reload to finish connecting.`,
+					"warning",
+				);
+			}
+		}
+	});
+}
+
+async function connectStdio(
+	name: string,
+	config: McpServerConfig,
+	dotEnv: Record<string, string>,
+	notify: NotifyFn,
+): Promise<ConnectedServer> {
 	const resolvedCommand = expandMcpPathLikeString(config.command!);
 	let resolvedArgs = config.args?.map(expandMcpPathLikeString);
 
@@ -235,13 +270,22 @@ async function connectStdio(name: string, config: McpServerConfig): Promise<Conn
 		}
 	}
 
+	// Inject env: process env + .env files + explicit config.env (config wins). Only
+	// override the SDK's default minimal env when we actually have extra vars to add.
+	const extraEnv = { ...dotEnv, ...(config.env ?? {}) };
+	const env =
+		Object.keys(extraEnv).length > 0
+			? ({ ...process.env, ...extraEnv } as Record<string, string>)
+			: undefined;
+
 	const transport = new StdioClientTransport({
 		command: resolvedCommand,
 		args: resolvedArgs,
-		env: config.env ? ({ ...process.env, ...config.env } as Record<string, string>) : undefined,
+		env,
 		stderr: "pipe",
 		cwd: getMcpStdioCwd(),
 	});
+	attachStderrListener(name, transport, notify);
 	const client = new Client({ name: `free-code:${name}`, version: "1.0.0" });
 	await client.connect(transport);
 
@@ -259,8 +303,13 @@ async function connectHttp(name: string, config: McpServerConfig): Promise<Conne
 	return { name, client, transport };
 }
 
-function connectServer(name: string, config: McpServerConfig): Promise<ConnectedServer> {
-	if (config.command) return connectStdio(name, config);
+function connectServer(
+	name: string,
+	config: McpServerConfig,
+	dotEnv: Record<string, string>,
+	notify: NotifyFn,
+): Promise<ConnectedServer> {
+	if (config.command) return connectStdio(name, config, dotEnv, notify);
 	if (config.url) return connectHttp(name, config);
 	return Promise.reject(new Error("no command or url specified"));
 }
@@ -335,8 +384,20 @@ export default function (pi: ExtensionAPI) {
 		await killOrphanedContainers((msg, level) => ctx.ui.notify(msg, level));
 
 		const config = loadMcpConfig(ctx.cwd);
-		const entries = Object.entries(config.mcpServers);
-		if (entries.length === 0) return;
+		const allEntries = Object.entries(config.mcpServers);
+		if (allEntries.length === 0) return;
+
+		// Only start servers the user has enabled. Newly configured servers default to
+		// disabled via reconciliation, so adding one to mcp.json never auto-starts it.
+		const status = reconcileMcpStatus(allEntries.map(([name]) => name));
+		const entries = allEntries.filter(([name]) => status[name] === "enabled");
+		if (entries.length === 0) {
+			ctx.ui.notify(
+				`MCP: ${allEntries.length} server(s) configured but none enabled. Enable with /mcp enable <name>.`,
+				"info",
+			);
+			return;
+		}
 
 		const cache = loadToolsCache();
 		const configHashes = new Map<string, string>();
@@ -354,9 +415,11 @@ export default function (pi: ExtensionAPI) {
 
 		// Kick off connections in parallel up-front so the eager path gets clients
 		// warming up while we register from cache, and the slow path awaits them.
+		const dotEnv = loadMcpDotEnv(ctx.cwd);
+		const notify: NotifyFn = (msg, level) => ctx.ui.notify(msg, level);
 		const clientPromises = new Map<string, Promise<ConnectedServer>>();
 		for (const [name, serverConfig] of entries) {
-			clientPromises.set(name, connectServer(name, serverConfig));
+			clientPromises.set(name, connectServer(name, serverConfig, dotEnv, notify));
 		}
 
 		const getClientFor = (name: string): Promise<Client> => {

@@ -13,4 +13,5 @@
 
 ### Added
 
+- `/mcp` command (`list`, `enable <name>`, `disable <name>`) handled in `host.mjs`, mirroring the CLI/RPC bundled extension: reads merged `mcp.json` (global + project-local) plus `~/.free-code/agent/mcp-status.json`, defaults newly seen servers to **disabled**, and writes activation state back so the change applies on the next session. The MCP startup loading indicator now counts only enabled servers. `mcp` added to the webview slash allowlist.
 - Initial package: shared chat host (`host.mjs`), VS Code activation bridge, macOS `stdio-mac.mjs`, and minimal `vscode` shim for native UI.
