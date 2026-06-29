@@ -8,6 +8,7 @@
 
 ### Fixed
 
+- Attach files (paperclip / `free-code.attachFiles` / `drop_request`) opened a folder-only picker on Linux that hid all files (title "Select Folder"). The dialog set both `canSelectFiles` and `canSelectFolders`, which GTK/Electron on Linux collapses to a directory chooser. On Linux it now picks files (`canSelectFolders: false`); macOS keeps both. Added an "Attach" open-button label.
 - Profile apply could leave the webview model pill on the spawn default when a late `postModelIndicator` round-trip finished after `set_model` (await indicator refresh after RPC sync and after profile `set_model`).
 - First message of a chat sent while MCPs/tools/agents are still loading now echoes immediately with a "Waiting for agent to finish loading…" indicator instead of clearing the input and showing nothing until the agent is ready. `handlePrompt` previously awaited `ensureClientStarted` (10-30s) before rendering the user bubble, making the message look lost; plain prompts are now echoed before that await and de-duplicated afterward.
 

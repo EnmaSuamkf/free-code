@@ -3118,11 +3118,16 @@ export class FreeCodeChatViewProvider {
       return;
     }
     if (message?.type === "drop_request") {
+      // On Linux the GTK/Electron open dialog cannot combine files and folders in one
+      // picker — enabling folders makes it a folder-only dialog where files are hidden.
+      // Attaching files is the primary action, so prefer files there.
+      const onLinux = process.platform === "linux";
       vscode.window
         .showOpenDialog({
           canSelectFiles: true,
-          canSelectFolders: true,
+          canSelectFolders: !onLinux,
           canSelectMany: true,
+          openLabel: "Attach",
         })
         .then(async (res) => {
           if (!res || res.length === 0) return;

@@ -17,10 +17,15 @@ export function activate(context) {
       } catch {
         // view id may differ by build; panel can still be opened manually
       }
+      // On Linux the GTK/Electron open dialog cannot combine files and folders in
+      // one picker — enabling folders makes it a folder-only dialog where files are
+      // hidden. Attaching files is the primary action, so prefer files there.
+      const onLinux = process.platform === "linux";
       const res = await vscode.window.showOpenDialog({
         canSelectFiles: true,
-        canSelectFolders: true,
+        canSelectFolders: !onLinux,
         canSelectMany: true,
+        openLabel: "Attach",
       });
       if (!res || res.length === 0) return;
       const paths = await resolveSelectionPaths(res);
