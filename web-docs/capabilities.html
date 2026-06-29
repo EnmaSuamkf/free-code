@@ -54,10 +54,11 @@
           </div>
           <div class="card-body">
             <p>
-              The code graph indexes every TypeScript and JavaScript file in your project, building
-              a queryable map of symbols (functions, classes, methods, interfaces, types, enums) and
-              the call edges between them. The result is stored in <code>.code-graph/</code> at the
-              project root — a set of JSON files the agent reads in milliseconds.
+              The code graph indexes every TypeScript, JavaScript, Python, and Java file in your
+              project, building a queryable map of symbols (functions, classes, methods, interfaces,
+              types, enums) and the call edges between them. The result is stored in
+              <code>.code-graph/</code> at the project root — a set of JSON files the agent reads
+              in milliseconds.
             </p>
 
             <h3>What this means in practice</h3>
@@ -97,8 +98,9 @@
 
             <h3>Stale index detection</h3>
             <p>
-              On every session startup, free-code checks whether any <code>.ts</code> / <code>.js</code>
-              files have been modified since the last index run. If they have, it displays a warning
+              On every session startup, free-code checks whether any indexed source files
+              (<code>.ts</code> / <code>.js</code> / <code>.py</code> / <code>.java</code> and friends)
+              have been modified since the last index run. If they have, it displays a warning
               and suggests running <code>code_index</code> before using the other tools.
             </p>
 

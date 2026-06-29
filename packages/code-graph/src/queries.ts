@@ -7,6 +7,14 @@ function relPath(filePath: string, rootDir?: string): string {
 	return rootDir ? relative(rootDir, filePath) : filePath;
 }
 
+/** Markdown code-fence language for a source file. */
+function fenceLang(filePath: string): string {
+	if (filePath.endsWith(".py")) return "python";
+	if (filePath.endsWith(".java")) return "java";
+	if (filePath.endsWith(".ts") || filePath.endsWith(".tsx")) return "typescript";
+	return "javascript";
+}
+
 export function querySymbols(store: CodeGraphStore, query: string, kind?: SymbolKind, limit = 50): string {
 	const results = store.searchSymbols(query, kind, limit);
 	if (results.length === 0) return `No symbols found matching "${query}"${kind ? ` (kind: ${kind})` : ""}.`;
@@ -91,8 +99,7 @@ function renderSymbolContext(store: CodeGraphStore, sym: SymbolInfo, rootDir?: s
 
 	const loc = `${relPath(sym.filePath, rootDir)}:${sym.startLine}-${sym.endLine}`;
 	const header = `## \`${sym.qualifiedName}\` (${sym.kind}) — ${loc}`;
-	const ext = sym.filePath.endsWith(".ts") || sym.filePath.endsWith(".tsx") ? "typescript" : "javascript";
-	const code = `\`\`\`${ext}\n${sourceLines}\n\`\`\``;
+	const code = `\`\`\`${fenceLang(sym.filePath)}\n${sourceLines}\n\`\`\``;
 
 	return `${header}\n\n${code}${callsLine}`;
 }

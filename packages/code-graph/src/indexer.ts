@@ -4,11 +4,13 @@ import { extname, join, relative } from "node:path";
 import ignore from "ignore";
 import ts from "typescript";
 import { loadAliases } from "./alias-resolver.js";
-import { extractFromSource } from "./extractor.js";
+import { type ExtractionResult, extractFromSource } from "./extractor.js";
+import { extractFromJava } from "./java-extractor.js";
+import { extractFromPython } from "./python-extractor.js";
 import type { CodeGraphStore } from "./store.js";
 import type { AliasEntry, IndexStats } from "./types.js";
 
-const SUPPORTED_EXTS = new Set([".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs"]);
+const SUPPORTED_EXTS = new Set([".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs", ".py", ".java"]);
 
 export class CodeGraphIndexer {
 	constructor(
@@ -60,8 +62,7 @@ export class CodeGraphIndexer {
 		const h = hash ?? createHash("sha1").update(src).digest("hex");
 		const mt = mtime ?? statSync(filePath).mtimeMs;
 
-		const source = ts.createSourceFile(filePath, src, ts.ScriptTarget.Latest, /* setParentNodes */ true);
-		const { symbols, edges } = extractFromSource(source, aliases, this.rootDir);
+		const { symbols, edges } = this.extract(filePath, src, aliases);
 
 		const fileId = this.store.upsertFile(filePath, h, mt);
 		this.store.deleteFileData(fileId);
@@ -88,6 +89,14 @@ export class CodeGraphIndexer {
 			const fromId = edge.fromScope ? (scopeToId.get(edge.fromScope) ?? undefined) : undefined;
 			this.store.insertEdge({ fromId, toName: edge.toName, kind: edge.kind, fileId });
 		}
+	}
+
+	private extract(filePath: string, src: string, aliases: AliasEntry[]): ExtractionResult {
+		const ext = extname(filePath).toLowerCase();
+		if (ext === ".py") return extractFromPython(src);
+		if (ext === ".java") return extractFromJava(src);
+		const source = ts.createSourceFile(filePath, src, ts.ScriptTarget.Latest, /* setParentNodes */ true);
+		return extractFromSource(source, aliases, this.rootDir);
 	}
 
 	private buildIgnore() {

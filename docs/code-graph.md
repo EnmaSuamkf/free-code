@@ -4,6 +4,18 @@ The **code graph** is a local index of symbols, call edges, and imports for your
 
 ---
 
+## Supported languages
+
+| Language | Extensions | Symbols extracted |
+|----------|-----------|-------------------|
+| TypeScript / JavaScript | `.ts` `.tsx` `.js` `.jsx` `.mts` `.cts` `.mjs` `.cjs` | functions, classes, methods, interfaces, types, enums, top-level variables |
+| Python | `.py` | classes, functions, methods, module-level variables |
+| Java | `.java` | classes, interfaces, enums, methods (incl. abstract / interface methods) |
+
+TypeScript and JavaScript are parsed with the TypeScript compiler API. Python (indentation-based) and Java (brace-based) use lightweight heuristic extractors — no extra dependencies, no build toolchain. Like the TS/JS call edges, cross-language call resolution is text-based, so common method names may produce occasional false positives; use `/codeGraph-context` to verify.
+
+---
+
 ## Agent tools
 
 These tools are active by default alongside the built-in tools (`read`, `bash`, etc.):
@@ -93,7 +105,7 @@ After large changes to the project:
 
 ## Automatic background re-indexing
 
-On session startup free-code checks whether any `.ts`/`.js` files have been modified since the last index. If so, it **automatically re-indexes in the background** — no manual action needed.
+On session startup free-code checks whether any indexed source files (`.ts`/`.js`/`.py`/`.java` and friends) have been modified since the last index. If so, it **automatically re-indexes in the background** — no manual action needed.
 
 You will see two notifications:
 
