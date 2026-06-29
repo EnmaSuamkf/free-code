@@ -298,16 +298,31 @@ Or build from source: [github.com/mudler/LocalAI](https://github.com/mudler/Loca
 
 ### Default on a fresh install
 
-On first run, free-code seeds a starter `models.json` containing an `only` whitelist with the default model of each provider you can log in to (Anthropic, OpenAI Codex, Gemini CLI, Google Antigravity, GitHub Copilot). This keeps `/model` short out of the box instead of listing the entire factory catalog. It is **only created if the file doesn't already exist** — your edits are never overwritten.
+On first run, free-code seeds a starter `models.json` containing an `only` whitelist with the **most-used models (4 per provider)** of each provider you can log in to (Anthropic, OpenAI Codex, Gemini CLI, Google Antigravity, GitHub Copilot). This keeps `/model` short out of the box instead of listing the entire factory catalog. It is **only created if the file doesn't already exist** — your edits are never overwritten.
 
 ```json
 {
   "only": [
     "anthropic/claude-opus-4-6",
+    "anthropic/claude-sonnet-4-6",
+    "anthropic/claude-sonnet-4-5",
+    "anthropic/claude-haiku-4-5",
     "openai-codex/gpt-5.4",
+    "openai-codex/gpt-5.4-mini",
+    "openai-codex/gpt-5.3-codex",
+    "openai-codex/gpt-5.2-codex",
     "google-gemini-cli/gemini-2.5-pro",
+    "google-gemini-cli/gemini-2.5-flash",
+    "google-gemini-cli/gemini-3.1-pro-preview",
+    "google-gemini-cli/gemini-3-pro-preview",
     "google-antigravity/gemini-3.1-pro-high",
-    "github-copilot/gpt-5.5"
+    "google-antigravity/gemini-3.1-pro-low",
+    "google-antigravity/claude-sonnet-4-6",
+    "google-antigravity/claude-opus-4-6-thinking",
+    "github-copilot/gpt-5.5",
+    "github-copilot/gpt-5.4",
+    "github-copilot/claude-sonnet-4.6",
+    "github-copilot/claude-opus-4.6"
   ],
   "providers": {}
 }

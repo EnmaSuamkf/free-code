@@ -26,19 +26,20 @@ import {
 	syncBundledThemesFromPackage,
 } from "./config.js";
 import { migrateKeybindingsConfig } from "./core/keybindings.js";
-import { defaultModelPerProvider } from "./core/model-resolver.js";
 
 /**
- * Providers you authenticate with via `/login` (OAuth). The default `models.json`
- * seed curates `/model` down to the default model of each, instead of the full catalog.
+ * Most-used models per provider you authenticate with via `/login` (OAuth). The default
+ * `models.json` seed curates `/model` down to these, instead of the full factory catalog.
+ * Users edit the resulting `only` whitelist freely. Ids must match the built-in catalog
+ * (`@free/pi-ai` models); stale entries simply don't match.
  */
-const LOGIN_PROVIDERS = [
-	"anthropic",
-	"openai-codex",
-	"google-gemini-cli",
-	"google-antigravity",
-	"github-copilot",
-] as const;
+const LOGIN_PROVIDER_MODELS: Record<string, string[]> = {
+	anthropic: ["claude-opus-4-6", "claude-sonnet-4-6", "claude-sonnet-4-5", "claude-haiku-4-5"],
+	"openai-codex": ["gpt-5.4", "gpt-5.4-mini", "gpt-5.3-codex", "gpt-5.2-codex"],
+	"google-gemini-cli": ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-3.1-pro-preview", "gemini-3-pro-preview"],
+	"google-antigravity": ["gemini-3.1-pro-high", "gemini-3.1-pro-low", "claude-sonnet-4-6", "claude-opus-4-6-thinking"],
+	"github-copilot": ["gpt-5.5", "gpt-5.4", "claude-sonnet-4.6", "claude-opus-4.6"],
+};
 
 const MIGRATION_GUIDE_URL =
 	"https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/CHANGELOG.md#extensions-migration";
@@ -462,19 +463,18 @@ function initDefaultSettings(): void {
  * Seed a starter `models.json` (only if absent — never overwrites the user's file).
  *
  * Fresh installs otherwise show the full factory catalog of every authenticated
- * provider in `/model`. Instead we seed an `only` whitelist with the default model
- * of each login-capable (OAuth) provider, giving a clean list out of the box. Users
- * edit `only` to curate and add custom providers/models under `providers`
- * (see docs/models.md).
+ * provider in `/model`. Instead we seed an `only` whitelist with the most-used models
+ * of each login-capable (OAuth) provider (see `LOGIN_PROVIDER_MODELS`), giving a clean
+ * list out of the box. Users edit `only` to curate and add custom providers/models
+ * under `providers` (see docs/models.md).
  */
 function initDefaultModelsJson(): void {
 	const modelsPath = join(getAgentDir(), "models.json");
 	if (existsSync(modelsPath)) return;
 
-	const only = LOGIN_PROVIDERS.map((provider) => {
-		const modelId = defaultModelPerProvider[provider];
-		return modelId ? `${provider}/${modelId}` : undefined;
-	}).filter((entry): entry is string => entry !== undefined);
+	const only = Object.entries(LOGIN_PROVIDER_MODELS).flatMap(([provider, ids]) =>
+		ids.map((id) => `${provider}/${id}`),
+	);
 
 	const defaults = { only, providers: {} };
 
