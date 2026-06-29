@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Models — free-code</title>
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <div class="doc-root">
+      <header class="site-shell-header" role="banner">
+        <div class="site-shell-inner">
+          <a class="site-brand" href="index.html">
+            <span class="site-brand-angles" aria-hidden="true">&lt;</span>
+            <span>free-code</span>
+            <span class="site-brand-angles" aria-hidden="true">&gt;</span>
+          </a>
+          <div class="site-header-actions">
+            <button type="button" class="theme-toggle" id="doc-theme-toggle" aria-label="Color theme">
+              <span class="theme-toggle-label" id="doc-theme-label">System</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="container">
+        <header class="hero">
+          <h1 class="brand">
+            <span class="angle" aria-hidden="true">&lt;</span>
+            <span class="name">free-code</span>
+            <span class="angle" aria-hidden="true">&gt;</span>
+          </h1>
+          <p class="tagline">
+            <span class="prompt" aria-hidden="true">// </span>
+            Models — manage which models appear, and add your own.
+          </p>
+
+          <nav class="nav" aria-label="Primary">
+            <a href="index.html">[home]</a>
+            <a href="capabilities.html">[capabilities]</a>
+            <a href="models.html" aria-current="page">[models]</a>
+            <a href="rag.html">[rag]</a>
+            <a href="commands.html">[commands]</a>
+            <a href="installation.html">[installation]</a>
+            <a href="code-graph.html">[code graph]</a>
+          </nav>
+        </header>
+
+        <!-- One place to manage models -->
+        <section class="card" aria-labelledby="models-manage">
+          <div class="card-header">
+            <h2 id="models-manage">One file to manage models</h2>
+            <p>Everything about which models free-code offers lives in <code>~/.free-code/agent/models.json</code>.</p>
+          </div>
+          <div class="card-body">
+            <p>
+              <code>~/.free-code/agent/models.json</code> is the single place you edit to control the
+              model list. It is <strong>re-read every time you open <code>/model</code></strong>, so changes
+              apply without restarting. Use it to:
+            </p>
+            <ul>
+              <li><strong>Curate</strong> which models show in <code>/model</code> (the <code>only</code> whitelist) — including built-in ones.</li>
+              <li><strong>Add</strong> custom providers and models (Fireworks, proxies, local servers).</li>
+              <li><strong>Override</strong> built-in models (rename, change context window, route through a proxy).</li>
+            </ul>
+            <div class="callout info">
+              <strong>Fresh installs start clean</strong><br />
+              On first run free-code seeds <code>models.json</code> with an <code>only</code> whitelist
+              containing the default model of each provider you can log in to, so <code>/model</code> is
+              short out of the box instead of listing the whole factory catalog. It is only created if
+              the file doesn't already exist — your edits are never overwritten.
+            </div>
+          </div>
+        </section>
+
+        <!-- Curating the list -->
+        <section class="card" aria-labelledby="models-only">
+          <div class="card-header">
+            <h2 id="models-only">Curating the list — the <code>only</code> whitelist</h2>
+            <p>Show just the models you use, instead of every factory model.</p>
+          </div>
+          <div class="card-body">
+            <p>Add a top-level <code>only</code> array. When present and non-empty, <code>/model</code> shows only matching models:</p>
+            <pre><code>{
+  "only": [
+    "anthropic/claude-sonnet-4-6",
+    "anthropic/claude-haiku-4-5",
+    "fireworks/**",
+    "lmstudio/**"
+  ],
+  "providers": {}
+}</code></pre>
+            <ul>
+              <li><strong>Add</strong> a model: add its <code>provider/id</code> (list ids with <code>free-code --list-models</code>).</li>
+              <li><strong>Remove</strong> a model: delete its line.</li>
+              <li><strong>Show everything</strong>: remove the <code>only</code> key (or set it to <code>[]</code>).</li>
+              <li><strong>Keep a whole provider</strong>: use a glob such as <code>lmstudio/**</code> or <code>fireworks/**</code>.</li>
+            </ul>
+            <p>
+              Matching is lenient: each entry matches by <code>provider/id</code>, <code>id</code>, or name
+              (case-insensitive; <code>.</code> <code>-</code> <code>_</code> and spaces treated alike) or as a
+              glob. If the whitelist accidentally matches nothing, free-code falls back to showing all
+              models so the picker is never empty. Selecting a model explicitly with <code>--model</code>
+              still works even if it isn't in <code>only</code>.
+            </p>
+          </div>
+        </section>
+
+        <!-- Supported providers -->
+        <section class="card" aria-labelledby="models-providers">
+          <div class="card-header">
+            <h2 id="models-providers">Supported providers</h2>
+            <p>Built-in providers appear in <code>/model</code> once you authenticate. You can also add any OpenAI-compatible endpoint.</p>
+          </div>
+          <div class="card-body">
+            <h3>Log in with <code>/login</code> (OAuth)</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Provider</th><th>Sign-in / token</th></tr></thead>
+                <tbody>
+                  <tr><td><code>anthropic</code></td><td>Claude subscription or <code>ANTHROPIC_API_KEY</code></td></tr>
+                  <tr><td><code>openai-codex</code></td><td>ChatGPT / Codex sign-in</td></tr>
+                  <tr><td><code>github-copilot</code></td><td>Copilot sign-in (or <code>GH_TOKEN</code>)</td></tr>
+                  <tr><td><code>google-gemini-cli</code></td><td>Gemini CLI sign-in</td></tr>
+                  <tr><td><code>google-antigravity</code></td><td>Google Antigravity sign-in</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>API key (set the environment variable)</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Provider</th><th>Environment variable</th></tr></thead>
+                <tbody>
+                  <tr><td><code>openai</code></td><td><code>OPENAI_API_KEY</code></td></tr>
+                  <tr><td><code>azure-openai-responses</code></td><td><code>AZURE_OPENAI_API_KEY</code> (+ base URL)</td></tr>
+                  <tr><td><code>google</code></td><td><code>GEMINI_API_KEY</code></td></tr>
+                  <tr><td><code>google-vertex</code></td><td><code>GOOGLE_APPLICATION_CREDENTIALS</code> or <code>GOOGLE_CLOUD_API_KEY</code></td></tr>
+                  <tr><td><code>amazon-bedrock</code></td><td>AWS credentials / <code>AWS_BEARER_TOKEN_BEDROCK</code></td></tr>
+                  <tr><td><code>xai</code></td><td><code>XAI_API_KEY</code></td></tr>
+                  <tr><td><code>groq</code></td><td><code>GROQ_API_KEY</code></td></tr>
+                  <tr><td><code>cerebras</code></td><td><code>CEREBRAS_API_KEY</code></td></tr>
+                  <tr><td><code>openrouter</code></td><td><code>OPENROUTER_API_KEY</code></td></tr>
+                  <tr><td><code>vercel-ai-gateway</code></td><td><code>AI_GATEWAY_API_KEY</code></td></tr>
+                  <tr><td><code>zai</code></td><td><code>ZAI_API_KEY</code></td></tr>
+                  <tr><td><code>mistral</code></td><td><code>MISTRAL_API_KEY</code></td></tr>
+                  <tr><td><code>minimax</code> / <code>minimax-cn</code></td><td><code>MINIMAX_API_KEY</code> / <code>MINIMAX_CN_API_KEY</code></td></tr>
+                  <tr><td><code>huggingface</code></td><td><code>HF_TOKEN</code></td></tr>
+                  <tr><td><code>opencode</code> / <code>opencode-go</code></td><td><code>OPENCODE_API_KEY</code></td></tr>
+                  <tr><td><code>kimi-coding</code></td><td><code>KIMI_API_KEY</code></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="callout info">
+              <strong>Local / custom</strong><br />
+              Ollama, LM Studio, vLLM, LocalAI, or any corporate proxy — add them as a custom provider
+              (see below). Any OpenAI-compatible endpoint works.
+            </div>
+          </div>
+        </section>
+
+        <!-- Add custom / local models -->
+        <section class="card" aria-labelledby="models-custom">
+          <div class="card-header">
+            <h2 id="models-custom">Add a custom or local model</h2>
+            <p>Define providers and models under <code>providers</code>. Keys resolve from env vars, a shell command, or a literal value.</p>
+          </div>
+          <div class="card-body">
+            <p><strong>Cloud (e.g. Fireworks) — key from an environment variable:</strong></p>
+            <pre><code>{
+  "providers": {
+    "fireworks": {
+      "baseUrl": "https://api.fireworks.ai/inference/v1",
+      "api": "openai-completions",
+      "apiKey": "FIREWORKS_API_KEY",
+      "authHeader": true,
+      "models": [
+        { "id": "accounts/fireworks/models/kimi-k2p7-code", "name": "Kimi K2.7 Code" }
+      ]
+    }
+  }
+}</code></pre>
+
+            <p><strong>Local (LM Studio / Ollama) — any dummy key works:</strong></p>
+            <pre><code>{
+  "providers": {
+    "ollama": {
+      "baseUrl": "http://localhost:11434/v1",
+      "api": "openai-completions",
+      "apiKey": "ollama",
+      "compat": { "supportsDeveloperRole": false, "supportsReasoningEffort": false },
+      "models": [ { "id": "qwen2.5-coder:7b" } ]
+    }
+  }
+}</code></pre>
+
+            <div class="callout tip">
+              <strong>Keys in one place</strong><br />
+              free-code loads <code>~/.free-code/agent/.env</code> on startup, so you can keep
+              <code>FIREWORKS_API_KEY</code> (and other secrets) there and reference them by name in
+              <code>models.json</code>.
+            </div>
+
+            <p>Full schema, value resolution, overriding built-ins, and OpenAI-compat flags: see <code>packages/coding-agent/docs/models.md</code> and <code>docs/local-models-setup.md</code>.</p>
+          </div>
+        </section>
+
+        <p class="footer">
+          <a href="capabilities.html">All capabilities →</a> &nbsp;·&nbsp;
+          <a href="commands.html">Commands →</a> &nbsp;·&nbsp;
+          <a href="installation.html">Installation →</a>
+        </p>
+        <p class="footer-credit">Powered by CX — developed by Pablo Castañeda</p>
+      </div>
+    </div>
+    <script src="assets/theme.js" defer></script>
+  </body>
+</html>

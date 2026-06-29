@@ -40,19 +40,21 @@
           </p>
 
           <div class="platform-row" role="list" aria-label="Supported platforms">
-            <span class="platform-badge" role="listitem">macOS native app</span>
+            <span class="platform-badge" role="listitem">Linux &amp; macOS</span>
             <span class="platform-badge" role="listitem">VS Code / Cursor plugin</span>
             <span class="platform-badge" role="listitem">Terminal CLI</span>
+            <span class="platform-badge" role="listitem">macOS desktop app</span>
             <span class="platform-badge" role="listitem">Anthropic · Vertex · Ollama · LM Studio</span>
           </div>
 
           <nav class="nav" aria-label="Primary">
             <a href="index.html" aria-current="page">[home]</a>
             <a href="capabilities.html">[capabilities]</a>
+            <a href="models.html">[models]</a>
+            <a href="rag.html">[rag]</a>
             <a href="commands.html">[commands]</a>
             <a href="installation.html">[installation]</a>
             <a href="code-graph.html">[code graph]</a>
-            <a href="roi.html">[ROI]</a>
           </nav>
         </header>
 
@@ -112,10 +114,9 @@
               <span class="home-card-icon" aria-hidden="true">&#x26A1;</span>
               <h3 class="home-card-title">Efficient</h3>
               <p class="home-card-desc">
-                Code graph and structured context cut wasted tokens. Benchmarks show up to 76% lower
-                cost per task versus generic assistants.
+                Code graph and structured context cut wasted tokens — the agent reads less, sends
+                smaller prompts, and iterates faster instead of scanning whole files.
               </p>
-              <a href="roi.html" class="home-card-link">See ROI benchmarks &rarr;</a>
             </article>
             <article class="home-card home-card--highlight" role="listitem">
               <span class="home-card-icon" aria-hidden="true">&#x1F6E1;&#xFE0F;</span>
@@ -257,23 +258,28 @@
           </div>
           <div class="card-body">
             <div class="callout info">
-              <strong>Recommended</strong><br />
-              Install the macOS native app or VS Code/Cursor plugin for the best experience.
-              The CLI works on any platform with Node.js 20+.
+              <strong>Runs on Linux and macOS</strong><br />
+              The installer sets up the <strong>CLI</strong> (on macOS, also the <strong>desktop app</strong>).
+              The <strong>VS Code / Cursor plugin</strong> is a quick separate step you do by hand afterwards.
+              Both installers live in the <code>installation/</code> folder.
             </div>
 
-            <h3>1. Fast Installation</h3>
-            <p><strong>Option A</strong> — Finder:</p>
-            <p>Open the <code>installation</code> folder in Finder and double-click <code>install-free-code-mac.command</code>.</p>
+            <h3>1. Fast installation</h3>
+            <p>Run the script for your platform from the <code>installation/</code> folder:</p>
+            <pre><code># Linux — installs the CLI
+bash ./installation/install-free-code-linux.sh
 
-            <p><strong>Option B</strong> — Terminal:</p>
-            <pre><code>bash ./installation/install-free-code-mac.command</code></pre>
+# macOS — installs the CLI + desktop app
+bash ./installation/install-free-code-mac.command</code></pre>
+            <p>On macOS you can also double-click <code>install-free-code-mac.command</code> in Finder.</p>
+            <p>Want the editor plugin too? See <a href="installation.html#install-plugin">Install the VS Code / Cursor plugin</a>.</p>
 
             <h3>2. Start a session</h3>
             <pre><code>free-code</code></pre>
+            <p>On macOS you can also open the <strong>FreeCodeMac</strong> desktop app from <code>/Applications</code>.</p>
 
             <div class="cta-row">
-              <a href="installation.html" class="btn btn-primary">Full Installation Guide (plugin - Mac app)</a>
+              <a href="installation.html" class="btn btn-primary">Full installation guide (Linux · macOS · plugin)</a>
               <a href="capabilities.html" class="btn btn-outline">All capabilities</a>
             </div>
           </div>

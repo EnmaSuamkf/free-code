@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RAG — free-code</title>
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <div class="doc-root">
+      <header class="site-shell-header" role="banner">
+        <div class="site-shell-inner">
+          <a class="site-brand" href="index.html">
+            <span class="site-brand-angles" aria-hidden="true">&lt;</span>
+            <span>free-code</span>
+            <span class="site-brand-angles" aria-hidden="true">&gt;</span>
+          </a>
+          <div class="site-header-actions">
+            <button type="button" class="theme-toggle" id="doc-theme-toggle" aria-label="Color theme">
+              <span class="theme-toggle-label" id="doc-theme-label">System</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="container">
+        <header class="hero">
+          <h1 class="brand">
+            <span class="angle" aria-hidden="true">&lt;</span>
+            <span class="name">free-code</span>
+            <span class="angle" aria-hidden="true">&gt;</span>
+          </h1>
+          <p class="tagline">
+            <span class="prompt" aria-hidden="true">// </span>
+            RAG — a local knowledge base your agent can search.
+          </p>
+
+          <nav class="nav" aria-label="Primary">
+            <a href="index.html">[home]</a>
+            <a href="capabilities.html">[capabilities]</a>
+            <a href="models.html">[models]</a>
+            <a href="rag.html" aria-current="page">[rag]</a>
+            <a href="commands.html">[commands]</a>
+            <a href="installation.html">[installation]</a>
+            <a href="code-graph.html">[code graph]</a>
+          </nav>
+        </header>
+
+        <!-- What is RAG -->
+        <section class="card" aria-labelledby="rag-what">
+          <div class="card-header">
+            <h2 id="rag-what">What is RAG?</h2>
+            <p>Retrieval-Augmented Generation — give the agent your own documents as searchable context.</p>
+          </div>
+          <div class="card-body">
+            <p>
+              RAG lets free-code answer from <strong>your</strong> material — docs, runbooks, ADRs, API
+              references, a third-party library's manual — instead of guessing. You index documents once;
+              during a session the agent retrieves the most relevant passages and grounds its answer in
+              them (and can cite the source) rather than hallucinating.
+            </p>
+            <p>
+              Everything runs <strong>locally</strong>: a small server on your machine, a local embedding
+              model, and an on-disk vector index. Nothing is uploaded to the cloud.
+            </p>
+          </div>
+        </section>
+
+        <!-- How it works -->
+        <section class="card" aria-labelledby="rag-how">
+          <div class="card-header">
+            <h2 id="rag-how">How it works</h2>
+            <p>Model, database, and how matches are found.</p>
+          </div>
+          <div class="card-body">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Piece</th><th>What free-code uses</th></tr></thead>
+                <tbody>
+                  <tr><td>Embedding model</td><td><code>all-MiniLM-L6-v2</code> (sentence-transformers), runs locally — 384-dimension vectors</td></tr>
+                  <tr><td>Vector database</td><td><strong>FAISS</strong> (<code>IndexFlatL2</code>), persisted on disk under <code>~/.free-code/faiss_store/</code> (<code>faiss.index</code> + <code>metadata.pkl</code>)</td></tr>
+                  <tr><td>Chunking</td><td>Recursive splitter — ~1000 chars per chunk with 200 char overlap, split on paragraphs → lines → words</td></tr>
+                  <tr><td>Server</td><td>Local HTTP server on <code>http://localhost:8085</code></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Indexing (once per document)</h3>
+            <ol>
+              <li>The file is loaded and split into overlapping chunks.</li>
+              <li>Each chunk is turned into a 384-dimension vector by the embedding model.</li>
+              <li>Vectors + metadata (source file, text) are stored in the FAISS index for the active knowledge base.</li>
+            </ol>
+
+            <h3>Searching &amp; matching</h3>
+            <ol>
+              <li>Your query is embedded with the same model, into the same vector space.</li>
+              <li>FAISS finds the nearest chunk vectors by <strong>L2 (Euclidean) distance</strong> — smaller distance means more semantically similar (it matches by <em>meaning</em>, not keywords).</li>
+              <li>The closest <strong>top 5</strong> chunks are returned, and results past a <strong>distance threshold (~1.2)</strong> are dropped so weak matches don't add noise.</li>
+              <li>The surviving chunks are injected into the conversation as context for the model to answer from.</li>
+            </ol>
+            <div class="callout info">
+              <strong>Semantic, not literal</strong><br />
+              Because matching is on embeddings, a query like "how do we authenticate users?" can match a
+              chunk that talks about "login flow" or "session tokens" even without sharing the same words.
+            </div>
+          </div>
+        </section>
+
+        <!-- Supported files -->
+        <section class="card" aria-labelledby="rag-files">
+          <div class="card-header">
+            <h2 id="rag-files">Supported file types</h2>
+            <p>Index plain text and common document formats.</p>
+          </div>
+          <div class="card-body">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Type</th><th>Extensions</th></tr></thead>
+                <tbody>
+                  <tr><td>Plain text</td><td><code>.txt</code></td></tr>
+                  <tr><td>Markdown</td><td><code>.md</code></td></tr>
+                  <tr><td>PDF</td><td><code>.pdf</code></td></tr>
+                  <tr><td>Word</td><td><code>.docx</code>, <code>.doc</code></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="callout tip">
+              <strong>Optional metadata sidecar</strong><br />
+              Place a <code>&lt;name&gt;.knowledge.md</code> next to a document to attach extra notes/description
+              for that source. It is used as discovery metadata and excluded from normal search chunks.
+            </div>
+          </div>
+        </section>
+
+        <!-- Commands -->
+        <section class="card" aria-labelledby="rag-commands">
+          <div class="card-header">
+            <h2 id="rag-commands">Using it — commands</h2>
+            <p>Start the server, create a knowledge base, add documents, and search.</p>
+          </div>
+          <div class="card-body">
+            <h3>Start the server</h3>
+            <pre><code># Keep this running (default http://localhost:8085)
+free-code-rag</code></pre>
+
+            <h3>Quick start in a session</h3>
+            <pre><code>/rag-kb create my-docs     # create a knowledge base
+/rag-kb use my-docs        # make it the active one
+/rag addFile ./README.md   # index a document
+/rag search "how does auth work?"   # query it</code></pre>
+
+            <h3>Documents</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Command</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>/rag addFile &lt;path&gt;</code></td><td>Index a single document</td></tr>
+                  <tr><td><code>/rag addGroup &lt;folder&gt;</code></td><td>Index all supported files in a folder</td></tr>
+                  <tr><td><code>/rag addGithubUrl &lt;url&gt; [subpath]</code></td><td>Clone a GitHub repo and index its files (saved as a source for refreshes)</td></tr>
+                  <tr><td><code>/rag search &lt;query&gt;</code></td><td>Query the active knowledge base and inject the matches as context</td></tr>
+                  <tr><td><code>/rag list</code></td><td>List indexed documents</td></tr>
+                  <tr><td><code>/rag remove &lt;file&gt;</code></td><td>Remove a document from the index</td></tr>
+                  <tr><td><code>/rag refresh</code></td><td>Re-fetch and re-index registered sources</td></tr>
+                  <tr><td><code>/rag schedule [daily|weekly]</code></td><td>Automatic recurring refresh (needs a GitHub source)</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Knowledge bases</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Command</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>/rag-kb create &lt;name&gt;</code></td><td>Create a named knowledge base</td></tr>
+                  <tr><td><code>/rag-kb use &lt;name&gt;</code></td><td>Switch the active knowledge base</td></tr>
+                  <tr><td><code>/rag-kb list</code></td><td>List all knowledge bases</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Why many KBs -->
+        <section class="card" aria-labelledby="rag-kbs">
+          <div class="card-header">
+            <h2 id="rag-kbs">Why multiple knowledge bases</h2>
+            <p>Separate indexes you switch between with <code>/rag-kb use</code>.</p>
+          </div>
+          <div class="card-body">
+            <p>Each knowledge base is its own isolated index. Keeping several — instead of one big pile — pays off:</p>
+            <ul>
+              <li><strong>Sharper results</strong> — searching a focused KB returns more on-topic matches; unrelated documents can't crowd out the right ones.</li>
+              <li><strong>Per-project / per-domain context</strong> — one KB for your backend, one for the design system, one for a client's docs. Switch with <code>/rag-kb use</code>.</li>
+              <li><strong>No cross-contamination</strong> — confidential or client-specific material stays in its own KB and never leaks into another project's answers.</li>
+              <li><strong>Cheaper, faster</strong> — a smaller, relevant index means quicker search and tighter, lower-token context.</li>
+              <li><strong>Easy lifecycle</strong> — refresh, rebuild, or drop a whole topic by managing just its KB.</li>
+            </ul>
+            <div class="callout info">
+              <strong>Example</strong><br />
+              <code>/rag-kb use backend-api</code> before working on the service, then
+              <code>/rag-kb use design-system</code> when you switch to the UI — the agent always
+              retrieves from the right body of knowledge.
+            </div>
+          </div>
+        </section>
+
+        <p class="footer">
+          <a href="capabilities.html">All capabilities →</a> &nbsp;·&nbsp;
+          <a href="models.html">Models →</a> &nbsp;·&nbsp;
+          <a href="commands.html">Commands →</a>
+        </p>
+        <p class="footer-credit">Powered by CX — developed by Pablo Castañeda</p>
+      </div>
+    </div>
+    <script src="assets/theme.js" defer></script>
+  </body>
+</html>

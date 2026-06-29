@@ -21,6 +21,7 @@ import { registerOAuthProvider, resetOAuthProviders } from "@free/pi-ai/oauth";
 import { type Static, Type } from "@sinclair/typebox";
 import AjvModule from "ajv";
 import { existsSync, readFileSync } from "fs";
+import { minimatch } from "minimatch";
 import { join } from "path";
 import { getAgentDir } from "../config.js";
 import type { AuthStorage } from "./auth-storage.js";
@@ -175,6 +176,13 @@ const ProviderConfigSchema = Type.Object({
 });
 
 const ModelsConfigSchema = Type.Object({
+	/**
+	 * Optional whitelist of models to show in `/model`. Each entry matches by
+	 * `provider/id`, `id`, or `name` (case-insensitive, `.`/`-`/`_` treated alike),
+	 * or as a glob (e.g. `lmstudio/**`, `anthropic/*sonnet*`). When present and
+	 * non-empty, only matching models are listed; built-in models are curated too.
+	 */
+	only: Type.Optional(Type.Array(Type.String())),
 	providers: Type.Record(Type.String(), ProviderConfigSchema),
 });
 
@@ -212,11 +220,33 @@ interface CustomModelsResult {
 	overrides: Map<string, ProviderOverride>;
 	/** Per-model overrides: provider -> modelId -> override */
 	modelOverrides: Map<string, Map<string, ModelOverride>>;
+	/** Optional whitelist of model patterns to show in `/model` (empty/undefined = show all) */
+	only: string[] | undefined;
 	error: string | undefined;
 }
 
 function emptyCustomModelsResult(error?: string): CustomModelsResult {
-	return { models: [], overrides: new Map(), modelOverrides: new Map(), error };
+	return { models: [], overrides: new Map(), modelOverrides: new Map(), only: undefined, error };
+}
+
+/** Normalize an id/name for lenient comparison (case- and separator-insensitive). */
+function normalizeModelToken(value: string): string {
+	return value.toLowerCase().replace(/[.\-_\s]+/g, "-");
+}
+
+/** Whether a model matches a single `only` entry (exact/normalized or glob). */
+function modelMatchesOnlyEntry(model: Model<Api>, entry: string): boolean {
+	const fullId = `${model.provider}/${model.id}`;
+	if (entry.includes("*") || entry.includes("?") || entry.includes("[")) {
+		return minimatch(fullId, entry, { nocase: true }) || minimatch(model.id, entry, { nocase: true });
+	}
+	const target = normalizeModelToken(entry);
+	return (
+		normalizeModelToken(fullId) === target ||
+		normalizeModelToken(model.id) === target ||
+		normalizeModelToken(model.name) === target ||
+		normalizeModelToken(`${model.provider}/${model.name}`) === target
+	);
 }
 
 function mergeCompat(
@@ -291,6 +321,7 @@ export class ModelRegistry {
 	private providerRequestConfigs: Map<string, ProviderRequestConfig> = new Map();
 	private modelRequestHeaders: Map<string, Record<string, string>> = new Map();
 	private registeredProviders: Map<string, ProviderConfigInput> = new Map();
+	private onlyPatterns: string[] = [];
 	private loadError: string | undefined = undefined;
 
 	private constructor(
@@ -340,8 +371,11 @@ export class ModelRegistry {
 			models: customModels,
 			overrides,
 			modelOverrides,
+			only,
 			error,
 		} = this.modelsJsonPath ? this.loadCustomModels(this.modelsJsonPath) : emptyCustomModelsResult();
+
+		this.onlyPatterns = only ?? [];
 
 		if (error) {
 			this.loadError = error;
@@ -451,7 +485,7 @@ export class ModelRegistry {
 				}
 			}
 
-			return { models: this.parseModels(config), overrides, modelOverrides, error: undefined };
+			return { models: this.parseModels(config), overrides, modelOverrides, only: config.only, error: undefined };
 		} catch (error) {
 			if (error instanceof SyntaxError) {
 				return emptyCustomModelsResult(`Failed to parse models.json: ${error.message}\n\nFile: ${modelsJsonPath}`);
@@ -555,7 +589,13 @@ export class ModelRegistry {
 	 * This is a fast check that doesn't refresh OAuth tokens.
 	 */
 	getAvailable(): Model<Api>[] {
-		return this.models.filter((m) => this.hasConfiguredAuth(m));
+		const authed = this.models.filter((m) => this.hasConfiguredAuth(m));
+		if (this.onlyPatterns.length === 0) return authed;
+
+		const curated = authed.filter((m) => this.onlyPatterns.some((entry) => modelMatchesOnlyEntry(m, entry)));
+		// Fail open: if the whitelist matches nothing (e.g. a typo), don't leave the
+		// model picker empty — fall back to the full authed list.
+		return curated.length > 0 ? curated : authed;
 	}
 
 	/**

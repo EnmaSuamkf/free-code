@@ -38,10 +38,11 @@
           <nav class="nav" aria-label="Primary">
             <a href="index.html">[home]</a>
             <a href="capabilities.html" aria-current="page">[capabilities]</a>
+            <a href="models.html">[models]</a>
+            <a href="rag.html">[rag]</a>
             <a href="commands.html">[commands]</a>
             <a href="installation.html">[installation]</a>
             <a href="code-graph.html">[code graph]</a>
-            <a href="roi.html">[ROI]</a>
           </nav>
         </header>
 
@@ -123,6 +124,18 @@
               base served on port 8085. Index documentation, runbooks, architecture notes, or any
               text file. The agent retrieves the most relevant chunks automatically during a session.
             </p>
+
+            <h3>Start the server</h3>
+            <p>The knowledge base is served by a small local server (default port 8085). Start it, then create and select a knowledge base:</p>
+            <pre><code># 1. Start the RAG server (keep it running)
+free-code-rag            # default http://localhost:8085
+
+# 2. In a free-code session, create and select a knowledge base
+/rag-kb create my-docs
+/rag-kb use my-docs
+
+# 3. Add documents
+/rag addFile ./README.md</code></pre>
 
             <h3>Key commands</h3>
             <div class="table-wrap">
@@ -436,20 +449,13 @@ free-code install https://example.com/pkg  # from a URL</code></pre>
               at any time.
             </p>
 
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr><th>Provider</th><th>Models</th></tr>
-                </thead>
-                <tbody>
-                  <tr><td>Anthropic</td><td>Claude 3 Opus, Sonnet, Haiku and newer</td></tr>
-                  <tr><td>Google Vertex AI</td><td>Gemini 2.0 Flash, Pro, Ultra</td></tr>
-                  <tr><td>Ollama</td><td>Llama 3, Mistral, Phi, Qwen, and any locally served model</td></tr>
-                  <tr><td>LM Studio</td><td>Any GGUF model served via LM Studio</td></tr>
-                  <tr><td>OpenAI-compatible</td><td>Any endpoint that follows the OpenAI chat completions API</td></tr>
-                </tbody>
-              </table>
-            </div>
+            <p>
+              Built-in providers (Anthropic, OpenAI, Google, and more) appear in <code>/model</code>
+              once you authenticate, and you can add any OpenAI-compatible endpoint or curate exactly
+              which models show — all from <code>~/.free-code/agent/models.json</code>.
+              <a href="models.html">See the Models tab →</a> for the full provider list and the
+              <code>only</code> whitelist.
+            </p>
 
             <h3>Switching models</h3>
             <ul>
@@ -458,6 +464,7 @@ free-code install https://example.com/pkg  # from a URL</code></pre>
               <li><code>/model</code> — switch via command</li>
               <li><span class="kbd">Shift+Tab</span> — cycle reasoning level (off → minimal → low → medium → high → xhigh)</li>
             </ul>
+
           </div>
         </section>
 

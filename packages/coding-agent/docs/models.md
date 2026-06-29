@@ -4,6 +4,7 @@ Add custom providers and models (Ollama, vLLM, LM Studio, proxies) via `~/.pi/ag
 
 ## Table of Contents
 
+- [Curating the model list (`only`)](#curating-the-model-list-only)
 - [Minimal Example](#minimal-example)
 - [Full Example](#full-example)
 - [Supported APIs](#supported-apis)
@@ -12,6 +13,41 @@ Add custom providers and models (Ollama, vLLM, LM Studio, proxies) via `~/.pi/ag
 - [Overriding Built-in Providers](#overriding-built-in-providers)
 - [Per-model Overrides](#per-model-overrides)
 - [OpenAI Compatibility](#openai-compatibility)
+
+## Curating the model list (`only`)
+
+By default `/model` shows every model whose provider has credentials configured — including all built-in/factory models. To curate that list down to just the ones you use, add a top-level `"only"` array. It is a **whitelist**: when present and non-empty, only matching models are shown (built-in models included).
+
+```json
+{
+  "only": [
+    "anthropic/claude-sonnet-4-6",
+    "anthropic/claude-haiku-4-5",
+    "fireworks/**",
+    "lmstudio/**"
+  ],
+  "providers": {
+    "fireworks": {
+      "baseUrl": "https://api.fireworks.ai/inference/v1",
+      "api": "openai-completions",
+      "apiKey": "FIREWORKS_API_KEY",
+      "authHeader": true,
+      "models": [{ "id": "accounts/fireworks/models/kimi-k2p7-code", "name": "Kimi K2.7 Code" }]
+    }
+  }
+}
+```
+
+Matching per entry:
+
+- **Exact**: `provider/id`, `id`, or `name`, case-insensitive, with `.` `-` `_` and spaces treated as equivalent (so `anthropic/claude-sonnet-4.6` matches `claude-sonnet-4-6`).
+- **Glob**: entries with `*`, `?`, or `[...]` match via globbing against `provider/id` and `id` — use `provider/**` to keep every model of a provider (handy for dynamic ones like LM Studio: `lmstudio/**`).
+
+Behavior:
+
+- Empty or absent `only` → show all models (default).
+- If `only` matches **nothing** (e.g. a typo), it **fails open** to the full list rather than leaving the picker empty.
+- `only` filters what is **listed** (`/model`, `--list-models`, RPC/plugin/desktop pickers). Selecting a model explicitly with `--model` still resolves against the full catalog.
 
 ## Minimal Example
 
@@ -127,6 +163,47 @@ The `baseUrl` is required when adding custom models to the `google-generative-ai
 | `google-generative-ai` | Google Generative AI |
 
 Set `api` at provider level (default for all models) or model level (override per model).
+
+## Supported providers
+
+Built-in providers ship with their models and appear in `/model` once you authenticate. You can also add **any OpenAI-compatible endpoint** (Ollama, LM Studio, vLLM, proxies) as a custom provider in this file.
+
+### Log in with `/login` (OAuth)
+
+| Provider | Notes |
+|----------|-------|
+| `anthropic` | Claude subscription or API key (`ANTHROPIC_API_KEY` / `ANTHROPIC_OAUTH_TOKEN`) |
+| `openai-codex` | ChatGPT / Codex sign-in |
+| `github-copilot` | Copilot sign-in (or `COPILOT_GITHUB_TOKEN` / `GH_TOKEN` / `GITHUB_TOKEN`) |
+| `google-gemini-cli` | Gemini CLI sign-in |
+| `google-antigravity` | Google Antigravity sign-in |
+
+### API key (set the environment variable)
+
+| Provider | Environment variable |
+|----------|----------------------|
+| `openai` | `OPENAI_API_KEY` |
+| `azure-openai-responses` | `AZURE_OPENAI_API_KEY` (+ `AZURE_OPENAI_BASE_URL` or `AZURE_OPENAI_RESOURCE_NAME`) |
+| `google` | `GEMINI_API_KEY` |
+| `google-vertex` | `GOOGLE_APPLICATION_CREDENTIALS` (ADC) or `GOOGLE_CLOUD_API_KEY` |
+| `amazon-bedrock` | AWS credentials / `AWS_BEARER_TOKEN_BEDROCK` |
+| `xai` | `XAI_API_KEY` |
+| `groq` | `GROQ_API_KEY` |
+| `cerebras` | `CEREBRAS_API_KEY` |
+| `openrouter` | `OPENROUTER_API_KEY` |
+| `vercel-ai-gateway` | `AI_GATEWAY_API_KEY` |
+| `zai` | `ZAI_API_KEY` |
+| `mistral` | `MISTRAL_API_KEY` |
+| `minimax` | `MINIMAX_API_KEY` |
+| `minimax-cn` | `MINIMAX_CN_API_KEY` |
+| `huggingface` | `HF_TOKEN` |
+| `opencode` | `OPENCODE_API_KEY` |
+| `opencode-go` | `OPENCODE_API_KEY` |
+| `kimi-coding` | `KIMI_API_KEY` |
+
+### Local / custom (via this file)
+
+Any OpenAI-compatible server — **Ollama**, **LM Studio**, **vLLM**, **LocalAI**, or a corporate proxy — added under `providers` with a `baseUrl`, `api: "openai-completions"`, and any `apiKey`. See the examples above and in [local-models-setup.md](../../../docs/local-models-setup.md).
 
 ## Provider Configuration
 

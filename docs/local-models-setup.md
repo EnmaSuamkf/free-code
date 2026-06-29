@@ -292,6 +292,44 @@ Or build from source: [github.com/mudler/LocalAI](https://github.com/mudler/Loca
 
 ---
 
+## Choosing which models appear in `/model` (the `only` whitelist)
+
+`~/.free-code/agent/models.json` is also where you **curate which models show up** in the `/model` picker — including the built-in/factory models, not just local or custom ones.
+
+### Default on a fresh install
+
+On first run, free-code seeds a starter `models.json` containing an `only` whitelist with the default model of each provider you can log in to (Anthropic, OpenAI Codex, Gemini CLI, Google Antigravity, GitHub Copilot). This keeps `/model` short out of the box instead of listing the entire factory catalog. It is **only created if the file doesn't already exist** — your edits are never overwritten.
+
+```json
+{
+  "only": [
+    "anthropic/claude-opus-4-6",
+    "openai-codex/gpt-5.4",
+    "google-gemini-cli/gemini-2.5-pro",
+    "google-antigravity/gemini-3.1-pro-high",
+    "github-copilot/gpt-5.5"
+  ],
+  "providers": {}
+}
+```
+
+### How to modify it
+
+Edit the `only` array — it is a **whitelist**: when present and non-empty, `/model` shows only matching models.
+
+- **Add a model**: add a line with its `provider/id` (find ids with `free-code --list-models`).
+- **Remove a model**: delete its line.
+- **Show everything again**: remove the `only` key entirely (or set it to `[]`).
+- **Keep a whole provider** (handy for local/dynamic ones): use a glob, e.g. `"lmstudio/**"` or `"fireworks/**"`.
+
+Matching is lenient: each entry matches by `provider/id`, `id`, or `name` (case-insensitive; `.` `-` `_` and spaces are treated alike, so `anthropic/claude-sonnet-4.6` matches `claude-sonnet-4-6`), or as a glob (`*`, `?`, `[...]`). If the whitelist accidentally matches nothing, free-code falls back to showing all models so the picker is never empty. Selecting a model explicitly with `--model` still works even if it isn't in `only`.
+
+The file is re-read every time you open `/model`, so changes apply without restarting.
+
+> Full schema and cloud-provider examples (Fireworks, proxies, overriding built-ins): see [`packages/coding-agent/docs/models.md`](../packages/coding-agent/docs/models.md).
+
+---
+
 ## Testing your setup
 
 ### Test the server is running

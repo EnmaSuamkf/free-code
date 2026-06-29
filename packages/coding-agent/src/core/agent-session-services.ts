@@ -1,7 +1,7 @@
 import { join } from "node:path";
 import type { ThinkingLevel } from "@free/pi-agent-core";
 import type { Model } from "@free/pi-ai";
-import { getAgentDir, getDefaultExtensionsDir } from "../config.js";
+import { getAgentDir, getDefaultExtensionsDir, loadAgentEnvFile } from "../config.js";
 import { AuthStorage } from "./auth-storage.js";
 import type { SessionStartEvent, ToolDefinition } from "./extensions/index.js";
 import { ModelRegistry } from "./model-registry.js";
@@ -129,6 +129,10 @@ function applyExtensionFlagValues(
 export async function createAgentSessionServices(
 	options: CreateAgentSessionServicesOptions,
 ): Promise<AgentSessionServices> {
+	// Load provider credentials from <agentDir>/.env into process.env (gap-fill) before
+	// the model registry resolves keys, so models.json can reference them by name.
+	loadAgentEnvFile();
+
 	const cwd = options.cwd;
 	const agentDir = options.agentDir ?? getAgentDir();
 	const authStorage = options.authStorage ?? AuthStorage.create(join(agentDir, "auth.json"));

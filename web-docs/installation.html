@@ -32,29 +32,117 @@
           </h1>
           <p class="tagline">
             <span class="prompt" aria-hidden="true">// </span>
-            Installation — macOS native app, VS Code / Cursor plugin, and CLI.
+            Installation — Linux &amp; macOS. CLI, VS Code / Cursor plugin, and the macOS desktop app.
           </p>
 
           <nav class="nav" aria-label="Primary">
             <a href="index.html">[home]</a>
             <a href="capabilities.html">[capabilities]</a>
+            <a href="models.html">[models]</a>
+            <a href="rag.html">[rag]</a>
             <a href="commands.html">[commands]</a>
             <a href="installation.html" aria-current="page">[installation]</a>
             <a href="code-graph.html">[code graph]</a>
-            <a href="roi.html">[ROI]</a>
           </nav>
         </header>
+
+        <!-- Platforms overview -->
+        <section class="card" aria-labelledby="install-platforms">
+          <div class="card-header">
+            <h2 id="install-platforms">Supported platforms</h2>
+            <p>free-code runs on <strong>Linux</strong> and <strong>macOS</strong>.</p>
+          </div>
+          <div class="card-body">
+            <div class="callout warning">
+              <strong>Read this first — what the installer does (and doesn't) do</strong><br />
+              The install script sets up the <strong>command-line app (CLI)</strong>. On macOS it also
+              installs the <strong>desktop app</strong>. The <strong>VS Code / Cursor plugin is NOT
+              installed by the script</strong> — it's a short, separate step you do by hand afterwards
+              (see <a href="#install-plugin">Install the VS Code / Cursor plugin</a> below).
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Platform</th><th>Installer script</th><th>What the script sets up</th><th>Editor plugin</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Linux</strong></td>
+                    <td><code>installation/install-free-code-linux.sh</code></td>
+                    <td>CLI + dependencies</td>
+                    <td>Manual — see below</td>
+                  </tr>
+                  <tr>
+                    <td><strong>macOS</strong></td>
+                    <td><code>installation/install-free-code-mac.command</code></td>
+                    <td>CLI + desktop app (FreeCodeMac)</td>
+                    <td>Manual — see below</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p>Both scripts live in the <code>installation/</code> folder of the repository.</p>
+          </div>
+        </section>
+
+        <!-- Linux -->
+        <section class="card" aria-labelledby="install-linux">
+          <div class="card-header">
+            <h2 id="install-linux">Linux — install the CLI</h2>
+            <p>One script installs the free-code command-line app and everything it needs.</p>
+          </div>
+          <div class="card-body">
+            <div class="callout info">
+              <strong>This installs the CLI only.</strong> Want to use free-code inside VS Code or Cursor?
+              Do the quick <a href="#install-plugin">plugin step</a> after this.
+            </div>
+
+            <h3>Step 1 — Run the install script</h3>
+            <pre><code>bash /&lt;path/to/repo&gt;/installation/install-free-code-linux.sh</code></pre>
+            <p>The script sets up everything you need to run free-code on Linux:</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Step</th><th>What it installs</th></tr></thead>
+                <tbody>
+                  <tr><td>Node.js (LTS)</td><td>nvm + latest LTS; set as default</td></tr>
+                  <tr><td>Dependencies</td><td><code>npm install</code> at repo root</td></tr>
+                  <tr><td>free-code CLI</td><td><code>npm install -g ./packages/coding-agent</code></td></tr>
+                  <tr><td>agent-browser</td><td><code>npm install -g agent-browser</code></td></tr>
+                  <tr><td>RAG (optional)</td><td>Python venv for the local knowledge-base server</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Step 2 — Start free-code</h3>
+            <p>Run the CLI in your terminal:</p>
+            <pre><code>free-code</code></pre>
+
+            <h3>Step 3 — Configure your AI provider</h3>
+            <p>You only need one provider to get started:</p>
+            <pre><code># Login (Claude, GitHub Copilot, Gemini, and others)
+/login
+
+# Or set an API key for your provider, e.g.
+export ANTHROPIC_API_KEY=sk-...</code></pre>
+            <div class="callout tip">
+              <strong>Tip</strong><br />
+              Add any <code>export</code> line to your <code>~/.bashrc</code> or <code>~/.zshrc</code> so it persists across terminal sessions.
+            </div>
+          </div>
+        </section>
 
         <!-- macOS -->
         <section class="card" aria-labelledby="install-macos">
           <div class="card-header">
-            <h2 id="install-macos">macOS — Full installation</h2>
-            <p>One script installs everything: Homebrew, Node.js, dependencies, CLI, native app.</p>
+            <h2 id="install-macos">macOS — install the CLI &amp; desktop app</h2>
+            <p>One script installs everything: Homebrew, Node.js, dependencies, the CLI, and the native desktop app.</p>
           </div>
           <div class="card-body">
             <div class="callout warning">
               <strong>Before you start</strong><br />
               Close VS Code, Cursor, or any other IDE before running the script.
+            </div>
+            <div class="callout info">
+              <strong>This installs the CLI and the desktop app.</strong> The VS Code / Cursor plugin is a
+              separate step — do the quick <a href="#install-plugin">plugin step</a> afterwards if you want it.
             </div>
 
             <h3>Step 1 — Run the install script</h3>
@@ -107,66 +195,58 @@ export GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json
         <!-- VS Code / Cursor plugin -->
         <section class="card" aria-labelledby="install-plugin">
           <div class="card-header">
-            <h2 id="install-plugin">VS Code / Cursor plugin</h2>
-            <p>Use free-code directly from your editor as a chat panel.</p>
+            <h2 id="install-plugin">Install the VS Code / Cursor plugin</h2>
+            <p>Optional. Adds a free-code chat panel inside your editor. Works the same on Linux and macOS.</p>
           </div>
           <div class="card-body">
-            <h3>Step 1 — Enable the editor command in your terminal</h3>
+            <div class="callout info">
+              <strong>No terminal needed.</strong> You install the plugin from inside VS Code or Cursor by
+              clicking a few buttons. Follow the steps below exactly — you don't need any command line.
+            </div>
 
-            <h4>Cursor</h4>
-            <pre><code># Option A — symlink (recommended)
-sudo ln -s /Applications/Cursor.app/Contents/Resources/app/bin/cursor /usr/local/bin/cursor
+            <h3>What you need first</h3>
+            <ul>
+              <li>VS Code <em>or</em> Cursor installed on your computer.</li>
+              <li>The <strong>free-code folder</strong> you downloaded (the same one where the install script lives). Inside it there is a plugin file at:
+                <br /><code>packages/vscode-free-code/vscode-free-code-0.66.1.vsix</code>
+                <br />A <code>.vsix</code> file is just the packaged plugin.
+              </li>
+            </ul>
 
-# Apple Silicon (M1/M2/M3) — if the path above doesn't work
-sudo ln -s /Applications/Cursor.app/Contents/MacOS/Cursor /usr/local/bin/cursor
+            <h3>Step 1 — Open the Extensions panel</h3>
+            <p>Open VS Code or Cursor. On the left side bar, click the <strong>Extensions</strong> icon (four little squares). Or press:</p>
+            <ul>
+              <li><strong>macOS:</strong> <span class="kbd">Cmd</span> + <span class="kbd">Shift</span> + <span class="kbd">X</span></li>
+              <li><strong>Linux:</strong> <span class="kbd">Ctrl</span> + <span class="kbd">Shift</span> + <span class="kbd">X</span></li>
+            </ul>
 
-# Verify
-cursor --version</code></pre>
-
-            <h4>VS Code</h4>
-            <p>
-              Easiest: open VS Code, press <span class="kbd">Cmd+Shift+P</span>, and run:
-              <code>Shell Command: Install 'code' command in PATH</code>
-            </p>
-            <pre><code># Or manually
-sudo ln -s "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" /usr/local/bin/code
-
-# Verify
-code --version</code></pre>
-
-            <h3>Step 2 — Install the plugin</h3>
-            <p>
-              Open <strong>Terminal</strong> and go to the cloned <code>free-code</code> repository
-              (the same folder where you ran the macOS install script). The plugin ships as a
-              <code>.vsix</code> file inside that repo:
-            </p>
-            <pre><code>cd /path/to/free-code
-
-# Plugin file (relative to the repo root)
-packages/vscode-free-code/vscode-free-code-0.66.1.vsix</code></pre>
-            <p>From the repository root, install the extension with your editor&apos;s CLI:</p>
-            <pre><code># Cursor
-cursor --install-extension packages/vscode-free-code/vscode-free-code-0.66.1.vsix
-
-# VS Code
-code --install-extension packages/vscode-free-code/vscode-free-code-0.66.1.vsix</code></pre>
-
-            <p>Or install graphically:</p>
+            <h3>Step 2 — Choose “Install from VSIX…”</h3>
             <ol>
-              <li>Open <strong>Extensions</strong> (<span class="kbd">Cmd+Shift+X</span>)</li>
-              <li>Click the <strong>&middot;&middot;&middot;</strong> menu → <strong>Install from VSIX…</strong></li>
-              <li>Select the <code>.vsix</code> file</li>
+              <li>At the top of the Extensions panel, find the small <strong>…</strong> (three dots) menu button and click it.</li>
+              <li>In the menu that opens, click <strong>Install from VSIX…</strong></li>
             </ol>
 
-            <h3>Step 3 — Reload the editor</h3>
-            <pre><code>Cmd+Shift+P → Developer: Reload Window</code></pre>
+            <h3>Step 3 — Pick the plugin file</h3>
+            <p>A file picker opens. Go into the free-code folder, then into <code>packages</code> → <code>vscode-free-code</code>, and select:</p>
+            <pre><code>vscode-free-code-0.66.1.vsix</code></pre>
+            <p>Click <strong>Install</strong>. You'll see a small confirmation in the bottom-right corner.</p>
 
-            <div class="callout info">
-              <strong>Slash commands in the plugin</strong><br />
-              All <code>/code-index</code>, <code>/code-symbols</code>, <code>/code-callers</code>, and
-              <code>/code-context</code> commands are available in the plugin UI. Type <code>/</code>
-              in the chat input to see the full list.
+            <h3>Step 4 — Reload the editor</h3>
+            <p>If a <strong>Reload</strong> button appears, click it. Otherwise just close and reopen VS Code / Cursor.</p>
+
+            <h3>Step 5 — Open the free-code chat</h3>
+            <p>Open the Command Palette (<span class="kbd">Cmd</span>/<span class="kbd">Ctrl</span> + <span class="kbd">Shift</span> + <span class="kbd">P</span>), type <strong>free-code</strong>, and choose the command to open the chat panel. Type <code>/</code> in the input to see all commands.</p>
+
+            <div class="callout tip">
+              <strong>Prefer the terminal?</strong><br />
+              If you're comfortable with the command line, you can install it in one line from inside the
+              free-code folder instead:
             </div>
+            <pre><code># VS Code
+code --install-extension packages/vscode-free-code/vscode-free-code-0.66.1.vsix
+
+# Cursor
+cursor --install-extension packages/vscode-free-code/vscode-free-code-0.66.1.vsix</code></pre>
           </div>
         </section>
 

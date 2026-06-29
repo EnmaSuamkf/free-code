@@ -26,6 +26,19 @@ import {
 	syncBundledThemesFromPackage,
 } from "./config.js";
 import { migrateKeybindingsConfig } from "./core/keybindings.js";
+import { defaultModelPerProvider } from "./core/model-resolver.js";
+
+/**
+ * Providers you authenticate with via `/login` (OAuth). The default `models.json`
+ * seed curates `/model` down to the default model of each, instead of the full catalog.
+ */
+const LOGIN_PROVIDERS = [
+	"anthropic",
+	"openai-codex",
+	"google-gemini-cli",
+	"google-antigravity",
+	"github-copilot",
+] as const;
 
 const MIGRATION_GUIDE_URL =
 	"https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/CHANGELOG.md#extensions-migration";
@@ -446,6 +459,30 @@ function initDefaultSettings(): void {
 }
 
 /**
+ * Seed a starter `models.json` (only if absent — never overwrites the user's file).
+ *
+ * Fresh installs otherwise show the full factory catalog of every authenticated
+ * provider in `/model`. Instead we seed an `only` whitelist with the default model
+ * of each login-capable (OAuth) provider, giving a clean list out of the box. Users
+ * edit `only` to curate and add custom providers/models under `providers`
+ * (see docs/models.md).
+ */
+function initDefaultModelsJson(): void {
+	const modelsPath = join(getAgentDir(), "models.json");
+	if (existsSync(modelsPath)) return;
+
+	const only = LOGIN_PROVIDERS.map((provider) => {
+		const modelId = defaultModelPerProvider[provider];
+		return modelId ? `${provider}/${modelId}` : undefined;
+	}).filter((entry): entry is string => entry !== undefined);
+
+	const defaults = { only, providers: {} };
+
+	mkdirSync(dirname(modelsPath), { recursive: true });
+	writeFileSync(modelsPath, `${JSON.stringify(defaults, null, 2)}\n`);
+}
+
+/**
  * Resolve the source AGENTS.md that should be seeded into ~/.free-code/agent/.
  *
  * Lookup order:
@@ -588,6 +625,7 @@ export function runMigrations(cwd: string = process.cwd()): {
 	syncDefaultExtensions();
 	syncDefaultSkills();
 	initDefaultSettings();
+	initDefaultModelsJson();
 	initDefaultFreeCodeMd();
 	initDefaultAgentsMd();
 	const deprecationWarnings = migrateExtensionSystem(cwd);

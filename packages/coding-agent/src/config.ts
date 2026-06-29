@@ -290,6 +290,48 @@ export function getAgentDir(): string {
 	return join(homedir(), CONFIG_DIR_NAME, "agent");
 }
 
+let agentEnvLoaded = false;
+
+/**
+ * Load `<agentDir>/.env` into `process.env`, filling only variables that are not
+ * already set (shell/exported values always win). This lets users keep provider
+ * credentials (e.g. `FIREWORKS_API_KEY`) in one place and reference them by name in
+ * `models.json`, so `/model` availability checks and requests both resolve them.
+ *
+ * Idempotent: runs once per process. Best-effort — a missing or malformed file is ignored.
+ */
+export function loadAgentEnvFile(): void {
+	if (agentEnvLoaded) return;
+	agentEnvLoaded = true;
+
+	const envPath = join(getAgentDir(), ".env");
+	if (!existsSync(envPath)) return;
+
+	let content: string;
+	try {
+		content = readFileSync(envPath, "utf-8");
+	} catch {
+		return;
+	}
+
+	for (const rawLine of content.split("\n")) {
+		const line = rawLine.trim();
+		if (!line || line.startsWith("#")) continue;
+		const eq = line.indexOf("=");
+		if (eq === -1) continue;
+		const key = line.slice(0, eq).trim();
+		if (!key || key in process.env) continue; // never override an existing value
+		let value = line.slice(eq + 1).trim();
+		if (
+			value.length >= 2 &&
+			((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'")))
+		) {
+			value = value.slice(1, -1);
+		}
+		process.env[key] = value;
+	}
+}
+
 /**
  * Optional monorepo root for resolving relative CLI paths (`-e`, `--skill`, `--prompt`, `--theme`).
  * When a path does not exist relative to the process cwd, it is tried against this directory.
