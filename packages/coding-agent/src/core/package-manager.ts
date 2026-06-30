@@ -1983,8 +1983,6 @@ export class DefaultPackageManager implements PackageManager {
 			themes: join(projectBaseDir, "themes"),
 			agents: join(projectBaseDir, "agents"),
 		};
-		const userAgentsSkillsDir = join(getHomeDir(), CONFIG_DIR_NAME, "skills");
-
 		const addResources = (
 			resourceType: ResourceType,
 			paths: string[],
@@ -2044,7 +2042,7 @@ export class DefaultPackageManager implements PackageManager {
 		);
 		addResources(
 			"skills",
-			[...collectAutoSkillEntries(userDirs.skills, "pi"), ...collectAutoSkillEntries(userAgentsSkillsDir, "agents")],
+			collectAutoSkillEntries(userDirs.skills, "pi"),
 			userMetadata,
 			userOverrides.skills,
 			globalBaseDir,

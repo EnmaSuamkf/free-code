@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MCP Servers — free-code</title>
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <div class="doc-root">
+      <header class="site-shell-header" role="banner">
+        <div class="site-shell-inner">
+          <a class="site-brand" href="index.html">
+            <span class="site-brand-angles" aria-hidden="true">&lt;</span>
+            <span>free-code</span>
+            <span class="site-brand-angles" aria-hidden="true">&gt;</span>
+          </a>
+          <div class="site-header-actions">
+            <button type="button" class="theme-toggle" id="doc-theme-toggle" aria-label="Color theme">
+              <span class="theme-toggle-label" id="doc-theme-label">System</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="container">
+        <header class="hero">
+          <h1 class="brand">
+            <span class="angle" aria-hidden="true">&lt;</span>
+            <span class="name">free-code</span>
+            <span class="angle" aria-hidden="true">&gt;</span>
+          </h1>
+          <p class="tagline">
+            <span class="prompt" aria-hidden="true">// </span>
+            MCP — connect external tools, with credentials kept out of your config.
+          </p>
+
+          <nav class="nav" aria-label="Primary">
+            <a href="index.html">[home]</a>
+            <a href="capabilities.html">[capabilities]</a>
+            <a href="models.html">[models]</a>
+            <a href="rag.html">[rag]</a>
+            <a href="commands.html">[commands]</a>
+            <a href="installation.html">[installation]</a>
+            <a href="code-graph.html">[code graph]</a>
+            <a href="mcp.html" aria-current="page">[mcp]</a>
+          </nav>
+        </header>
+
+        <!-- What it is -->
+        <section class="card" aria-labelledby="mcp-what">
+          <div class="card-header">
+            <h2 id="mcp-what">What is MCP?</h2>
+            <p>The Model Context Protocol lets free-code talk to external tool servers — databases, APIs, CI systems, design tools.</p>
+          </div>
+          <div class="card-body">
+            <p>
+              An <strong>MCP server</strong> exposes a set of tools over a standard protocol. Once a
+              server is configured and enabled, its tools appear in your next free-code session
+              automatically — alongside the built-in <code>read</code>, <code>bash</code>, and code
+              graph tools — and the agent can call them like any other tool.
+            </p>
+            <p>
+              free-code supports two kinds of server:
+            </p>
+            <ul>
+              <li><strong>stdio</strong> — a local process free-code launches (defined with <code>command</code> + <code>args</code>). Most servers, including Docker- and <code>npx</code>-based ones.</li>
+              <li><strong>HTTP</strong> — a remote endpoint free-code connects to (defined with <code>url</code>).</li>
+            </ul>
+            <div class="callout info">
+              <strong>Newly added servers start disabled</strong><br />
+              Adding a server to <code>mcp.json</code> does <em>not</em> auto-start it. You opt in
+              explicitly with <code>/mcp enable &lt;name&gt;</code> — so importing a config never
+              silently runs code. See <a href="#mcp-enable">Enabling servers</a>.
+            </div>
+          </div>
+        </section>
+
+        <!-- Where config lives -->
+        <section class="card" aria-labelledby="mcp-files">
+          <div class="card-header">
+            <h2 id="mcp-files">Where the configuration lives</h2>
+            <p>Server definitions and secrets are plain files under <code>.free-code/</code>.</p>
+          </div>
+          <div class="card-body">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>File</th><th>Purpose</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><code>~/.free-code/agent/mcp.json</code></td>
+                    <td>Global server definitions — available in every project.</td>
+                  </tr>
+                  <tr>
+                    <td><code>&lt;project&gt;/.free-code/mcp.json</code></td>
+                    <td>Project-local server definitions. Merged over the global file; on a name clash the project copy wins.</td>
+                  </tr>
+                  <tr>
+                    <td><code>~/.free-code/agent/.env</code></td>
+                    <td>Global secrets (tokens, API keys) as <code>KEY=VALUE</code>.</td>
+                  </tr>
+                  <tr>
+                    <td><code>&lt;project&gt;/.free-code/.env</code></td>
+                    <td>Project-local secrets. Override the global <code>.env</code> for that project.</td>
+                  </tr>
+                  <tr>
+                    <td><code>~/.free-code/agent/mcp-status.json</code></td>
+                    <td>Which servers are enabled/disabled. Managed by the <code>/mcp</code> command — you normally don't edit it by hand.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="callout tip">
+              <strong>Server definitions and activation are separate on purpose</strong><br />
+              You can edit <code>mcp.json</code> freely without changing which servers start —
+              that state lives in <code>mcp-status.json</code>.
+            </div>
+          </div>
+        </section>
+
+        <!-- Adding a server -->
+        <section class="card" aria-labelledby="mcp-add">
+          <div class="card-header">
+            <h2 id="mcp-add">Adding a server</h2>
+            <p>Edit <code>mcp.json</code> — global or project-local — under the <code>mcpServers</code> key.</p>
+          </div>
+          <div class="card-body">
+            <h3>stdio server (a local command)</h3>
+            <pre><code>{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {}
+    }
+  }
+}</code></pre>
+            <p>
+              Paths in <code>command</code> and <code>args</code> may use <code>~</code>,
+              <code>$HOME</code>, or <code>${HOME}</code> — they are expanded without needing a shell.
+            </p>
+
+            <h3>HTTP server (a remote endpoint)</h3>
+            <pre><code>{
+  "mcpServers": {
+    "my-remote": {
+      "type": "http",
+      "url": "https://mcp.example.com/endpoint"
+    }
+  }
+}</code></pre>
+
+            <p>
+              After editing, run <code>/mcp enable &lt;name&gt;</code> and then <code>/reload</code>
+              (or start a new session) for the tools to appear.
+            </p>
+          </div>
+        </section>
+
+        <!-- Tokens & API keys -->
+        <section class="card" aria-labelledby="mcp-secrets">
+          <div class="card-header">
+            <h2 id="mcp-secrets">Tokens &amp; API keys</h2>
+            <p>Keep credentials in <code>.env</code>, out of <code>mcp.json</code>.</p>
+          </div>
+          <div class="card-body">
+            <p>
+              For stdio servers, free-code injects environment variables into the server process
+              from, in increasing priority:
+            </p>
+            <ol>
+              <li>the global <code>~/.free-code/agent/.env</code></li>
+              <li>the project-local <code>&lt;project&gt;/.free-code/.env</code></li>
+              <li>any <code>env</code> block written directly in the server's <code>mcp.json</code> entry (wins on conflict)</li>
+            </ol>
+
+            <h3>Recommended: put the secret in <code>.env</code></h3>
+            <p>Add the credential as a <code>KEY=VALUE</code> line:</p>
+            <pre><code># ~/.free-code/agent/.env
+GITHUB_PERSONAL_ACCESS_TOKEN=ghp_xxxxxxxxxxxxxxxx
+OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxx</code></pre>
+            <p>
+              The server process inherits these in its environment, so a server that reads
+              <code>GITHUB_PERSONAL_ACCESS_TOKEN</code> just works. For Docker-based servers, forward
+              the variable with <code>-e</code>:
+            </p>
+            <pre><code>{
+  "mcpServers": {
+    "github": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN", "ghcr.io/github/github-mcp-server"]
+    }
+  }
+}</code></pre>
+
+            <div class="callout warning">
+              <strong>Prefer <code>.env</code> over inline <code>env</code></strong><br />
+              Writing secrets inside <code>mcp.json</code> works, but that file is the one you copy,
+              import, and share. Keeping tokens in <code>.env</code> avoids leaking them. Add
+              <code>.free-code/.env</code> to your <code>.gitignore</code>.
+            </div>
+
+            <h3>OAuth servers (browser login)</h3>
+            <p>
+              Some remote servers authenticate via OAuth instead of a static token. Run them through
+              the <code>mcp-remote</code> bridge as a stdio server:
+            </p>
+            <pre><code>{
+  "mcpServers": {
+    "linear": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.linear.app/sse"]
+    }
+  }
+}</code></pre>
+            <p>
+              On first connect, free-code detects the authorization URL the server prints and surfaces
+              it in the UI — open it in your browser to complete the login. No token to copy by hand.
+            </p>
+          </div>
+        </section>
+
+        <!-- Enabling servers + commands -->
+        <section class="card" aria-labelledby="mcp-enable">
+          <div class="card-header">
+            <h2 id="mcp-enable">Enabling servers &amp; the <code>/mcp</code> commands</h2>
+            <p>Control which servers start, and import configs from other tools.</p>
+          </div>
+          <div class="card-body">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><code>/mcp list</code></td>
+                    <td>List every configured server with its state — <code>[on]</code> (enabled) or <code>[off]</code> (disabled).</td>
+                  </tr>
+                  <tr>
+                    <td><code>/mcp enable &lt;name&gt;</code></td>
+                    <td>Mark a server to start automatically. Takes effect after <code>/reload</code> or a new session.</td>
+                  </tr>
+                  <tr>
+                    <td><code>/mcp disable &lt;name&gt;</code></td>
+                    <td>Stop a server from starting automatically.</td>
+                  </tr>
+                  <tr>
+                    <td><code>/mcp-import</code></td>
+                    <td>Import MCP server definitions from another tool (see below).</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <pre><code>/mcp list                 # see what's configured and what's on
+/mcp enable github        # opt a server in
+/reload                   # apply — github's tools appear next turn</code></pre>
+
+            <h3><code>/mcp-import</code> — bring in existing servers</h3>
+            <p>
+              If you already use MCP in another tool, import its servers instead of writing
+              <code>mcp.json</code> by hand. <code>/mcp-import</code> reads from:
+            </p>
+            <ul>
+              <li><strong>Claude</strong> (Claude Code / Desktop)</li>
+              <li><strong>Cursor</strong></li>
+              <li><strong>VS Code</strong></li>
+              <li><strong>IntelliJ</strong> (GitHub Copilot)</li>
+            </ul>
+            <p>
+              It merges the chosen servers into <code>~/.free-code/agent/mcp.json</code> and extracts
+              any <code>env</code> values it finds into <code>~/.free-code/agent/.env</code>. Imported
+              servers arrive <strong>disabled</strong> — enable the ones you want, then
+              <code>/reload</code>.
+            </p>
+          </div>
+        </section>
+
+        <!-- Typical workflow -->
+        <section class="card" aria-labelledby="mcp-workflow">
+          <div class="card-header">
+            <h2 id="mcp-workflow">Typical workflow</h2>
+            <p>From zero to a working MCP server.</p>
+          </div>
+          <div class="card-body">
+            <pre><code># 1. Add the server definition to ~/.free-code/agent/mcp.json
+#    (or run /mcp-import to bring one in)
+
+# 2. Put any token/API key in ~/.free-code/agent/.env
+echo 'GITHUB_PERSONAL_ACCESS_TOKEN=ghp_xxx' &gt;&gt; ~/.free-code/agent/.env
+
+# 3. Enable it and reload
+/mcp enable github
+/reload
+
+# 4. Confirm it's on
+/mcp list</code></pre>
+          </div>
+        </section>
+
+        <p class="footer">
+          <a href="capabilities.html">All capabilities →</a> &nbsp;·&nbsp;
+          <a href="commands.html">Commands →</a> &nbsp;·&nbsp;
+          <a href="installation.html">Installation →</a>
+        </p>
+        <p class="footer-credit">Powered by CX — developed by Pablo Castañeda</p>
+      </div>
+    </div>
+    <script src="assets/theme.js" defer></script>
+  </body>
+</html>

@@ -1034,10 +1034,10 @@
     { g: "RAG",     slash: "/rag",       desc: "addFile · addGroup · addGithubUrl · search · list · refresh · schedule" },
     { g: "Subagents", slash: "/sub",     desc: "Start a subagent with a task" },
     { g: "Subagents", slash: "/subcont", desc: "Continue talking to a subagent" },
-    { g: "Code Graph", slash: "/code-index",   desc: "Index the project (--force to re-index all)" },
-    { g: "Code Graph", slash: "/code-symbols", desc: "Search symbols by name" },
-    { g: "Code Graph", slash: "/code-callers", desc: "Find all callers of a function" },
-    { g: "Code Graph", slash: "/code-context", desc: "Source and callees of a symbol" },
+    { g: "Code Graph", slash: "/codeGraph-index",   desc: "Index the project (--force to re-index all)" },
+    { g: "Code Graph", slash: "/codeGraph-symbols", desc: "Search symbols by name" },
+    { g: "Code Graph", slash: "/codeGraph-callers", desc: "Find all callers of a function" },
+    { g: "Code Graph", slash: "/codeGraph-context", desc: "Source and callees of a symbol" },
     { g: "Session", slash: "/quit",      desc: "Quit the agent" },
   ];
 
@@ -1398,11 +1398,11 @@
 
   function fakeResponse(prompt) {
     const p = prompt.toLowerCase();
-    if (p.startsWith("/code-index")) {
+    if (p.startsWith("/codeGraph-index")) {
       addToolEvent("code_index  (incremental)", "Indexed 3 files · 142 symbols · 87 edges · 0.4s", true);
-      addMessage("assistant", "✓ Code graph updated. 142 symbols and 87 call edges indexed across 3 changed files. You can now use `/code-symbols`, `/code-callers`, and `/code-context`.");
-    } else if (p.startsWith("/code-symbols")) {
-      const q = prompt.slice("/code-symbols".length).trim() || "handler";
+      addMessage("assistant", "✓ Code graph updated. 142 symbols and 87 call edges indexed across 3 changed files. You can now use `/codeGraph-symbols`, `/codeGraph-callers`, and `/codeGraph-context`.");
+    } else if (p.startsWith("/codeGraph-symbols")) {
+      const q = prompt.slice("/codeGraph-symbols".length).trim() || "handler";
       addToolEvent(`code_symbols  "${q}"`, "", true);
       addMessage("assistant",
         `Found 4 symbols matching <code style="font-family:var(--vscode-editor-font-family);background:rgba(128,128,128,.15);padding:1px 4px;border-radius:3px;">${escHtml(q)}</code>:\n\n` +
@@ -1411,8 +1411,8 @@
         `• <b>create${cap(q)}</b>  function  src/controllers/auth.ts:45\n` +
         `• <b>${escHtml(q)}Error</b>  function  src/auth/middleware.ts:102`
       );
-    } else if (p.startsWith("/code-callers")) {
-      const q = prompt.slice("/code-callers".length).trim() || "authenticate";
+    } else if (p.startsWith("/codeGraph-callers")) {
+      const q = prompt.slice("/codeGraph-callers".length).trim() || "authenticate";
       addToolEvent(`code_callers  "${q}"`, "", true);
       addMessage("assistant",
         `3 callers of <code style="font-family:var(--vscode-editor-font-family);background:rgba(128,128,128,.15);padding:1px 4px;border-radius:3px;">${escHtml(q)}</code>:\n\n` +
@@ -1429,7 +1429,7 @@
       addMessage("assistant", "Subagent #1 started. It will work independently on the task and report back when done.");
     } else {
       addToolEvent("read  (relevant files)", "Returned file contents", true);
-      addMessage("assistant", `I'm working on: "${escHtml(prompt)}"\n\nBased on the codebase structure, here's my analysis and suggested approach. Feel free to ask follow-up questions or use /code-symbols to explore specific functions.`);
+      addMessage("assistant", `I'm working on: "${escHtml(prompt)}"\n\nBased on the codebase structure, here's my analysis and suggested approach. Feel free to ask follow-up questions or use /codeGraph-symbols to explore specific functions.`);
     }
   }
 

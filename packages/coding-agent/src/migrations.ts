@@ -15,6 +15,7 @@ import {
 	rmSync,
 	writeFileSync,
 } from "fs";
+import { homedir } from "os";
 import { dirname, join, relative, sep } from "path";
 import {
 	CONFIG_DIR_NAME,
@@ -418,6 +419,56 @@ function syncDefaultSkills(): void {
 	}
 }
 
+/**
+ * Migrate skills from the legacy ~/.free-code/skills/ directory to ~/.free-code/agent/skills/.
+ * Only moves entries not already present in the target (user-authored custom skills).
+ * Bundled skills are already copied by syncDefaultSkills(); this only rescues custom ones.
+ * After migration the legacy directory is removed if empty.
+ */
+function migrateLegacySkillsDir(): void {
+	const legacyDir = join(homedir(), CONFIG_DIR_NAME, "skills");
+	if (!existsSync(legacyDir)) return;
+
+	const targetDir = join(getAgentDir(), "skills");
+	mkdirSync(targetDir, { recursive: true });
+
+	let entries: string[];
+	try {
+		entries = readdirSync(legacyDir);
+	} catch {
+		return;
+	}
+
+	for (const entry of entries) {
+		const src = join(legacyDir, entry);
+		const dest = join(targetDir, entry);
+		if (!existsSync(dest)) {
+			try {
+				renameSync(src, dest);
+			} catch {
+				// best effort
+			}
+		} else {
+			// Already present in agent/skills (bundled); remove the legacy copy
+			try {
+				rmSync(src, { recursive: true, force: true });
+			} catch {
+				// best effort
+			}
+		}
+	}
+
+	// Remove the legacy dir if now empty
+	try {
+		const remaining = readdirSync(legacyDir);
+		if (remaining.length === 0) {
+			rmSync(legacyDir, { recursive: true, force: true });
+		}
+	} catch {
+		// best effort
+	}
+}
+
 function unlinkBundledBrowserExtension(sourceDir: string, targetDir: string): void {
 	const browserSource = join(sourceDir, "browser");
 	const browserTarget = join(targetDir, "browser");
@@ -624,6 +675,7 @@ export function runMigrations(cwd: string = process.cwd()): {
 	migrateKeybindingsConfigFile();
 	syncDefaultExtensions();
 	syncDefaultSkills();
+	migrateLegacySkillsDir();
 	initDefaultSettings();
 	initDefaultModelsJson();
 	initDefaultFreeCodeMd();
