@@ -930,7 +930,14 @@ export class AgentSession {
 		if (expandPromptTemplates && text.startsWith("/")) {
 			const handled = await this._tryExecuteExtensionCommand(text);
 			if (handled) {
-				// Extension command executed, no prompt to send
+				// Extension command executed, no prompt to send.
+				// Under RPC, emit agent_end so the host clears the "Agent working" indicator and
+				// sends busy:false to the webview. These commands bypass the normal agent loop, so
+				// without this the spinner hangs until the host's stale-busy auto-recovery fires
+				// (same reason /login and /logout emit agent_end below).
+				if (options?.source === "rpc") {
+					this._emit({ type: "agent_end", messages: [] });
+				}
 				return;
 			}
 			if (await this._tryExecuteRpcOAuthSlashCommand(text, options)) {
