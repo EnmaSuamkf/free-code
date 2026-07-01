@@ -119,6 +119,7 @@ const RPC_WEBVIEW_SLASH_ALLOWLIST = new Set([
   "login",
   "logout",
   "mcp",
+  "webhook",
   "codeGraph-index",
   "codeGraph-symbols",
   "codeGraph-callers",

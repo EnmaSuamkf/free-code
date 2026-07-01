@@ -49,13 +49,14 @@
 
           <nav class="nav" aria-label="Primary">
             <a href="index.html" aria-current="page">[home]</a>
-            <a href="capabilities.html">[capabilities]</a>
-            <a href="models.html">[models]</a>
-            <a href="rag.html">[rag]</a>
-            <a href="commands.html">[commands]</a>
             <a href="installation.html">[installation]</a>
+            <a href="webhooks.html">[webhooks]</a>
+            <a href="rag.html">[rag]</a>
             <a href="code-graph.html">[code graph]</a>
             <a href="mcp.html">[mcp]</a>
+            <a href="capabilities.html">[capabilities]</a>
+            <a href="commands.html">[commands]</a>
+            <a href="models.html">[models]</a>
           </nav>
         </header>
 
@@ -118,6 +119,16 @@
                 Code graph and structured context cut wasted tokens — the agent reads less, sends
                 smaller prompts, and iterates faster instead of scanning whole files.
               </p>
+            </article>
+            <article class="home-card" role="listitem">
+              <span class="home-card-icon" aria-hidden="true">&#x1F517;</span>
+              <h3 class="home-card-title">Connected</h3>
+              <p class="home-card-desc">
+                Reaches beyond your repo: calls MCP servers, receives inbound webhooks from external
+                systems (Flowise, CI, GitHub), and explores the web autonomously — browsing pages,
+                searching, and fetching what it needs to finish a task.
+              </p>
+              <a href="webhooks.html" class="home-card-link">External integrations &rarr;</a>
             </article>
             <article class="home-card home-card--highlight" role="listitem">
               <span class="home-card-icon" aria-hidden="true">&#x1F6E1;&#xFE0F;</span>
@@ -183,6 +194,17 @@
               Connect any Model Context Protocol server — databases, APIs, CI systems, design
               tools. One import command and the tools appear in the next session automatically.
             </p>
+          </article>
+
+          <article class="home-card home-card--highlight" role="listitem">
+            <span class="home-card-icon" aria-hidden="true">&#x1F4E1;</span>
+            <h3 class="home-card-title">Inbound Webhooks</h3>
+            <p class="home-card-desc">
+              The reverse of MCP: external systems — Flowise flows, CI, GitHub — POST events into a
+              running session. Queue them for the agent to drain, or trigger a turn immediately.
+              Local, authenticated, one auto-assigned port per session.
+            </p>
+            <a href="webhooks.html" class="home-card-link">How webhooks work &rarr;</a>
           </article>
 
           <article class="home-card" role="listitem">

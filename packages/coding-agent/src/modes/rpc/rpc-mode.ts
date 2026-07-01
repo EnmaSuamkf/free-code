@@ -60,6 +60,7 @@ const RPC_GET_COMMANDS_ALLOWLIST = new Set([
 	"logout",
 	"mcp",
 	"mcp-import",
+	"webhook",
 	"codeGraph-index",
 	"codeGraph-symbols",
 	"codeGraph-callers",

@@ -5,6 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>RAG — free-code</title>
     <link rel="stylesheet" href="assets/styles.css" />
+    <style>
+      /* Theme-aware flow diagrams (inherit the site color variables). */
+      .wh-fig { margin: 1.5rem 0 0.25rem; }
+      .wh-fig svg { width: 100%; height: auto; display: block; }
+      .wh-fig figcaption { color: var(--ink-muted); font-size: 0.85rem; margin-top: 0.6rem; }
+      .wh-b { fill: var(--surface-muted); stroke: var(--border); stroke-width: 1.5; }
+      .wh-b-accent { fill: var(--primary-soft); stroke: var(--primary); stroke-width: 1.5; }
+      .wh-b-mute { fill: var(--code-bg); stroke: var(--border); stroke-width: 1.5; }
+      .wh-t { fill: var(--ink); font-family: inherit; font-size: 14px; font-weight: 600; }
+      .wh-t-sm { fill: var(--ink-muted); font-family: inherit; font-size: 11.5px; font-weight: 500; }
+      .wh-line { stroke: var(--primary); stroke-width: 2; fill: none; }
+      .wh-line-mute { stroke: var(--ink-muted); stroke-width: 1.5; fill: none; stroke-dasharray: 5 4; }
+      .wh-ah { fill: var(--primary); }
+      .wh-ah-mute { fill: var(--ink-muted); }
+    </style>
   </head>
   <body>
     <div class="doc-root">
@@ -37,13 +52,14 @@
 
           <nav class="nav" aria-label="Primary">
             <a href="index.html">[home]</a>
-            <a href="capabilities.html">[capabilities]</a>
-            <a href="models.html">[models]</a>
-            <a href="rag.html" aria-current="page">[rag]</a>
-            <a href="commands.html">[commands]</a>
             <a href="installation.html">[installation]</a>
+            <a href="webhooks.html">[webhooks]</a>
+            <a href="rag.html" aria-current="page">[rag]</a>
             <a href="code-graph.html">[code graph]</a>
             <a href="mcp.html">[mcp]</a>
+            <a href="capabilities.html">[capabilities]</a>
+            <a href="commands.html">[commands]</a>
+            <a href="models.html">[models]</a>
           </nav>
         </header>
 
@@ -105,6 +121,75 @@
               Because matching is on embeddings, a query like "how do we authenticate users?" can match a
               chunk that talks about "login flow" or "session tokens" even without sharing the same words.
             </div>
+          </div>
+        </section>
+
+        <!-- Flow diagrams -->
+        <section class="card" aria-labelledby="rag-diagrams">
+          <div class="card-header">
+            <h2 id="rag-diagrams">Flow diagrams</h2>
+            <p>Two pipelines: putting documents in, and querying them back out.</p>
+          </div>
+          <div class="card-body">
+
+            <h3>1 · Indexing — putting information in</h3>
+            <figure class="wh-fig">
+              <svg viewBox="0 0 760 120" role="img" aria-label="A document is loaded and split into overlapping chunks, each chunk is embedded into a 384-dimension vector, and the vectors plus metadata are stored in the FAISS index of the active knowledge base.">
+                <defs>
+                  <marker id="rag-arrow-a" markerWidth="10" markerHeight="8" refX="8" refY="3" orient="auto">
+                    <path d="M0,0 L8,3 L0,6 Z" class="wh-ah" />
+                  </marker>
+                </defs>
+                <rect x="8" y="24" width="150" height="72" rx="10" class="wh-b" />
+                <text x="83" y="52" text-anchor="middle" dominant-baseline="central" class="wh-t">Document</text>
+                <text x="83" y="74" text-anchor="middle" dominant-baseline="central" class="wh-t-sm">.md &#183; .pdf &#183; .docx</text>
+                <line x1="158" y1="60" x2="198" y2="60" class="wh-line" marker-end="url(#rag-arrow-a)" />
+                <rect x="206" y="24" width="150" height="72" rx="10" class="wh-b" />
+                <text x="281" y="52" text-anchor="middle" dominant-baseline="central" class="wh-t">Chunk</text>
+                <text x="281" y="74" text-anchor="middle" dominant-baseline="central" class="wh-t-sm">~1000 chars, 200 overlap</text>
+                <line x1="356" y1="60" x2="396" y2="60" class="wh-line" marker-end="url(#rag-arrow-a)" />
+                <rect x="404" y="24" width="150" height="72" rx="10" class="wh-b" />
+                <text x="479" y="52" text-anchor="middle" dominant-baseline="central" class="wh-t">Embed</text>
+                <text x="479" y="74" text-anchor="middle" dominant-baseline="central" class="wh-t-sm">MiniLM-L6-v2 &#183; 384-d</text>
+                <line x1="554" y1="60" x2="594" y2="60" class="wh-line" marker-end="url(#rag-arrow-a)" />
+                <rect x="602" y="24" width="150" height="72" rx="10" class="wh-b-accent" />
+                <text x="677" y="52" text-anchor="middle" dominant-baseline="central" class="wh-t">Store in FAISS</text>
+                <text x="677" y="74" text-anchor="middle" dominant-baseline="central" class="wh-t-sm">vectors + metadata</text>
+              </svg>
+              <figcaption>Runs once per document (<code>/rag addFile</code>, <code>/rag addGroup</code>, <code>/rag addGithubUrl</code>). Everything is stored locally under <code>~/.free-code/faiss_store/</code> for the active knowledge base.</figcaption>
+            </figure>
+
+            <h3>2 · Querying — getting information back out</h3>
+            <figure class="wh-fig">
+              <svg viewBox="0 0 900 120" role="img" aria-label="Your query is embedded with the same model, FAISS finds the nearest chunk vectors by L2 distance, the top five within the distance threshold survive, and those chunks are injected into the conversation as context.">
+                <defs>
+                  <marker id="rag-arrow-b" markerWidth="10" markerHeight="8" refX="8" refY="3" orient="auto">
+                    <path d="M0,0 L8,3 L0,6 Z" class="wh-ah" />
+                  </marker>
+                </defs>
+                <rect x="1" y="24" width="150" height="72" rx="10" class="wh-b-accent" />
+                <text x="76" y="52" text-anchor="middle" dominant-baseline="central" class="wh-t">Your query</text>
+                <text x="76" y="74" text-anchor="middle" dominant-baseline="central" class="wh-t-sm">/rag search "…"</text>
+                <line x1="151" y1="60" x2="182" y2="60" class="wh-line" marker-end="url(#rag-arrow-b)" />
+                <rect x="188" y="24" width="150" height="72" rx="10" class="wh-b" />
+                <text x="263" y="52" text-anchor="middle" dominant-baseline="central" class="wh-t">Embed query</text>
+                <text x="263" y="74" text-anchor="middle" dominant-baseline="central" class="wh-t-sm">same model / space</text>
+                <line x1="338" y1="60" x2="369" y2="60" class="wh-line" marker-end="url(#rag-arrow-b)" />
+                <rect x="375" y="24" width="150" height="72" rx="10" class="wh-b" />
+                <text x="450" y="52" text-anchor="middle" dominant-baseline="central" class="wh-t">FAISS search</text>
+                <text x="450" y="74" text-anchor="middle" dominant-baseline="central" class="wh-t-sm">nearest by L2</text>
+                <line x1="525" y1="60" x2="556" y2="60" class="wh-line" marker-end="url(#rag-arrow-b)" />
+                <rect x="562" y="24" width="150" height="72" rx="10" class="wh-b" />
+                <text x="637" y="52" text-anchor="middle" dominant-baseline="central" class="wh-t">Top 5</text>
+                <text x="637" y="74" text-anchor="middle" dominant-baseline="central" class="wh-t-sm">drop dist &#62; ~1.2</text>
+                <line x1="712" y1="60" x2="743" y2="60" class="wh-line" marker-end="url(#rag-arrow-b)" />
+                <rect x="749" y="24" width="150" height="72" rx="10" class="wh-b-accent" />
+                <text x="824" y="52" text-anchor="middle" dominant-baseline="central" class="wh-t">Inject context</text>
+                <text x="824" y="74" text-anchor="middle" dominant-baseline="central" class="wh-t-sm">agent answers</text>
+              </svg>
+              <figcaption>The query and the documents are embedded by the <strong>same</strong> model into the <strong>same</strong> 384-d space — that's why matching is by meaning, not keywords. Weak matches beyond the threshold are dropped so they don't add noise.</figcaption>
+            </figure>
+
           </div>
         </section>
 
