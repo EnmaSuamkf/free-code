@@ -5,11 +5,97 @@ function clearMessages() {
   messagesEl.innerHTML =
     '<div id="empty-hint">Use /pick-tools to choose which MCPs and extensions are active in this session.</div>';
   assistantNodes.clear();
+  assistantRawText.clear();
   thinkingNodes.clear();
   subagentWidgetNodes.clear();
   pendingToolEntriesByName.clear();
   pendingToolRows.clear();
 }
+
+/** @type {Record<string, Set<string>>} allowed attributes per uppercase tag name */
+const MD_ALLOWED_ATTRS = {
+  A: new Set(["href", "title", "target", "rel"]),
+  CODE: new Set(["class"]),
+  SPAN: new Set(["class"]),
+};
+const MD_ALLOWED_TAGS = new Set([
+  "P", "BR", "STRONG", "EM", "B", "I", "CODE", "PRE", "UL", "OL", "LI", "A",
+  "H1", "H2", "H3", "H4", "H5", "H6", "BLOCKQUOTE", "HR", "TABLE", "THEAD",
+  "TBODY", "TR", "TH", "TD", "DEL", "SPAN",
+]);
+
+/**
+ * Strip anything not on an explicit allowlist from `marked`-generated HTML before it's
+ * inserted via innerHTML. Assistant text can echo back adversarial content (e.g. from a
+ * fetched web page or file), so raw HTML tokens and event-handler/script-ish attributes
+ * must not survive into the DOM.
+ * @param {string} html
+ * @returns {string}
+ */
+function sanitizeMarkdownHtml(html) {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  /** @param {Node} parent */
+  const sanitize = (parent) => {
+    for (const child of Array.from(parent.childNodes)) {
+      if (child.nodeType === Node.ELEMENT_NODE) {
+        const el = /** @type {Element} */ (child);
+        if (!MD_ALLOWED_TAGS.has(el.tagName)) {
+          parent.replaceChild(document.createTextNode(el.textContent || ""), el);
+          continue;
+        }
+        const allowedAttrs = MD_ALLOWED_ATTRS[el.tagName];
+        for (const attr of Array.from(el.attributes)) {
+          const name = attr.name.toLowerCase();
+          if (!allowedAttrs || !allowedAttrs.has(name)) {
+            el.removeAttribute(attr.name);
+            continue;
+          }
+          if (name === "href" && !/^(https?:|mailto:)/i.test(attr.value.trim())) {
+            el.removeAttribute(attr.name);
+          }
+        }
+        if (el.tagName === "A") {
+          el.setAttribute("target", "_blank");
+          el.setAttribute("rel", "noopener noreferrer");
+        }
+        sanitize(el);
+      } else if (child.nodeType !== Node.TEXT_NODE) {
+        parent.removeChild(child);
+      }
+    }
+  };
+  sanitize(doc.body);
+  return doc.body.innerHTML;
+}
+
+/**
+ * Render markdown source into `el`, falling back to plain text if `marked` isn't
+ * available or parsing throws.
+ * @param {HTMLElement} el
+ * @param {string} rawText
+ */
+function renderMarkdownInto(el, rawText) {
+  if (window.marked && rawText) {
+    try {
+      el.innerHTML = sanitizeMarkdownHtml(window.marked.parse(rawText));
+      return;
+    } catch {
+      // fall through to plain text
+    }
+  }
+  el.textContent = rawText;
+}
+
+messagesEl.addEventListener("click", (e) => {
+  const target = /** @type {HTMLElement} */ (e.target);
+  const link = target.closest ? target.closest("a[href]") : null;
+  if (!link) return;
+  e.preventDefault();
+  const href = link.getAttribute("href") || "";
+  if (/^(https?:|mailto:)/i.test(href)) {
+    vscode.postMessage({ type: "open_link", url: href });
+  }
+});
 
 /**
  * Append a thinking `<details>` block and return its streaming body. Defaults to
@@ -72,7 +158,11 @@ function collapseOpenThinkingBlocks() {
 function addMessage(role, text) {
   const row = document.createElement("div");
   row.className = `message ${role}`;
-  row.textContent = text;
+  if (role === "assistant") {
+    renderMarkdownInto(row, text);
+  } else {
+    row.textContent = text;
+  }
   messagesEl.appendChild(row);
   scrollMessagesAfterContentChange();
   return row;

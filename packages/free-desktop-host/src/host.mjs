@@ -1961,6 +1961,57 @@ function readMcpServersAndStatus(cwd) {
   return { names, status };
 }
 
+const MCP_TOOL_DESCRIPTION_MAX_LEN = 100;
+
+/**
+ * Collapse a (possibly multi-line) tool description to a single trimmed, truncated
+ * line, mirroring summarizeToolDescription() in
+ * packages/coding-agent/default-extensions/lib/mcp-tools-cache.ts.
+ * @param {unknown} description
+ * @returns {string}
+ */
+function summarizeMcpToolDescription(description) {
+  if (typeof description !== "string" || !description) return "";
+  const firstLine = description
+    .split("\n")
+    .map((line) => line.trim())
+    .find((line) => line.length > 0);
+  if (!firstLine) return "";
+  if (firstLine.length <= MCP_TOOL_DESCRIPTION_MAX_LEN) return firstLine;
+  return `${firstLine.slice(0, MCP_TOOL_DESCRIPTION_MAX_LEN - 1).trimEnd()}…`;
+}
+
+/**
+ * Read cached tools per MCP server, mirroring
+ * packages/coding-agent/default-extensions/lib/mcp-tools-cache.ts, so the GUI's fast-path
+ * `/mcp list` (which doesn't spin up the agent) can show tools without a live connection.
+ * @returns {Record<string, { name: string; description: string }[]>} server name -> sorted tools
+ */
+function readMcpToolsCache() {
+  const agentRoot = resolveCodingAgentAgentRoot();
+  const cachePath = path.join(agentRoot, "mcp-tools-cache.json");
+  /** @type {Record<string, { name: string; description: string }[]>} */
+  const result = {};
+  try {
+    const raw = JSON.parse(readFileSync(cachePath, "utf8"));
+    const entries = raw?.entries;
+    if (entries && typeof entries === "object") {
+      for (const [name, entry] of Object.entries(entries)) {
+        const tools = entry?.tools;
+        if (Array.isArray(tools)) {
+          result[name] = tools
+            .filter((t) => typeof t?.name === "string")
+            .map((t) => ({ name: t.name, description: summarizeMcpToolDescription(t.description) }))
+            .sort((a, b) => a.name.localeCompare(b.name));
+        }
+      }
+    }
+  } catch {
+    // best effort; cache may not exist yet
+  }
+  return result;
+}
+
 /**
  * @param {string} name
  * @param {"enabled" | "disabled"} value
@@ -3115,6 +3166,19 @@ export class FreeCodeChatViewProvider {
         () => {},
         () => {},
       );
+      return;
+    }
+    if (message?.type === "open_link" && typeof message.url === "string") {
+      // Only http(s)/mailto links can reach here (webview-side sanitizer restricts
+      // hrefs to those schemes before posting), but re-check since this handler
+      // ultimately shells out to the OS via openExternal.
+      const url = message.url.trim();
+      if (/^(https?:|mailto:)/i.test(url)) {
+        vscode.env.openExternal(vscode.Uri.parse(url)).then(
+          () => {},
+          () => {},
+        );
+      }
       return;
     }
     if (message?.type === "drop_request") {
@@ -5106,10 +5170,21 @@ export class FreeCodeChatViewProvider {
             body =
               "No MCP servers configured. Add them to ~/.free-code/agent/mcp.json or run /mcp-import.";
           } else {
+            const toolsByServer = readMcpToolsCache();
             const lines = names
               .slice()
               .sort()
-              .map((n) => `  ${status[n] === "enabled" ? "[on] " : "[off]"} ${n}`);
+              .flatMap((n) => {
+                const header = `  ${status[n] === "enabled" ? "[on] " : "[off]"} ${n}`;
+                const tools = toolsByServer[n];
+                if (!tools || tools.length === 0) {
+                  return [header, "        (tools unknown — connect once to populate)"];
+                }
+                return [
+                  header,
+                  ...tools.map((t) => (t.description ? `        - ${t.name}: ${t.description}` : `        - ${t.name}`)),
+                ];
+              });
             body = `MCP servers:\n${lines.join("\n")}\n\nEnabled servers start automatically. Restart the session to apply changes.`;
           }
         } else {
@@ -6942,7 +7017,11 @@ export class FreeCodeChatViewProvider {
             void vscode.window.showWarningMessage(message);
             this.postToWebviewForRuntime(runtime, { type: "hint", text: message });
           } else {
+            // VS Code's native info toast collapses multi-line content (e.g. `/mcp
+            // list` output), so also post it to the chat panel, which preserves
+            // newlines and indentation like the CLI does.
             void vscode.window.showInformationMessage(message);
+            this.postToWebviewForRuntime(runtime, { type: "info", text: message });
           }
           return;
         }

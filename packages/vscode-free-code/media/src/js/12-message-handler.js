@@ -19,12 +19,17 @@ window.addEventListener("message", (event) => {
       collapseOpenThinkingBlocks();
       const node = addMessage("assistant", "");
       assistantNodes.set(message.messageId, node);
+      assistantRawText.set(message.messageId, "");
       lastTurnNodes.push(node);
       break;
     }
     case "assistant_message_delta": {
       const node = assistantNodes.get(message.messageId);
-      if (node) node.textContent += message.text;
+      if (node) {
+        const raw = (assistantRawText.get(message.messageId) ?? "") + message.text;
+        assistantRawText.set(message.messageId, raw);
+        renderMarkdownInto(node, raw);
+      }
       setWorkingStatus("Writing response");
       scrollMessagesAfterContentChange();
       break;
@@ -109,6 +114,11 @@ window.addEventListener("message", (event) => {
     case "hint":
       if (typeof message.text === "string") {
         addMessage("hint", message.text);
+      }
+      break;
+    case "info":
+      if (typeof message.text === "string") {
+        addMessage("info", message.text);
       }
       break;
     case "mcp_loading_start":
@@ -295,6 +305,7 @@ window.addEventListener("message", (event) => {
       }
       lastTurnNodes = [];
       assistantNodes.clear();
+      assistantRawText.clear();
       pendingToolEntriesByName.clear();
       pendingToolRows.clear();
       if (inputEl && typeof message.text === "string") {

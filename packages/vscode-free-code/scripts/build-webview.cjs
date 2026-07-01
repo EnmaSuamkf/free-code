@@ -7,6 +7,7 @@ const path = require("path");
 const root = path.join(__dirname, "..");
 
 const jsFiles = [
+  "media/src/js/00-vendor-marked.js",
   "media/src/js/01-dom-refs.js",
   "media/src/js/02-state.js",
   "media/src/js/03-utils.js",

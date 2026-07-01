@@ -668,6 +668,95 @@ body.drawer-pinned .main-content {
 	max-width: 90%;
 }
 
+/* Assistant text is rendered from markdown (see renderMarkdownInto in
+   08-messages.js), so block spacing/wrapping is handled by normal HTML flow
+   instead of the raw `pre-wrap` used for plain-text message types. `<pre>`
+   keeps its own UA-default whitespace handling regardless of this override. */
+.message.assistant {
+	white-space: normal;
+}
+
+.message.assistant > :first-child {
+	margin-top: 0;
+}
+
+.message.assistant > :last-child {
+	margin-bottom: 0;
+}
+
+.message.assistant p,
+.message.assistant ul,
+.message.assistant ol,
+.message.assistant blockquote,
+.message.assistant pre,
+.message.assistant table,
+.message.assistant h1,
+.message.assistant h2,
+.message.assistant h3,
+.message.assistant h4,
+.message.assistant h5,
+.message.assistant h6 {
+	margin: 0.5em 0;
+}
+
+.message.assistant ul,
+.message.assistant ol {
+	padding-left: 1.5em;
+}
+
+.message.assistant code {
+	font-family: var(--vscode-editor-font-family, monospace);
+	font-size: 0.9em;
+	background: color-mix(in srgb, var(--vscode-editorWidget-background) 80%, transparent);
+	border-radius: 3px;
+	padding: 0.1em 0.35em;
+}
+
+.message.assistant pre {
+	font-family: var(--vscode-editor-font-family, monospace);
+	font-size: 0.9em;
+	background: var(--vscode-textBlockQuote-background);
+	border: 1px solid var(--vscode-textBlockQuote-border);
+	border-radius: 6px;
+	padding: 8px 10px;
+	overflow-x: auto;
+}
+
+.message.assistant pre code {
+	background: none;
+	border-radius: 0;
+	padding: 0;
+}
+
+.message.assistant a {
+	color: var(--vscode-textLink-foreground);
+}
+
+.message.assistant a:hover {
+	color: var(--vscode-textLink-activeForeground);
+}
+
+.message.assistant blockquote {
+	border-left: 3px solid var(--vscode-textBlockQuote-border);
+	padding-left: 0.75em;
+	color: var(--vscode-descriptionForeground);
+}
+
+.message.assistant hr {
+	border: none;
+	border-top: 1px solid var(--vscode-textBlockQuote-border);
+}
+
+.message.assistant table {
+	border-collapse: collapse;
+}
+
+.message.assistant th,
+.message.assistant td {
+	border: 1px solid var(--vscode-textBlockQuote-border);
+	padding: 0.25em 0.5em;
+}
+
 .message.user .file-chips-inline {
 	display: flex;
 	flex-wrap: wrap;
@@ -755,6 +844,14 @@ body.drawer-pinned .main-content {
 }
 
 .message.custom {
+	font-family: var(--vscode-editor-font-family, monospace);
+	font-size: 12px;
+	background: var(--vscode-textBlockQuote-background);
+	border: 1px solid var(--vscode-textBlockQuote-border);
+	max-width: 95%;
+}
+
+.message.info {
 	font-family: var(--vscode-editor-font-family, monospace);
 	font-size: 12px;
 	background: var(--vscode-textBlockQuote-background);

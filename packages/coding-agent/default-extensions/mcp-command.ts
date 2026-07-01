@@ -12,6 +12,7 @@
  */
 import type { ExtensionAPI } from "@free/pi-coding-agent";
 import { getReconciledMcpStatus, setMcpServerStatus } from "./lib/mcp-status.ts";
+import { loadToolsCache, summarizeToolDescription } from "./lib/mcp-tools-cache.ts";
 
 const USAGE = "Usage: /mcp list | /mcp enable <name> | /mcp disable <name>";
 const SUBCOMMANDS = new Set(["list", "enable", "disable"]);
@@ -40,10 +41,25 @@ export default function mcpCommandExtension(pi: ExtensionAPI) {
 					);
 					return;
 				}
+				const cache = loadToolsCache();
 				const lines = names
 					.slice()
 					.sort()
-					.map((n) => `  ${status[n] === "enabled" ? "[on] " : "[off]"} ${n}`);
+					.flatMap((n) => {
+						const header = `  ${status[n] === "enabled" ? "[on] " : "[off]"} ${n}`;
+						const tools = cache.entries[n]?.tools;
+						if (!tools || tools.length === 0) {
+							return [header, "        (tools unknown — connect once to populate)"];
+						}
+						const toolLines = tools
+							.slice()
+							.sort((a, b) => a.name.localeCompare(b.name))
+							.map((t) => {
+								const desc = summarizeToolDescription(t.description);
+								return desc ? `        - ${t.name}: ${desc}` : `        - ${t.name}`;
+							});
+						return [header, ...toolLines];
+					});
 				ctx.ui.notify(
 					`MCP servers:\n${lines.join("\n")}\n\nEnabled servers start automatically. Run /reload (or start a new session) to apply changes.`,
 					"info",

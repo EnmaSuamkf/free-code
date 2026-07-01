@@ -41,6 +41,13 @@ let queuedMessage = null;
 
 const assistantNodes = new Map();
 /**
+ * messageId -> raw (un-rendered) markdown accumulated so far for a streaming
+ * assistant message. Needed because the node's innerHTML is rendered markdown,
+ * not the source text, so it can't be used as the append buffer.
+ * @type {Map<string, string>}
+ */
+const assistantRawText = new Map();
+/**
  * messageId -> `<pre>` body of the thinking `<details>` element.
  * Used by streaming thinking_delta handlers to append text to the right block.
  * @type {Map<string, HTMLElement>}

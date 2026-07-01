@@ -4,10 +4,17 @@ import { Client, StdioClientTransport, StreamableHTTPClientTransport } from "@mo
 import { createHash } from "node:crypto";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { homedir } from "os";
-import { dirname, join } from "path";
+import { join } from "path";
 import { CONFIG_DIR, loadMcpConfig, type McpServerConfig, reconcileMcpStatus } from "./lib/mcp-status.ts";
+import {
+	loadToolsCache,
+	saveToolsCache,
+	TOOLS_CACHE_VERSION,
+	type ToolList,
+	type ToolsCacheFile,
+} from "./lib/mcp-tools-cache.ts";
 
 const execFileAsync = promisify(execFile);
 const MCP_LABEL_KEY = "free-code-pid";
@@ -84,25 +91,6 @@ interface ConnectedServer {
 	transport: StdioClientTransport | StreamableHTTPClientTransport;
 }
 
-type ToolList = Awaited<ReturnType<Client["listTools"]>>["tools"];
-
-interface CachedEntry {
-	hash: string;
-	tools: ToolList;
-}
-
-interface ToolsCacheFile {
-	version: number;
-	entries: Record<string, CachedEntry>;
-}
-
-const TOOLS_CACHE_FILE = "mcp-tools-cache.json";
-const TOOLS_CACHE_VERSION = 1;
-
-function getToolsCachePath(): string {
-	return join(homedir(), CONFIG_DIR, "agent", TOOLS_CACHE_FILE);
-}
-
 /** Directory used as cwd for stdio MCP subprocesses so `./.env` resolves next to global `mcp.json`. */
 function getMcpStdioCwd(): string {
 	return join(homedir(), CONFIG_DIR, "agent");
@@ -148,30 +136,6 @@ function hashServerConfig(config: McpServerConfig): string {
 		type: config.type,
 	};
 	return createHash("sha1").update(stableStringify(normalized)).digest("hex");
-}
-
-function loadToolsCache(): ToolsCacheFile {
-	const cachePath = getToolsCachePath();
-	if (!existsSync(cachePath)) return { version: TOOLS_CACHE_VERSION, entries: {} };
-	try {
-		const raw = JSON.parse(readFileSync(cachePath, "utf-8")) as ToolsCacheFile;
-		if (raw.version !== TOOLS_CACHE_VERSION || !raw.entries) {
-			return { version: TOOLS_CACHE_VERSION, entries: {} };
-		}
-		return raw;
-	} catch {
-		return { version: TOOLS_CACHE_VERSION, entries: {} };
-	}
-}
-
-function saveToolsCache(cache: ToolsCacheFile): void {
-	const cachePath = getToolsCachePath();
-	try {
-		mkdirSync(dirname(cachePath), { recursive: true });
-		writeFileSync(cachePath, JSON.stringify(cache, null, 2));
-	} catch {
-		// best effort; cache is an optimization only
-	}
 }
 
 type NotifyFn = (msg: string, level: "info" | "warning") => void;
@@ -248,6 +212,43 @@ function attachStderrListener(name: string, transport: StdioClientTransport, not
 	});
 }
 
+const DEFAULT_MCP_CONNECT_TIMEOUT_MS = 10_000;
+
+function getMcpConnectTimeoutMs(): number {
+	const raw = process.env.MCP_TIMEOUT;
+	const parsed = raw ? Number(raw) : NaN;
+	return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_MCP_CONNECT_TIMEOUT_MS;
+}
+
+/**
+ * Races `client.connect()` against a timeout so a hung handshake (e.g. an
+ * unreachable HTTP server, or a stdio process that never speaks MCP) fails
+ * fast instead of blocking `session_start` forever. On timeout the transport
+ * is closed so any spawned child process doesn't linger.
+ */
+async function connectWithTimeout(
+	client: Client,
+	transport: StdioClientTransport | StreamableHTTPClientTransport,
+): Promise<void> {
+	const timeoutMs = getMcpConnectTimeoutMs();
+	let timer: ReturnType<typeof setTimeout>;
+	const timeout = new Promise<never>((_, reject) => {
+		timer = setTimeout(() => reject(new Error(`connection timed out after ${timeoutMs}ms`)), timeoutMs);
+	});
+	try {
+		await Promise.race([client.connect(transport), timeout]);
+	} catch (e) {
+		try {
+			await transport.close();
+		} catch {
+			// Best effort — transport may already be dead.
+		}
+		throw e;
+	} finally {
+		clearTimeout(timer!);
+	}
+}
+
 async function connectStdio(
 	name: string,
 	config: McpServerConfig,
@@ -287,7 +288,7 @@ async function connectStdio(
 	});
 	attachStderrListener(name, transport, notify);
 	const client = new Client({ name: `free-code:${name}`, version: "1.0.0" });
-	await client.connect(transport);
+	await connectWithTimeout(client, transport);
 
 	// Track the child PID for synchronous exit cleanup.
 	const pid = transport.pid;
@@ -299,7 +300,7 @@ async function connectStdio(
 async function connectHttp(name: string, config: McpServerConfig): Promise<ConnectedServer> {
 	const transport = new StreamableHTTPClientTransport(new URL(config.url!));
 	const client = new Client({ name: `free-code:${name}`, version: "1.0.0" });
-	await client.connect(transport);
+	await connectWithTimeout(client, transport);
 	return { name, client, transport };
 }
 
