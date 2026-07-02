@@ -63,33 +63,33 @@ const AGENT_BROWSER_PARAMS = Type.Object({
 const PROJECT_RULE_PROMPT =
 	"Project rule: when browser automation is needed, prefer the native `agent_browser` tool. Do not run direct `agent-browser` bash commands unless the user explicitly asks for a bash-oriented workflow or browser-integration debugging.";
 const QUICK_START_GUIDELINES = [
-	"Quick start mental model: args are the exact agent-browser CLI args after the binary; stdin is only for batch and eval --stdin; sessionMode=fresh switches the extension-managed session to a fresh upstream launch when you need new --profile, --session-name, or --cdp state.",
-	"Common first calls: { args: [\"open\", \"https://example.com\"] } then { args: [\"snapshot\", \"-i\"] }; after navigation, use { args: [\"click\", \"@e2\"] } then { args: [\"snapshot\", \"-i\"] }.",
-	"Common advanced calls: { args: [\"batch\"], stdin: \"[[\\\"open\\\",\\\"https://example.com\\\"],[\\\"snapshot\\\",\\\"-i\\\"]]\" }, { args: [\"eval\", \"--stdin\"], stdin: \"document.title\" }, and { args: [\"--profile\", \"Default\", \"open\", \"https://example.com/account\"], sessionMode: \"fresh\" }.",
+	"Quick start mental model: args are the exact agent-browser CLI args after the binary; stdin is only for batch and eval --stdin. Always include [\"--cdp\", \"http://127.0.0.1:9222\", ...] in args and always set sessionMode: \"fresh\" so every call attaches to the already-running debug Chrome instead of launching a separate browser.",
+	"Common first calls: { args: [\"--cdp\", \"http://127.0.0.1:9222\", \"navigate\", \"https://example.com\"], sessionMode: \"fresh\" } then { args: [\"--cdp\", \"http://127.0.0.1:9222\", \"snapshot\", \"-i\"], sessionMode: \"fresh\" }; after navigation, use { args: [\"--cdp\", \"http://127.0.0.1:9222\", \"click\", \"@e2\"], sessionMode: \"fresh\" } then snapshot -i again the same way.",
+	"Common advanced calls: { args: [\"--cdp\", \"http://127.0.0.1:9222\", \"batch\"], stdin: \"[[\\\"navigate\\\",\\\"https://example.com\\\"],[\\\"snapshot\\\",\\\"-i\\\"]]\", sessionMode: \"fresh\" } and { args: [\"--cdp\", \"http://127.0.0.1:9222\", \"eval\", \"--stdin\"], stdin: \"document.title\", sessionMode: \"fresh\" }.",
 ] as const;
 const BRAVE_SEARCH_PROMPT_GUIDELINE =
 	"When a non-empty BRAVE_API_KEY is available in the current environment, prefer the Brave Search API via bash/curl to discover specific destination URLs, then open the chosen URL with agent_browser instead of browsing a search engine results page just to find the target.";
 const SHARED_BROWSER_PLAYBOOK_GUIDELINES = [
-	"Standard workflow: open the page, snapshot -i, interact using refs, and re-snapshot after navigation or major DOM changes.",
-	"For authenticated or user-specific content like feeds, inboxes, dashboards, and accounts, prefer --profile Default on the first browser call and let the implicit session carry continuity. Use --auto-connect only if profile-based reuse is unavailable or the task is specifically about attaching to a running debug-enabled browser.",
-	"Do not invent fixed explicit session names for routine tasks. Use the implicit session unless you truly need multiple isolated browser sessions in the same conversation.",
-	"When using --profile, --session-name, or --cdp, put them on the first command for that session. If you intentionally use an explicit --session, keep using that same explicit session for follow-ups.",
-	"If you already used the implicit session and now need startup-scoped flags like --profile, --session-name, or --cdp, retry with sessionMode set to fresh or pass an explicit --session for the new launch. After a successful unnamed fresh launch, later auto calls follow that new session.",
-	"If a session lands on the wrong page or tab, an interaction changes origin unexpectedly, or an open call returns blocked, blank, or otherwise unexpected results, use tab list / tab <n> / snapshot -i to recover state before retrying different URLs or fallback strategies. Only use wait with an explicit argument like milliseconds, --load, --url, --fn, or --text.",
+	"CRITICAL default: always include [\"--cdp\", \"http://127.0.0.1:9222\", ...] in args and always set sessionMode: \"fresh\" on every agent_browser call (navigate, snapshot, click, type, tab, eval, batch, close). This attaches to the already-running debug Chrome; the CDP connection does not persist between calls, so dropping --cdp or using sessionMode \"auto\" lands on a blank about:blank session instead of that Chrome.",
+	"Standard workflow: navigate to the page (reuses the current tab; avoid \"open\", which can leave an extra blank tab), snapshot -i, interact using refs, and re-snapshot after navigation or major DOM changes — all with --cdp + sessionMode fresh.",
+	"The already-running CDP browser is the user's logged-in Chrome, so it already carries authenticated/user-specific state for feeds, inboxes, dashboards, and accounts. Only use --profile Default (without --cdp) as a fallback when no CDP-enabled Chrome is running and the user confirms a separate profile-based browser is acceptable.",
+	"Do not invent fixed explicit session names for routine tasks; --cdp plus sessionMode: \"fresh\" already gives you a correctly-attached session on every call.",
+	"If a snapshot comes back empty or shows about:blank, you are on the wrong tab: run { args: [\"--cdp\", \"http://127.0.0.1:9222\", \"tab\", \"list\"], sessionMode: \"fresh\" }, then { args: [\"--cdp\", \"http://127.0.0.1:9222\", \"tab\", \"<tID>\"], sessionMode: \"fresh\" } for the real page, then snapshot -i again — all with --cdp + fresh.",
+	"If a session lands on the wrong page or tab, an interaction changes origin unexpectedly, or a navigate call returns blocked, blank, or otherwise unexpected results, use tab list / tab <n> / snapshot -i to recover state before retrying different URLs or fallback strategies. Only use wait with an explicit argument like milliseconds, --load, --url, --fn, or --text.",
 	"For feed, timeline, or inbox reading tasks, focus on the main timeline/list region and read the first item there rather than unrelated composer or sidebar content.",
 	"For read-only browsing tasks, prefer extracting the answer from the current snapshot, structured ref labels, or eval --stdin on the current page before navigating away. Only click into media viewers, detail routes, or new pages when the current view does not contain the needed information.",
 	"When using eval --stdin, scope checks and actions to the target element or route whenever possible instead of relying on broad page-wide text heuristics.",
 	"When using eval --stdin for extraction, return the value you want instead of relying on console.log as the primary result channel.",
+	"If the CDP connection to http://127.0.0.1:9222 fails (connection refused, discovery methods failing, etc.), do not ask the user to open a browser. Launch a debug Chrome yourself via bash using the exact candidate-binary/flags/polling recipe in the agent_browser CRITICAL rules in AGENTS.md (dedicated --user-data-dir under $HOME/.free-code/chrome-debug-profile, setsid+nohup+disown, poll /json/version), wait for port 9222 to respond, then retry the original call with --cdp + sessionMode fresh. Never add --headless or --headless=new to that launch — the user must see a real window, and a headless fallback is never an acceptable substitute even if it answers CDP. Do not improvise different flags or pkill unrelated Chrome processes across retries.",
 	"Do not call --help or other exploratory inspection commands unless the user explicitly asks for them or debugging the browser integration is necessary.",
 ] as const;
 const TOOL_PROMPT_GUIDELINES_PREFIX = ["Use this tool whenever the task requires a real browser or live web content."] as const;
 const TOOL_PROMPT_GUIDELINES_SUFFIX = [
 	"Prefer this tool over bash for opening sites, reading docs on the web, clicking, filling, screenshots, eval, and batch workflows.",
 	"Do not fall back to osascript, AppleScript, or generic browser-driving bash commands when this tool can do the job.",
-	"Pass exact agent-browser CLI arguments in args, excluding the binary name.",
+	"Pass exact agent-browser CLI arguments in args, excluding the binary name, and always lead with [\"--cdp\", \"http://127.0.0.1:9222\"].",
 	"Use stdin for commands like eval --stdin and batch instead of shell heredocs.",
-	"Let the extension-managed session handle the common path unless you explicitly need a fresh launch for upstream flags like --profile, --session-name, or --cdp.",
-	"Use sessionMode=fresh when switching from an existing implicit session to a new profile/debug launch without inventing a fixed explicit session name; later auto calls will follow that new session.",
+	"Always set sessionMode: \"fresh\" on every call so it attaches to the already-running debug Chrome; sessionMode \"auto\" or omitting --cdp lands on a blank, disconnected session instead.",
 ] as const;
 
 function extractCdpPort(args: string[]): number | undefined {

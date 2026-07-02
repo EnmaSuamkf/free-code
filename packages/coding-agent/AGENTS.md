@@ -90,6 +90,54 @@ Some agent runtimes return a generic error (for example `An unknown error occurr
 
 ## **CRITICAL** agent_browser / agent-browser Rules **CRITICAL**
 
+### Always attach over CDP with a fresh session
+
+On **every** `agent_browser` call (navigate, snapshot, click, type, tab, eval, batch, close — no exceptions), always include `["--cdp", "http://127.0.0.1:9222", ...]` in `args` and always set `sessionMode: "fresh"`:
+
+```json
+{ "args": ["--cdp", "http://127.0.0.1:9222", "navigate", "https://example.com"], "sessionMode": "fresh" }
+{ "args": ["--cdp", "http://127.0.0.1:9222", "snapshot", "-i"], "sessionMode": "fresh" }
+```
+
+- The CDP connection does **not** persist between calls — dropping `--cdp` or using `sessionMode: "auto"` lands on a blank `about:blank` session instead of the already-running debug Chrome.
+- Use `navigate` to change pages (it reuses the current tab). Avoid `open`, which can leave an extra blank tab behind.
+- If a snapshot comes back empty or shows `about:blank`, you're on the wrong tab: run `{"args":["--cdp","http://127.0.0.1:9222","tab","list"],"sessionMode":"fresh"}`, then `{"args":["--cdp","http://127.0.0.1:9222","tab","<tID>"],"sessionMode":"fresh"}` for the real page, then `snapshot -i` again — all with `--cdp` + `fresh`.
+- The already-running CDP browser is the user's logged-in Chrome, so it already carries authenticated/user-specific state (feeds, inboxes, dashboards, accounts). Do not spin up a separate `--profile` browser for these; only fall back to `--profile Default` (without `--cdp`) if no CDP-enabled Chrome is running and the user confirms that's acceptable.
+- If the CDP connection fails (`connection refused`, discovery methods failing, etc.), **do not** just tell the user to click a button — launch a debug Chrome yourself over bash, the same way the plugin's "Launch Chrome with remote debugging" button does, then retry. **Run the block below exactly as written, as a single bash call.** Do not improvise your own flags/binary/profile dir, do not guess a binary name without checking it exists first, and do not `pkill` any existing Chrome process (an already-running Chrome under the user's normal profile is expected and must be left alone — this launches a *separate* instance under its own profile):
+
+  ```bash
+  for candidate in \
+    "/usr/bin/google-chrome" "/usr/bin/google-chrome-stable" "/opt/google/chrome/chrome" \
+    "/usr/bin/chromium" "/usr/bin/chromium-browser" "/snap/bin/chromium" \
+    "/usr/bin/microsoft-edge" "/usr/bin/microsoft-edge-stable" "/usr/bin/brave-browser" \
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+    "/Applications/Chromium.app/Contents/MacOS/Chromium" \
+    "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge" \
+    "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"; do
+    [ -x "$candidate" ] && CHROME_BIN="$candidate" && break
+  done
+  setsid nohup "$CHROME_BIN" \
+    --remote-debugging-port=9222 \
+    --user-data-dir="$HOME/.free-code/chrome-debug-profile" \
+    --no-first-run \
+    --disable-default-browser-check \
+    "https://www.google.com" \
+    >/dev/null 2>&1 < /dev/null &
+  disown
+  for i in $(seq 1 60); do
+    code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:9222/json/version)
+    [ "$code" = "200" ] && break
+    sleep 0.5
+  done
+  curl -s http://127.0.0.1:9222/json/version
+  ```
+
+  On Windows, use the equivalent `Start-Process` with the same flags (`chrome.exe --remote-debugging-port=9222 --user-data-dir=%LOCALAPPDATA%\free-code\chrome-debug-profile --no-first-run --disable-default-browser-check https://www.google.com`), started detached, then poll the same way.
+
+  **Never add `--headless` or `--headless=new`, and never add `--disable-gpu` for headless purposes.** The whole point is a *visible* window the user can watch live — a headless Chrome technically answers CDP but the user sees nothing, which defeats the feature. If a window doesn't appear on screen even though the port responds, that's a window-manager/display issue to report to the user, not a reason to switch to headless.
+
+  This reuses `$HOME/.free-code/chrome-debug-profile` (a dedicated profile, separate from the user's normal Chrome profile and from any prior debug-profile launch) so it never collides with an already-open Chrome — it opens as a distinct window, not a new tab in the user's existing browser. `setsid` + `nohup` + `disown` + redirected stdio ensure the process keeps running after this bash call returns. Once the port responds with `200`, retry the original `agent_browser` call with `--cdp` + `sessionMode: "fresh"`. If the port still doesn't respond after the 30s poll, report the exact command you ran and its output to the user instead of retrying with different flags — do not fall back to headless. Only tell the user to install Chrome/Chromium if no candidate binary exists on the machine.
+
 When using `agent_browser` (or `agent-browser` via bash), the `fill` and `type` commands take the text to input as a **plain positional argument**, not a flag:
 
 ```bash

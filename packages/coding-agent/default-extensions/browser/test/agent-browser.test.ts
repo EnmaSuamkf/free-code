@@ -686,11 +686,11 @@ test("agentBrowserExtension keeps the full browser playbook in tool metadata and
 
 		const sharedGuidelineFragments = [
 			"Quick start mental model: args are the exact agent-browser CLI args after the binary",
-			"Common first calls: { args: [\"open\", \"https://example.com\"] } then { args: [\"snapshot\", \"-i\"] }",
-			"Common advanced calls: { args: [\"batch\"]",
-			"Standard workflow: open the page, snapshot -i, interact using refs",
+			"Common first calls: { args: [\"--cdp\", \"http://127.0.0.1:9222\", \"navigate\", \"https://example.com\"], sessionMode: \"fresh\" }",
+			"Common advanced calls: { args: [\"--cdp\", \"http://127.0.0.1:9222\", \"batch\"]",
+			"Standard workflow: navigate to the page (reuses the current tab; avoid \"open\", which can leave an extra blank tab), snapshot -i, interact using refs",
 			"When a non-empty BRAVE_API_KEY is available in the current environment",
-			"Do not invent fixed explicit session names for routine tasks.",
+			"Do not invent fixed explicit session names for routine tasks;",
 			"When using eval --stdin for extraction, return the value you want",
 			"Do not call --help or other exploratory inspection commands unless the user explicitly asks",
 		];

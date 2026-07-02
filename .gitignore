@@ -49,3 +49,6 @@ collect.sh
 free-code-rag/.venv/
 free-code-rag/.coverage
 free-code-rag/.pytest_cache/
+
+
+features/
