@@ -306,6 +306,64 @@ npm install -g ./packages/code-graph</code></pre>
           </div>
         </section>
 
+        <!-- Vision Mode -->
+        <section class="card" aria-labelledby="install-vision">
+          <div class="card-header">
+            <h2 id="install-vision">Vision Mode (optional)</h2>
+            <p>Multimodal capabilities: screen capture, speech-to-text, and text-to-speech.</p>
+          </div>
+          <div class="card-body">
+            <p>
+              Vision Mode is included in the default installation but requires additional
+              system dependencies for full functionality.
+            </p>
+
+            <h3>Screen capture backends</h3>
+            <p>At least one capture method required for <code>/see</code> and live mode:</p>
+            <ul>
+              <li><strong>Linux/Wayland:</strong> <code>xdg-desktop-portal-gnome</code> (primary), or <code>grim</code> / <code>gnome-screenshot</code> / <code>spectacle</code> / <code>scrot</code> / ImageMagick <code>import</code></li>
+              <li><strong>Linux/X11:</strong> <code>scrot</code> or ImageMagick <code>import</code></li>
+              <li><strong>macOS:</strong> <code>screencapture</code> (built-in)</li>
+            </ul>
+
+            <h3>Audio recording</h3>
+            <p>For <code>/voice</code> and live mode STT, install one of:</p>
+            <ul>
+              <li><strong>PipeWire:</strong> <code>pw-record</code> (modern Linux)</li>
+              <li><strong>ALSA:</strong> <code>arecord</code></li>
+              <li><strong>SoX:</strong> <code>sox</code> (cross-platform)</li>
+              <li><strong>FFmpeg:</strong> <code>ffmpeg</code></li>
+            </ul>
+
+            <h3>Speech-to-text (STT)</h3>
+            <p>Choose API-based or local:</p>
+            <ul>
+              <li><strong>API:</strong> OpenAI Whisper (env: <code>OPENAI_API_KEY</code>) or Groq (env: <code>GROQ_API_KEY</code>)</li>
+              <li><strong>Local:</strong> <a href="https://github.com/ggerganov/whisper.cpp" target="_blank" rel="noopener">whisper.cpp</a> (no API cost, fully private)</li>
+            </ul>
+
+            <h3>Text-to-speech (TTS)</h3>
+            <p>Live mode spoken responses:</p>
+            <ul>
+              <li><strong>OpenAI TTS:</strong> <code>tts-1</code> model (env: <code>OPENAI_API_KEY</code>)</li>
+              <li><strong>espeak:</strong> Local, open-source (Linux)</li>
+              <li><strong>say:</strong> macOS native TTS</li>
+            </ul>
+
+            <h3>Check installed backends</h3>
+            <pre><code>/vision backends                # List available capture/STT/TTS backends
+/vision status                  # Current configuration</code></pre>
+
+            <div class="callout info">
+              <strong>Quick start</strong><br />
+              Run <code>/see what is this?</code> with a browser open. The agent will capture your screen,
+              analyze it, and answer based on what it sees.
+            </div>
+
+            <p><a href="capabilities.html#cap-vision">Vision Mode full documentation →</a></p>
+          </div>
+        </section>
+
         <p class="footer">
           <a href="capabilities.html">All capabilities →</a> &nbsp;·&nbsp;
           <a href="commands.html">Commands →</a> &nbsp;·&nbsp;

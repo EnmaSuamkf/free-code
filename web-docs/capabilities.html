@@ -208,6 +208,88 @@ free-code-rag            # default http://localhost:8085
           </div>
         </section>
 
+        <!-- Vision Mode -->
+        <section class="card" aria-labelledby="cap-vision">
+          <div class="card-header">
+            <h2 id="cap-vision">Vision Mode — Multimodal AI Agent</h2>
+            <p>See the screen, hear your voice, respond naturally — hands-free AI assistance.</p>
+          </div>
+          <div class="card-body">
+            <p>
+              Vision Mode brings multimodal capabilities to free-code: screen capture, speech-to-text (STT),
+              and text-to-speech (TTS). The agent can see what's on your screen, listen to your voice,
+              and speak answers back — enabling natural, hands-free interactions.
+            </p>
+
+            <h3>Three interaction modes</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Command</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>/see &lt;question&gt;</code></td>
+                    <td>Capture the current screen and ask about it. Single-shot vision query.</td>
+                  </tr>
+                  <tr>
+                    <td><code>/voice [context]</code></td>
+                    <td>Push-to-talk: record audio, transcribe with Whisper/Groq/OpenAI, then send to the agent.</td>
+                  </tr>
+                  <tr>
+                    <td><code>/vision live on</code></td>
+                    <td>Hands-free mode: continuous voice listening with wake word detection, automatic screen capture, and spoken responses.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>How it works</h3>
+            <p>
+              Vision Mode follows a snapshot-at-question-time model (inspired by 
+              <a href="https://github.com/svpino/alloy-voice-assistant" target="_blank" rel="noopener">alloy-voice-assistant</a>).
+              No video upload, no continuous streaming — the agent receives <strong>one image</strong> at the moment you ask a question,
+              plus the conversation history.
+            </p>
+            <ul>
+              <li><strong>Screen capture:</strong> Cross-platform backends (Wayland portal, scrot, screencapture, PowerShell).</li>
+              <li><strong>Speech-to-text:</strong> Local whisper.cpp or API-based (OpenAI Whisper, Groq).</li>
+              <li><strong>Text-to-speech:</strong> OpenAI TTS, espeak, or native macOS <code>say</code>.</li>
+              <li><strong>Auto-resize:</strong> Images are downscaled (default 1568px max) to ~1.1–1.6k tokens before sending.</li>
+            </ul>
+
+            <h3>Live mode features</h3>
+            <p>When <code>/vision live on</code> is active:</p>
+            <ul>
+              <li><strong>Wake word detection:</strong> Configure keywords (e.g., "free-code", "oye") to trigger processing.</li>
+              <li><strong>Voice-activated capture:</strong> Only captures the screen when vision keywords are detected ("qué ves", "mira", "pantalla").</li>
+              <li><strong>Spoken responses:</strong> TTS speaks the agent's answer while rendering in the terminal.</li>
+              <li><strong>Hands-free workflow:</strong> Ask → capture → transcribe → answer → listen again, all without typing.</li>
+            </ul>
+
+            <h3>Configuration</h3>
+            <pre><code>/vision config                  # View all settings
+/vision backends                # List available capture/STT/TTS backends
+/vision status                  # Current state
+
+# Example: set wake word and language
+/vision config liveWakeWord "free-code"
+/vision config language es</code></pre>
+
+            <div class="callout info">
+              <strong>Use case</strong><br />
+              Open a browser error page, say "free-code, what is this error?", and the agent sees the screen,
+              reads the stack trace, and answers out loud — no typing required.
+            </div>
+
+            <div class="callout tip">
+              <strong>Privacy &amp; cost</strong><br />
+              Vision Mode only captures when you ask a question (or in live mode, when vision keywords are detected).
+              One 1568px image ≈ 1.5k tokens. A 30-question session ≈ 40–50k image tokens — manageable for daily use.
+            </div>
+          </div>
+        </section>
+
         <!-- MCP -->
         <section class="card" aria-labelledby="cap-mcp">
           <div class="card-header">
