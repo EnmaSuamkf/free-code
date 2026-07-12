@@ -561,8 +561,10 @@ export default function visionExtension(pi: ExtensionAPI): void {
 			description: "Vision: push-to-talk (press to start/stop recording, then transcribe)",
 			handler: async (ctx) => {
 				if (live.active) {
-					// In live mode the shortcut barges in on the current capture.
+					// In live mode the shortcut interrupts TTS and recording.
+					stopLiveTts();
 					stopLiveCapture();
+					ctx.ui.notify("Interrupted.", "info");
 					return;
 				}
 				if (!recording) {
