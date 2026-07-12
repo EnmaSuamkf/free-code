@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free-Code Vision Mode — Investigation &amp; Plan</title>
+<style>
+  :root {
+    --bg: #0f1117; --panel: #171a23; --panel2: #1d2130;
+    --text: #d8dce6; --muted: #8b93a7; --accent: #7aa2f7;
+    --green: #9ece6a; --red: #f7768e; --amber: #e0af68; --border: #2a2f3f;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f7f8fa; --panel: #ffffff; --panel2: #eef1f6;
+      --text: #23283a; --muted: #5d6577; --accent: #2f5fd0;
+      --green: #3c8a2e; --red: #c43b5b; --amber: #a1700c; --border: #d9dee8;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 24px; margin-bottom: 32px; }
+  h1 { font-size: 1.9rem; margin: 0 0 8px; }
+  h1 .eye { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05rem; margin: 0; }
+  h2 { font-size: 1.35rem; margin: 44px 0 12px; color: var(--accent); }
+  h3 { font-size: 1.05rem; margin: 28px 0 8px; }
+  p { margin: 10px 0; }
+  a { color: var(--accent); }
+  code {
+    background: var(--panel2); border: 1px solid var(--border); border-radius: 4px;
+    padding: 1px 5px; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.88em;
+  }
+  pre {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    padding: 16px; overflow-x: auto; font-size: 0.82rem; line-height: 1.45;
+  }
+  pre code { background: none; border: none; padding: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 0.92rem; }
+  th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+  th { background: var(--panel2); }
+  tr:nth-child(even) td { background: var(--panel); }
+  .ok { color: var(--green); font-weight: 600; }
+  .missing { color: var(--red); font-weight: 600; }
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--panel);
+    border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 18px 0;
+  }
+  .callout.warn { border-left-color: var(--amber); }
+  .phases { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0; }
+  .phase {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px;
+  }
+  .phase .num {
+    display: inline-block; background: var(--accent); color: var(--bg);
+    border-radius: 6px; padding: 1px 9px; font-weight: 700; font-size: 0.85rem; margin-bottom: 8px;
+  }
+  .phase h4 { margin: 0 0 6px; font-size: 0.98rem; }
+  .phase p { margin: 0; font-size: 0.86rem; color: var(--muted); }
+  .phase .effort { margin-top: 10px; font-size: 0.8rem; color: var(--amber); }
+  footer { margin-top: 56px; border-top: 1px solid var(--border); padding-top: 16px; color: var(--muted); font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1><span class="eye">👁</span> Free-Code Vision Mode — Investigation &amp; Plan</h1>
+  <p class="subtitle">Give free-code eyes (your screen) and ears (your voice), so you can solve things together while you interact. <em>“I have a browser open — what is this?”</em></p>
+</header>
+
+<p><strong>Reference project studied:</strong> <a href="https://github.com/svpino/alloy-voice-assistant">svpino/alloy-voice-assistant</a>, cloned and analyzed at <code>/tmp/alloy-voice-assistant</code>.</p>
+
+<h2>1. What alloy-voice-assistant does (and teaches us)</h2>
+
+<p>It is a single ~170-line Python script that proves the whole interaction loop end-to-end:</p>
+
+<pre><code>┌─────────────┐     ┌──────────────┐     ┌───────────────┐     ┌─────────┐
+│ Mic listens │ ──▶ │ Whisper STT  │ ──▶ │ GPT-4o        │ ──▶ │ TTS     │
+│ (background)│     │ (local)      │     │ text + image  │     │ (voice) │
+└─────────────┘     └──────────────┘     └───────┬───────┘     └─────────┘
+                                                 ▲
+                                    ┌────────────┴────────────┐
+                                    │ Webcam thread keeps the │
+                                    │ LATEST frame in memory  │
+                                    └─────────────────────────┘</code></pre>
+
+<ol>
+  <li>A background thread continuously keeps the <em>freshest webcam frame</em> in a buffer. Nothing is uploaded.</li>
+  <li>The mic listens in the background with voice-activity detection; when you stop talking it fires a callback.</li>
+  <li>The callback transcribes your speech with <strong>local Whisper</strong>, grabs the current frame as base64 JPEG, and sends <em>transcript + one image + chat history</em> to a multimodal model.</li>
+  <li>The answer is spoken back with streamed TTS.</li>
+</ol>
+
+<div class="callout">
+  <strong>The key insight:</strong> you do <em>not</em> need video understanding. The model sees <strong>one snapshot taken at the instant you ask</strong>, plus conversation history. That makes the feature cheap, fast, and buildable with any vision model free-code already supports.
+</div>
+
+<h3>What we must do differently</h3>
+<table>
+  <tr><th>alloy-voice-assistant</th><th>What free-code needs</th></tr>
+  <tr><td>Webcam</td><td><strong>Screen capture</strong> (the actual request)</td></tr>
+  <tr><td>Standalone Python script</td><td>Integrated into free-code (TypeScript extension)</td></tr>
+  <tr><td>OpenAI / Google hardcoded</td><td>Any vision model via <code>packages/ai</code></td></tr>
+  <tr><td>Chat only, no tools</td><td>Full agent — it can <em>act</em> on what it sees (edit files, run commands)</td></tr>
+  <tr><td>English hardcoded in STT</td><td>Configurable language (Spanish / English / auto)</td></tr>
+  <tr><td>No consent model</td><td>Screen = secrets → explicit opt-in, visible indicator</td></tr>
+</table>
+
+<h2>2. What free-code already has (repo audit)</h2>
+
+<p>The good news: <strong>most of the pipeline already exists.</strong> Only capture (eyes) and audio (ears/mouth) are missing.</p>
+
+<table>
+  <tr><th>Building block</th><th>Status</th><th>Where</th></tr>
+  <tr><td>Image content in user messages</td><td class="ok">✅ exists</td><td><code>packages/ai/src/types.ts:153</code> — <code>ImageContent</code>, all providers</td></tr>
+  <tr><td>Vision-capable models</td><td class="ok">✅ exists</td><td>Claude, GPT-4o/5, Gemini… via <code>packages/ai</code></td></tr>
+  <tr><td>Extensions can inject text+image turns</td><td class="ok">✅ exists</td><td><code>pi.sendUserMessage((TextContent|ImageContent)[])</code> — <code>extensions/types.ts:1183</code></td></tr>
+  <tr><td>Slash commands / keybindings via extensions</td><td class="ok">✅ exists</td><td><code>pi.registerCommand()</code> + <code>pi.registerShortcut()</code> (<code>types.ts:1138/1140</code>), default-extensions pattern</td></tr>
+  <tr><td>Clipboard image paste</td><td class="ok">✅ exists</td><td><code>src/utils/clipboard-image.ts</code> + native <code>packages/free-clipboard</code></td></tr>
+  <tr><td>Browser screenshots</td><td class="ok">✅ exists</td><td><code>default-extensions/browser/</code> (agent-browser)</td></tr>
+  <tr><td>Wayland detection</td><td class="ok">✅ exists</td><td><code>isWaylandSession()</code> in <code>src/utils/clipboard-image.ts</code></td></tr>
+  <tr><td>Image resize / conversion (WASM)</td><td class="ok">✅ exists</td><td>Photon via <code>loadPhoton()</code> (<code>src/utils/photon.ts</code>)</td></tr>
+  <tr><td>Auto-resize pipeline</td><td class="ok">✅ exists</td><td>“2000×2000” setting + <code>processFileArguments</code> (<code>main.ts:142</code>)</td></tr>
+  <tr><td>Extension status bar &amp; widgets</td><td class="ok">✅ exists</td><td><code>ctx.ui.setStatus()</code>, <code>ctx.ui.setWidget()</code> — <code>mode.ts</code> uses <code>setStatus</code></td></tr>
+  <tr><td>Input-editor manipulation</td><td class="ok">✅ exists</td><td><code>ctx.ui.setEditorText()</code> / <code>getEditorText()</code></td></tr>
+  <tr><td>Session event hooks</td><td class="ok">✅ exists</td><td><code>pi.on("tool_call"/"context"/…)</code> — used by <code>mode.ts</code></td></tr>
+  <tr><td>Desktop screen capture</td><td class="missing">❌ missing</td><td>—</td></tr>
+  <tr><td>Voice input (STT)</td><td class="missing">❌ missing</td><td>—</td></tr>
+  <tr><td>Voice output (TTS)</td><td class="missing">❌ missing</td><td>—</td></tr>
+  <tr><td>Live “assist mode” UX</td><td class="missing">❌ missing</td><td>—</td></tr>
+</table>
+
+<div class="callout warn">
+  <strong>Environment note (this machine):</strong> Ubuntu GNOME on <strong>Wayland</strong>, no screenshot CLI installed. On Wayland, apps cannot silently grab the screen — capture goes through the <strong>XDG Desktop Portal</strong> (<code>Screenshot</code> for snapshots; <code>ScreenCast</code> + PipeWire for a persistent stream after a one-time permission dialog). This is a feature: the OS provides the consent flow for free.
+</div>
+
+<h2>3. Proposed architecture — a <code>vision.ts</code> default extension</h2>
+
+<p>Ship it like <code>browse-command.ts</code>: a default extension exposing <code>/see</code>, <code>/voice</code> and <code>/vision live</code>, with pluggable platform backends for capture, speech-to-text, and text-to-speech. No core changes needed — everything flows through the existing extension API.</p>
+
+<div class="phases">
+  <div class="phase">
+    <span class="num">Phase 1</span>
+    <h4>/see — snapshot on demand ⭐ start here</h4>
+    <p><code>/see what is this error?</code> → capture screen → <code>sendUserMessage([text, image])</code>. Downscaling reuses Photon (<code>loadPhoton()</code>) and the <code>autoResizeImages</code> pipeline (2000×2000) instead of a hardcoded ~1568px JPEG. Backends chosen with <code>isWaylandSession()</code>: XDG portal as the <strong>primary</strong> path on Wayland (not a fallback), scrot/import (X11), screencapture (macOS), PowerShell (Windows). Detect the available backend and warn if nothing is present. Already fulfills the motivating example, typed instead of spoken.</p>
+    <p class="effort">≈ 1–2 days</p>
+  </div>
+  <div class="phase">
+    <span class="num">Phase 2</span>
+    <h4>/voice — push-to-talk input</h4>
+    <p>A shortcut registered with <code>pi.registerShortcut()</code> records the mic (pw-record / arecord / sox); transcription via local whisper.cpp (private, free) or API (OpenAI Whisper, Groq, Gemini). Transcript is dropped into the editor with <code>ctx.ui.setEditorText()</code> for review, or sends directly. Language configurable. Detect dependencies (whisper/tts not installed here).</p>
+    <p class="effort">≈ 2–3 days</p>
+  </div>
+  <div class="phase">
+    <span class="num">Phase 3</span>
+    <h4>/vision live — the alloy loop</h4>
+    <p>Hands-free, modeled as a mode (precedent <code>mode.ts</code>). Background VAD listening; each utterance grabs the freshest frame (ScreenCast portal → one permission dialog per session) + transcript → <code>sendUserMessage([...], {deliverAs:"steer"})</code> to inject even while the agent streams. Answers spoken via streamed, interruptible TTS (<code>pi.on(…)</code> detects a new utterance) and rendered in the TUI. Status via <code>ctx.ui.setStatus("vision",…)</code>; controls via <code>setWidget()</code>.</p>
+    <p class="effort">≈ 4–6 days</p>
+  </div>
+  <div class="phase">
+    <span class="num">Phase 4</span>
+    <h4>web-ui variant — cheapest demo</h4>
+    <p>In <code>packages/web-ui</code> the browser gives everything natively: <code>getDisplayMedia()</code> screen picker, Web Speech API for STT, <code>speechSynthesis</code> for TTS. Zero native dependencies — ideal place to prototype the live-mode UX.</p>
+    <p class="effort">≈ 2–3 days, parallelizable</p>
+  </div>
+</div>
+
+<h2>4. Privacy, cost, latency</h2>
+<ul>
+  <li><strong>Privacy:</strong> the screen shows password managers, tokens, private messages. Rules: explicit opt-in per session; capture <em>only at question time</em> (never continuous upload); always-visible indicator in live mode; <code>vision.exclude</code> config; Wayland portal dialogs reinforce consent.</li>
+  <li><strong>Cost:</strong> one downscaled 1568px JPEG ≈ 1.1–1.6k input tokens; a 30-question live session ≈ 40–50k image tokens. Only attach an image when the question needs one (heuristic or wake-word “look…”).</li>
+  <li><strong>Latency (target &lt; 5 s, like alloy):</strong> VAD stop ~0.3s + local Whisper <code>base</code> ~0.5–1s + capture ~0.1s + model first token ~1–2s + streamed TTS start ~0.5s.</li>
+</ul>
+
+<h2>5. Verdict</h2>
+<div class="callout">
+  <strong>Yes — very feasible.</strong> alloy-voice-assistant validates the interaction model (snapshot-at-question-time, no video needed), and free-code already has the hard parts: a multimodal message pipeline, vision models, and an extension API that accepts image content in user messages. The genuinely new work is three well-understood adapters — screen capture, STT, TTS — plus careful consent UX. <strong>Phase 1 (<code>/see</code>) alone already delivers “what is this on my screen?” and can be built immediately.</strong>
+</div>
+
+<p>Real environments in this repo: CLI (<code>default-extensions</code>), VS Code (<code>packages/vscode-free-code</code> + <code>free-desktop-host/activate-vscode.mjs</code>), macOS (<code>free-desktop-host/src/stdio-mac.mjs</code>, an stdio bridge that reuses the core), and web-ui. There is no separate <code>FreeCodeMac</code> package. Slash commands are registered once in <code>default-extensions</code> (shared core); only shortcuts (<code>registerShortcut</code>) and the VS Code command palette need per-environment registration. See the <code>AGENTS.md</code> checklist (and fix there <code>DEFAULT_APP_KEYBINDINGS</code>, which does not exist).</p>
+
+<footer>
+  Companion document: <code>analysis/vision-mode-plan.md</code> · Investigation date: 2026-07-12 · Reference repo cloned at <code>/tmp/alloy-voice-assistant</code>
+</footer>
+
+</div>
+</body>
+</html>

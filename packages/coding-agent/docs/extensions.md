@@ -132,7 +132,7 @@ Additional paths via `settings.json`:
 }
 ```
 
-To share extensions via npm or git as pi packages, see [packages.md](packages.md).
+To share extensions via npm or git as free-code packages, see [packages.md](packages.md).
 
 ## Available Imports
 

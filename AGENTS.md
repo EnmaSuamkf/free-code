@@ -17,25 +17,26 @@ read README.md, then ask which module(s) to work on. Based on the answer, read t
 
 ## Code Quality (free-code)
 
-- Never hardcode key checks with, eg. `matchesKey(keyData, "ctrl+x")`. All keybindings must be configurable. Add default to matching object (`DEFAULT_EDITOR_KEYBINDINGS` or `DEFAULT_APP_KEYBINDINGS`)
+- Never hardcode key checks with, eg. `matchesKey(keyData, "ctrl+x")`. All keybindings must be configurable. Base keybindings live in `TUI_KEYBINDINGS` in `packages/tui/src/keybindings.ts` (add new entries there via the `Keybindings` interface declaration merging). Extensions register their own hotkeys at runtime with `pi.registerShortcut(shortcut, { description, handler })` (`packages/coding-agent/src/core/extensions/types.ts`) — never invent `DEFAULT_EDITOR_KEYBINDINGS` / `DEFAULT_APP_KEYBINDINGS` constants, they do not exist.
 
 ## Registering Commands and Subcommands
 
-When you create or modify a slash command or subcommand (e.g. `/rag drive`, `/drive download`, `/rag-kb use`), you **must** register it in all three environments. Leaving any environment out means the command silently fails or shows "unknown subcommand" for users of that environment.
+Slash commands are registered **once** in `packages/coding-agent/default-extensions/*.ts` via `pi.registerCommand()`. That core is shared by every environment (CLI, VS Code plugin, macOS bridge), so a command registered there is available everywhere automatically. Only **hotkeys** and **VS Code command-palette entries** need per-environment wiring.
 
-### The three environments
+### The environments
 
-| Environment | Where commands are registered |
-| --- | --- |
-| **free-code CLI** | `packages/coding-agent/default-extensions/*.ts` — via `pi.registerCommand()`. The `SUBCOMMANDS` / `KB_SUBCOMMANDS` arrays and `switch` cases must be updated. Also update the `description` string and any usage-text `notify()` calls so autocomplete and help messages stay accurate. |
-| **free-code Plugin** | VS Code / JetBrains extension entry point. Look for the equivalent `registerCommand` or command-palette registration file in `packages/tui/` or the plugin package. Add the new command/subcommand there following the same pattern. |
-| **FreeCodeMac** | The Mac desktop app. Register the command in the Mac app's command registry (same API surface as the CLI extension). Check `packages/*/` for a `mac` or `desktop` package and replicate the registration. |
+| Environment | Where it lives | What you may need to register there |
+| --- | --- | --- |
+| **CLI / TUI** | `packages/coding-agent/default-extensions/*.ts` | `pi.registerCommand()` for the slash command; `pi.registerShortcut()` for a hotkey. Update `SUBCOMMANDS` / `KB_SUBCOMMANDS` arrays, `switch` cases, the `description` string, and any usage-text `notify()` calls. |
+| **VS Code / Cursor plugin** | `packages/vscode-free-code` + `packages/free-desktop-host/src/activate-vscode.mjs` | Slash commands are inherited from the core. Add a **command-palette** entry in `activate-vscode.mjs` (`vscode.commands.registerCommand`) and, if you want a hotkey, a `keybindings.json` contribution. |
+| **macOS desktop** | `packages/free-desktop-host/src/stdio-mac.mjs` (an stdio bridge that reuses the coding-agent core) | Slash commands are inherited from the core. No separate `FreeCodeMac` package exists; do not look for one. |
+| **web-ui** | `packages/web-ui` | Slash commands are inherited from the core. For purely web features (e.g. `getDisplayMedia`, Web Speech) add the web-specific wiring here. |
 
 ### Checklist for every new command or subcommand
 
 - [ ] `packages/coding-agent/default-extensions/<manager>.ts` — add to `SUBCOMMANDS` array, add `case` in switch, update description string and all usage `notify()` calls
-- [ ] free-code Plugin — register command/subcommand in the plugin entry point
-- [ ] FreeCodeMac — register command/subcommand in the Mac app entry point
+- [ ] If the command needs a hotkey: `pi.registerShortcut()` in the extension; and a VS Code `keybindings.json` contribution if it should work in the plugin
+- [ ] If the command should appear in the VS Code command palette: add a `vscode.commands.registerCommand` entry in `packages/free-desktop-host/src/activate-vscode.mjs`
 - [ ] Run `npm run build` in the affected package and verify no TypeScript errors
 - [ ] Update root `AGENTS.md` or `packages/coding-agent/AGENTS.md` if the command introduces a new workflow pattern agents should follow
 
