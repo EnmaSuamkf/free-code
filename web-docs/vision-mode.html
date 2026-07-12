@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vision Mode — free-code</title>
+    <link rel="stylesheet" href="assets/styles.css" />
+    <style>
+      /* Theme-aware flow diagrams */
+      .vm-fig { margin: 1.5rem 0 0.25rem; }
+      .vm-fig svg { width: 100%; height: auto; display: block; }
+      .vm-fig figcaption { color: var(--ink-muted); font-size: 0.85rem; margin-top: 0.6rem; }
+      .vm-b { fill: var(--surface-muted); stroke: var(--border); stroke-width: 1.5; }
+      .vm-b-accent { fill: var(--primary-soft); stroke: var(--primary); stroke-width: 1.5; }
+      .vm-b-mute { fill: var(--code-bg); stroke: var(--border); stroke-width: 1.5; }
+      .vm-t { fill: var(--ink); font-family: inherit; font-size: 14px; font-weight: 600; }
+      .vm-t-sm { fill: var(--ink-muted); font-family: inherit; font-size: 11.5px; font-weight: 500; }
+      .vm-line { stroke: var(--primary); stroke-width: 2; fill: none; }
+      .vm-line-mute { stroke: var(--ink-muted); stroke-width: 1.5; fill: none; stroke-dasharray: 5 4; }
+      .vm-ah { fill: var(--primary); }
+      .vm-ah-mute { fill: var(--ink-muted); }
+    </style>
+  </head>
+  <body>
+    <div class="doc-root">
+      <header class="site-shell-header" role="banner">
+        <div class="site-shell-inner">
+          <a class="site-brand" href="index.html">
+            <span class="site-brand-angles" aria-hidden="true">&lt;</span>
+            <span>free-code</span>
+            <span class="site-brand-angles" aria-hidden="true">&gt;</span>
+          </a>
+          <div class="site-header-actions">
+            <button type="button" class="theme-toggle" id="doc-theme-toggle" aria-label="Color theme">
+              <span class="theme-toggle-label" id="doc-theme-label">System</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="container">
+        <header class="hero">
+          <h1 class="brand">
+            <span class="angle" aria-hidden="true">&lt;</span>
+            <span class="name">free-code</span>
+            <span class="angle" aria-hidden="true">&gt;</span>
+          </h1>
+          <p class="tagline">
+            <span class="prompt" aria-hidden="true">// </span>
+            Vision Mode — See the screen. Hear your voice. Respond naturally.
+          </p>
+
+          <nav class="nav" aria-label="Primary">
+            <a href="index.html">[home]</a>
+            <a href="installation.html">[installation]</a>
+            <a href="webhooks.html">[webhooks]</a>
+            <a href="rag.html">[rag]</a>
+            <a href="code-graph.html">[code graph]</a>
+            <a href="mcp.html">[mcp]</a>
+            <a href="vision-mode.html" aria-current="page">[vision mode]</a>
+            <a href="capabilities.html">[capabilities]</a>
+            <a href="commands.html">[commands]</a>
+            <a href="models.html">[models]</a>
+          </nav>
+        </header>
+
+        <!-- What is Vision Mode -->
+        <section class="card" aria-labelledby="vm-what">
+          <div class="card-header">
+            <h2 id="vm-what">What is Vision Mode?</h2>
+            <p>Multimodal AI agent with eyes, ears, and voice — hands-free assistance powered by your screen and speech.</p>
+          </div>
+          <div class="card-body">
+            <p>
+              Vision Mode brings multimodal capabilities to free-code: <strong>screen capture</strong>,
+              <strong>speech-to-text (STT)</strong>, and <strong>text-to-speech (TTS)</strong>.
+              The agent can see what's on your screen, listen to your voice, and speak answers back.
+            </p>
+            <p>
+              Built on a <strong>snapshot-at-question-time model</strong> — no continuous video upload,
+              no streaming. The agent receives <strong>one image</strong> at the moment you ask,
+              plus the conversation history. This keeps cost low, latency reasonable, and privacy high.
+            </p>
+            <div class="callout info">
+              <strong>Example</strong><br />
+              Open a browser with an error page, say "free-code, what is this error?", and the agent
+              captures the screen, reads the stack trace, and answers out loud — zero typing required.
+            </div>
+          </div>
+        </section>
+
+        <!-- How it works -->
+        <section class="card" aria-labelledby="vm-how">
+          <div class="card-header">
+            <h2 id="vm-how">How it works</h2>
+            <p>Three interaction modes, one seamless pipeline.</p>
+          </div>
+          <div class="card-body">
+            <h3>Three commands</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Mode</th><th>Command</th><th>Use case</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><strong>On-demand vision</strong></td>
+                    <td><code>/see &lt;question&gt;</code></td>
+                    <td>Capture screen once, ask about it. Typed question, instant screenshot.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Push-to-talk</strong></td>
+                    <td><code>/voice [context]</code></td>
+                    <td>Record audio, transcribe, send. No screen capture unless explicitly requested.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Live hands-free</strong></td>
+                    <td><code>/vision live on</code></td>
+                    <td>Continuous listening with wake word. Auto-captures when vision keywords detected. Speaks responses.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>The pipeline</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Step</th><th>What happens</th><th>Configurable backends</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><strong>1. Screen capture</strong></td>
+                    <td>Grabs a single frame of the current screen</td>
+                    <td>Portal (Wayland), scrot, gnome-screenshot, spectacle, import, screencapture (macOS), PowerShell</td>
+                  </tr>
+                  <tr>
+                    <td><strong>2. Image resize</strong></td>
+                    <td>Downscales to max 1568px (configurable) with Photon WASM</td>
+                    <td>JPEG quality 85 (default), ~1.1–1.6k tokens per image</td>
+                  </tr>
+                  <tr>
+                    <td><strong>3. Audio record</strong></td>
+                    <td>Records microphone input until stopped (PTT or VAD)</td>
+                    <td>pw-record, arecord, sox, ffmpeg</td>
+                  </tr>
+                  <tr>
+                    <td><strong>4. Speech-to-text</strong></td>
+                    <td>Transcribes audio to text</td>
+                    <td>OpenAI Whisper, Groq Whisper, local whisper.cpp</td>
+                  </tr>
+                  <tr>
+                    <td><strong>5. Agent turn</strong></td>
+                    <td>Sends text + optional image to the model</td>
+                    <td>Any vision-capable model: GPT-4o, Claude 3.5, Gemini 2.0 Flash, etc.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>6. Text-to-speech</strong></td>
+                    <td>Speaks the assistant's reply (live mode only)</td>
+                    <td>OpenAI TTS, espeak, macOS say</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="callout tip">
+              <strong>Why snapshot instead of video?</strong><br />
+              A 10-second video at 1 frame per second = 10 images = 10–15k tokens. One snapshot at question time = 1.5k tokens.
+              The agent doesn't need to see continuous motion — it needs <strong>context for the question you asked</strong>.
+            </div>
+          </div>
+        </section>
+
+        <!-- Flow diagrams -->
+        <section class="card" aria-labelledby="vm-diagrams">
+          <div class="card-header">
+            <h2 id="vm-diagrams">Flow diagrams</h2>
+            <p>Visualizing the three interaction modes.</p>
+          </div>
+          <div class="card-body">
+
+            <h3>1 · On-demand vision (<code>/see</code>)</h3>
+            <figure class="vm-fig">
+              <svg viewBox="0 0 800 120" role="img" aria-label="User types a question, screen is captured, image is resized, then text plus image are sent to the model.">
+                <defs>
+                  <marker id="vm-arrow-a" markerWidth="10" markerHeight="8" refX="8" refY="3" orient="auto">
+                    <path d="M0,0 L8,3 L0,6 Z" class="vm-ah" />
+                  </marker>
+                </defs>
+                <rect x="8" y="24" width="140" height="72" rx="10" class="vm-b-accent" />
+                <text x="78" y="52" text-anchor="middle" dominant-baseline="central" class="vm-t">/see &lt;question&gt;</text>
+                <text x="78" y="74" text-anchor="middle" dominant-baseline="central" class="vm-t-sm">Typed by user</text>
+                <line x1="148" y1="60" x2="180" y2="60" class="vm-line" marker-end="url(#vm-arrow-a)" />
+                <rect x="188" y="24" width="140" height="72" rx="10" class="vm-b" />
+                <text x="258" y="52" text-anchor="middle" dominant-baseline="central" class="vm-t">Capture screen</text>
+                <text x="258" y="74" text-anchor="middle" dominant-baseline="central" class="vm-t-sm">Portal / scrot / etc.</text>
+                <line x1="328" y1="60" x2="360" y2="60" class="vm-line" marker-end="url(#vm-arrow-a)" />
+                <rect x="368" y="24" width="140" height="72" rx="10" class="vm-b" />
+                <text x="438" y="52" text-anchor="middle" dominant-baseline="central" class="vm-t">Resize image</text>
+                <text x="438" y="74" text-anchor="middle" dominant-baseline="central" class="vm-t-sm">Max 1568px, JPEG</text>
+                <line x1="508" y1="60" x2="540" y2="60" class="vm-line" marker-end="url(#vm-arrow-a)" />
+                <rect x="548" y="24" width="140" height="72" rx="10" class="vm-b-accent" />
+                <text x="618" y="52" text-anchor="middle" dominant-baseline="central" class="vm-t">Model</text>
+                <text x="618" y="74" text-anchor="middle" dominant-baseline="central" class="vm-t-sm">Text + Image</text>
+              </svg>
+              <figcaption>Single-shot: question → capture → resize → model answer</figcaption>
+            </figure>
+
+            <h3>2 · Push-to-talk (<code>/voice</code>)</h3>
+            <figure class="vm-fig">
+              <svg viewBox="0 0 800 120" role="img" aria-label="User presses a hotkey to start recording, stops with the same key, audio is transcribed, then the transcript is sent to the model or placed in the editor for review.">
+                <defs>
+                  <marker id="vm-arrow-b" markerWidth="10" markerHeight="8" refX="8" refY="3" orient="auto">
+                    <path d="M0,0 L8,3 L0,6 Z" class="vm-ah" />
+                  </marker>
+                </defs>
+                <rect x="8" y="24" width="140" height="72" rx="10" class="vm-b-accent" />
+                <text x="78" y="52" text-anchor="middle" dominant-baseline="central" class="vm-t">Hotkey press</text>
+                <text x="78" y="74" text-anchor="middle" dominant-baseline="central" class="vm-t-sm">Start/stop record</text>
+                <line x1="148" y1="60" x2="180" y2="60" class="vm-line" marker-end="url(#vm-arrow-b)" />
+                <rect x="188" y="24" width="140" height="72" rx="10" class="vm-b" />
+                <text x="258" y="52" text-anchor="middle" dominant-baseline="central" class="vm-t">Record audio</text>
+                <text x="258" y="74" text-anchor="middle" dominant-baseline="central" class="vm-t-sm">pw-record / arecord</text>
+                <line x1="328" y1="60" x2="360" y2="60" class="vm-line" marker-end="url(#vm-arrow-b)" />
+                <rect x="368" y="24" width="140" height="72" rx="10" class="vm-b" />
+                <text x="438" y="52" text-anchor="middle" dominant-baseline="central" class="vm-t">Transcribe</text>
+                <text x="438" y="74" text-anchor="middle" dominant-baseline="central" class="vm-t-sm">Whisper / Groq</text>
+                <line x1="508" y1="60" x2="540" y2="60" class="vm-line" marker-end="url(#vm-arrow-b)" />
+                <rect x="548" y="24" width="140" height="72" rx="10" class="vm-b-accent" />
+                <text x="618" y="52" text-anchor="middle" dominant-baseline="central" class="vm-t">Send / Review</text>
+                <text x="618" y="74" text-anchor="middle" dominant-baseline="central" class="vm-t-sm">voiceMode config</text>
+              </svg>
+              <figcaption>Push-to-talk: record → transcribe → send (or place in editor for review)</figcaption>
+            </figure>
+
+            <h3>3 · Live hands-free mode (<code>/vision live on</code>)</h3>
+            <figure class="vm-fig">
+              <svg viewBox="0 0 900 180" role="img" aria-label="Continuous loop: listen for wake word, detect vision keywords, capture screen if needed, transcribe, send to model, speak response, loop again.">
+                <defs>
+                  <marker id="vm-arrow-c" markerWidth="10" markerHeight="8" refX="8" refY="3" orient="auto">
+                    <path d="M0,0 L8,3 L0,6 Z" class="vm-ah" />
+                  </marker>
+                </defs>
+                <!-- Listen -->
+                <rect x="20" y="30" width="130" height="60" rx="10" class="vm-b-accent" />
+                <text x="85" y="52" text-anchor="middle" dominant-baseline="central" class="vm-t">Listen</text>
+                <text x="85" y="72" text-anchor="middle" dominant-baseline="central" class="vm-t-sm">Wake word + VAD</text>
+                <line x1="150" y1="60" x2="180" y2="60" class="vm-line" marker-end="url(#vm-arrow-c)" />
+                <!-- Transcribe -->
+                <rect x="188" y="30" width="130" height="60" rx="10" class="vm-b" />
+                <text x="253" y="52" text-anchor="middle" dominant-baseline="central" class="vm-t">Transcribe</text>
+                <text x="253" y="72" text-anchor="middle" dominant-baseline="central" class="vm-t-sm">STT backend</text>
+                <line x1="318" y1="60" x2="348" y2="60" class="vm-line" marker-end="url(#vm-arrow-c)" />
+                <!-- Check keywords -->
+                <rect x="356" y="30" width="130" height="60" rx="10" class="vm-b" />
+                <text x="421" y="52" text-anchor="middle" dominant-baseline="central" class="vm-t">Vision check</text>
+                <text x="421" y="72" text-anchor="middle" dominant-baseline="central" class="vm-t-sm">"mira", "pantalla"</text>
+                <line x1="486" y1="60" x2="516" y2="60" class="vm-line" marker-end="url(#vm-arrow-c)" />
+                <!-- Capture (conditional) -->
+                <rect x="524" y="30" width="130" height="60" rx="10" class="vm-b-mute" />
+                <text x="589" y="52" text-anchor="middle" dominant-baseline="central" class="vm-t">Capture?</text>
+                <text x="589" y="72" text-anchor="middle" dominant-baseline="central" class="vm-t-sm">If keywords match</text>
+                <line x1="654" y1="60" x2="684" y2="60" class="vm-line" marker-end="url(#vm-arrow-c)" />
+                <!-- Model -->
+                <rect x="692" y="30" width="130" height="60" rx="10" class="vm-b-accent" />
+                <text x="757" y="52" text-anchor="middle" dominant-baseline="central" class="vm-t">Model</text>
+                <text x="757" y="72" text-anchor="middle" dominant-baseline="central" class="vm-t-sm">Text (+ Image?)</text>
+                <!-- Speak -->
+                <rect x="692" y="110" width="130" height="60" rx="10" class="vm-b" />
+                <text x="757" y="132" text-anchor="middle" dominant-baseline="central" class="vm-t">Speak</text>
+                <text x="757" y="152" text-anchor="middle" dominant-baseline="central" class="vm-t-sm">TTS backend</text>
+                <line x1="757" y1="90" x2="757" y2="110" class="vm-line" marker-end="url(#vm-arrow-c)" />
+                <!-- Loop back -->
+                <path d="M 692,140 L 450,140 L 450,10 L 85,10 L 85,30" class="vm-line-mute" marker-end="url(#vm-arrow-c)" />
+                <text x="450" y="155" text-anchor="middle" class="vm-t-sm">Loop (agent_end)</text>
+              </svg>
+              <figcaption>Live loop: listen → transcribe → check keywords → capture (if needed) → model → speak → repeat</figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <!-- Commands -->
+        <section class="card" aria-labelledby="vm-commands">
+          <div class="card-header">
+            <h2 id="vm-commands">Commands</h2>
+            <p>All vision-mode slash commands and shortcuts.</p>
+          </div>
+          <div class="card-body">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Command</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>/see &lt;question&gt;</code></td><td>Capture screen and ask about it (one-shot vision)</td></tr>
+                  <tr><td><code>/voice [context]</code></td><td>Push-to-talk: record, transcribe, send (or review)</td></tr>
+                  <tr><td><code>/vision live on</code></td><td>Start continuous hands-free mode with wake word</td></tr>
+                  <tr><td><code>/vision live off</code></td><td>Stop live mode</td></tr>
+                  <tr><td><code>/vision status</code></td><td>Show current backends, language, mode settings</td></tr>
+                  <tr><td><code>/vision backends</code></td><td>List available capture/STT/TTS backends and whether they're installed</td></tr>
+                  <tr><td><code>/vision config</code></td><td>View all configuration values</td></tr>
+                  <tr><td><code>/vision config &lt;key&gt;</code></td><td>View a single config value</td></tr>
+                  <tr><td><code>/vision config &lt;key&gt; &lt;value&gt;</code></td><td>Set a config value</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Keyboard shortcut</h3>
+            <p>
+              Push-to-talk is registered as a global shortcut (default: configurable via <code>VISION_SHORTCUT</code> env var or <code>vision.json</code>).
+              Press once to start recording, press again to stop and transcribe.
+            </p>
+            <div class="callout info">
+              <strong>In live mode</strong><br />
+              The PTT shortcut interrupts the current capture/recording — useful if the agent is listening too long
+              or you want to barge in mid-turn.
+            </div>
+          </div>
+        </section>
+
+        <!-- Configuration -->
+        <section class="card" aria-labelledby="vm-config">
+          <div class="card-header">
+            <h2 id="vm-config">Configuration</h2>
+            <p>All settings, environment variables, and config file location.</p>
+          </div>
+          <div class="card-body">
+            <h3>Config file</h3>
+            <p>Vision Mode settings are stored in <code>~/.free-code/vision.json</code>. Edit directly or use <code>/vision config &lt;key&gt; &lt;value&gt;</code>.</p>
+
+            <h3>Environment variables (override config file)</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Variable</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>VISION_CAPTURE_BACKEND</code></td><td>Capture method: <code>auto</code>, <code>portal</code>, <code>grim</code>, <code>scrot</code>, <code>import</code>, <code>screencapture</code>, <code>powershell</code></td></tr>
+                  <tr><td><code>VISION_STT_BACKEND</code></td><td>STT backend: <code>auto</code>, <code>openai</code>, <code>groq</code>, <code>whisper-cpp</code></td></tr>
+                  <tr><td><code>VISION_TTS_BACKEND</code></td><td>TTS backend: <code>auto</code>, <code>openai</code>, <code>espeak</code>, <code>say</code></td></tr>
+                  <tr><td><code>VISION_LANGUAGE</code></td><td>Language code: <code>es</code>, <code>en</code>, <code>auto</code></td></tr>
+                  <tr><td><code>VISION_VOICE_MODE</code></td><td>Transcript destination: <code>send</code> (automatic) or <code>review</code> (placed in editor)</td></tr>
+                  <tr><td><code>VISION_SHORTCUT</code></td><td>PTT hotkey (e.g., <code>ctrl+shift+space</code>)</td></tr>
+                  <tr><td><code>OPENAI_API_KEY</code></td><td>Required for OpenAI STT/TTS</td></tr>
+                  <tr><td><code>GROQ_API_KEY</code></td><td>Required for Groq STT</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>CLI flags (override env vars)</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>--vision-capture-backend &lt;id&gt;</code></td><td>Force a specific capture backend</td></tr>
+                  <tr><td><code>--vision-stt-backend &lt;id&gt;</code></td><td>Force a specific STT backend</td></tr>
+                  <tr><td><code>--vision-tts-backend &lt;id&gt;</code></td><td>Force a specific TTS backend</td></tr>
+                  <tr><td><code>--vision-language &lt;code&gt;</code></td><td>Override language</td></tr>
+                  <tr><td><code>--vision-voice-mode &lt;mode&gt;</code></td><td>Override voice mode</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>All config keys</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Key</th><th>Default</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>captureBackend</code></td><td><code>"auto"</code></td><td>Screen capture method</td></tr>
+                  <tr><td><code>captureInteractive</code></td><td><code>true</code></td><td>Allow monitor/window selection dialogs</td></tr>
+                  <tr><td><code>captureMaxWidth</code></td><td><code>1568</code></td><td>Max image dimension before resize (0 = no resize)</td></tr>
+                  <tr><td><code>captureJpegQuality</code></td><td><code>85</code></td><td>JPEG compression quality (0–100)</td></tr>
+                  <tr><td><code>sttBackend</code></td><td><code>"auto"</code></td><td>Speech-to-text backend</td></tr>
+                  <tr><td><code>sttModel</code></td><td><code>"whisper-1"</code></td><td>Model name for API STT (OpenAI/Groq)</td></tr>
+                  <tr><td><code>ttsBackend</code></td><td><code>"auto"</code></td><td>Text-to-speech backend</td></tr>
+                  <tr><td><code>ttsModel</code></td><td><code>"tts-1"</code></td><td>TTS model (OpenAI)</td></tr>
+                  <tr><td><code>ttsVoice</code></td><td><code>"alloy"</code></td><td>TTS voice (OpenAI: alloy, echo, fable, onyx, nova, shimmer)</td></tr>
+                  <tr><td><code>language</code></td><td><code>"auto"</code></td><td>STT language code</td></tr>
+                  <tr><td><code>voiceMode</code></td><td><code>"review"</code></td><td>Where transcript goes: <code>send</code> or <code>review</code></td></tr>
+                  <tr><td><code>shortcut</code></td><td><code>null</code></td><td>PTT hotkey (e.g., <code>"ctrl+shift+space"</code>)</td></tr>
+                  <tr><td><code>voiceCommandDuration</code></td><td><code>6000</code></td><td>Max recording duration for <code>/voice</code> command (ms)</td></tr>
+                  <tr><td><code>liveTurnMaxMs</code></td><td><code>8000</code></td><td>Max recording duration per live-mode turn (ms)</td></tr>
+                  <tr><td><code>liveAlwaysCapture</code></td><td><code>false</code></td><td>Capture screen on every utterance (ignore keyword detection)</td></tr>
+                  <tr><td><code>liveWakeWord</code></td><td><code>"freecode"</code></td><td>Wake word to activate processing (comma-separated for multiple)</td></tr>
+                  <tr><td><code>liveSpeak</code></td><td><code>true</code></td><td>Speak assistant responses in live mode</td></tr>
+                  <tr><td><code>liveIndicator</code></td><td><code>true</code></td><td>Show status indicator when live mode is active</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="callout tip">
+              <strong>Example: Spanish setup with Groq STT</strong><br />
+              <pre><code>export GROQ_API_KEY="gsk_..."
+/vision config language es
+/vision config sttBackend groq
+/vision config liveWakeWord "oye,free-code"
+/vision live on</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Privacy & Cost -->
+        <section class="card" aria-labelledby="vm-privacy">
+          <div class="card-header">
+            <h2 id="vm-privacy">Privacy &amp; cost</h2>
+            <p>What gets captured, when, and how much it costs.</p>
+          </div>
+          <div class="card-body">
+            <h3>Privacy model</h3>
+            <ul>
+              <li><strong>Explicit opt-in:</strong> Vision Mode commands must be invoked manually. Live mode requires <code>/vision live on</code>.</li>
+              <li><strong>No continuous upload:</strong> Screen is captured <strong>only</strong> at the moment you ask a question (or when vision keywords are detected in live mode).</li>
+              <li><strong>Visible indicator:</strong> Live mode shows a status indicator (<code>👁 live · listening…</code>) so you know it's active.</li>
+              <li><strong>Portal consent (Wayland):</strong> The XDG Desktop Portal shows a permission dialog before granting screen access — OS-level consent.</li>
+              <li><strong>Local backends:</strong> Use whisper.cpp (local STT) + espeak/say (local TTS) for fully private, zero-API mode.</li>
+            </ul>
+
+            <h3>Token cost</h3>
+            <p>One downscaled image (1568px max, JPEG quality 85) ≈ <strong>1.1–1.6k input tokens</strong>.</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Scenario</th><th>Images sent</th><th>Est. image tokens</th></tr></thead>
+                <tbody>
+                  <tr><td>10 <code>/see</code> questions</td><td>10</td><td>~11–16k</td></tr>
+                  <tr><td>30-question live session (vision keywords in half)</td><td>15</td><td>~16–24k</td></tr>
+                  <tr><td>100-question live session (liveAlwaysCapture=true)</td><td>100</td><td>~110–160k</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              Compare to text-only: a 500-line file ≈ 3–5k tokens. Vision adds cost, but the snapshot model
+              keeps it reasonable — you're not streaming 30fps video.
+            </p>
+
+            <h3>Latency budget</h3>
+            <p>Target: under 5 seconds from "stop talking" to "agent starts speaking" (live mode).</p>
+            <ul>
+              <li>VAD silence detection: ~300ms</li>
+              <li>Local whisper.cpp (base model): ~500–1000ms</li>
+              <li>Screen capture: ~100ms</li>
+              <li>Model first token: ~1–2s (depends on provider/load)</li>
+              <li>TTS first audio chunk: ~500ms (streaming)</li>
+            </ul>
+            <p>Total: ~2.4–4s under ideal conditions. Groq STT can shave off another ~500ms (faster than local Whisper).</p>
+          </div>
+        </section>
+
+        <!-- Installation -->
+        <section class="card" aria-labelledby="vm-install">
+          <div class="card-header">
+            <h2 id="vm-install">Installation &amp; dependencies</h2>
+            <p>What to install for each backend.</p>
+          </div>
+          <div class="card-body">
+            <p>
+              Vision Mode is included in the default free-code installation. You need to install
+              <strong>system dependencies</strong> for the backends you want to use.
+            </p>
+
+            <h3>Screen capture</h3>
+            <p>Pick one (or install multiple; <code>auto</code> will choose the best available):</p>
+            <ul>
+              <li><strong>Linux/Wayland:</strong> <code>xdg-desktop-portal-gnome</code> (recommended), or <code>grim</code> / <code>gnome-screenshot</code> / <code>spectacle</code> / <code>scrot</code> / ImageMagick <code>import</code></li>
+              <li><strong>Linux/X11:</strong> <code>scrot</code> or <code>import</code></li>
+              <li><strong>macOS:</strong> <code>screencapture</code> (built-in, no install needed)</li>
+            </ul>
+            <pre><code># Ubuntu/Debian (Wayland)
+sudo apt install xdg-desktop-portal-gnome
+
+# Fedora (Wayland)
+sudo dnf install xdg-desktop-portal-gnome
+
+# Arch (Wayland)
+sudo pacman -S xdg-desktop-portal-gnome
+
+# Fallback: scrot (X11)
+sudo apt install scrot</code></pre>
+
+            <h3>Audio recording</h3>
+            <p>One of:</p>
+            <ul>
+              <li><code>pw-record</code> (PipeWire, modern Linux — usually pre-installed on recent distros)</li>
+              <li><code>arecord</code> (ALSA)</li>
+              <li><code>sox</code> (cross-platform)</li>
+              <li><code>ffmpeg</code></li>
+            </ul>
+            <pre><code># Check if pw-record exists (PipeWire)
+which pw-record
+
+# Install ALSA utils (includes arecord)
+sudo apt install alsa-utils
+
+# Or install SoX
+sudo apt install sox</code></pre>
+
+            <h3>Speech-to-text</h3>
+            <p><strong>API-based (easiest):</strong></p>
+            <pre><code># OpenAI Whisper
+export OPENAI_API_KEY="sk-..."
+
+# Groq (faster, free tier available)
+export GROQ_API_KEY="gsk_..."</code></pre>
+
+            <p><strong>Local (no API cost, fully private):</strong></p>
+            <p>Install <a href="https://github.com/ggerganov/whisper.cpp" target="_blank" rel="noopener">whisper.cpp</a>:</p>
+            <pre><code>git clone https://github.com/ggerganov/whisper.cpp.git
+cd whisper.cpp
+make
+# Download a model (base is fast, small is smaller, large is most accurate)
+bash ./models/download-ggml-model.sh base
+# Ensure 'whisper' binary is in PATH or specify path via VISION_WHISPER_CPP_PATH</code></pre>
+
+            <h3>Text-to-speech</h3>
+            <p><strong>API-based:</strong></p>
+            <pre><code>export OPENAI_API_KEY="sk-..."   # for tts-1 model</code></pre>
+
+            <p><strong>Local:</strong></p>
+            <pre><code># Linux: espeak
+sudo apt install espeak
+
+# macOS: say (built-in, no install needed)</code></pre>
+
+            <h3>Verify backends</h3>
+            <p>After installing dependencies, check what's available:</p>
+            <pre><code>/vision backends</code></pre>
+            <p>Output shows ✓ for available backends, ✗ for missing ones.</p>
+          </div>
+        </section>
+
+        <!-- Examples -->
+        <section class="card" aria-labelledby="vm-examples">
+          <div class="card-header">
+            <h2 id="vm-examples">Examples</h2>
+            <p>Common workflows and use cases.</p>
+          </div>
+          <div class="card-body">
+            <h3>1. Debug a visual error</h3>
+            <p>Open a browser with a stack trace or error page:</p>
+            <pre><code>/see what is this error and how do I fix it?</code></pre>
+            <p>Agent captures the screen, reads the stack trace, and explains the issue.</p>
+
+            <h3>2. Code review via screen share</h3>
+            <p>Open a diff or PR in GitHub/GitLab:</p>
+            <pre><code>/see review this diff for potential issues</code></pre>
+
+            <h3>3. Hands-free pair programming</h3>
+            <p>Start live mode while coding:</p>
+            <pre><code>/vision config liveWakeWord "free-code"
+/vision config language en
+/vision live on
+
+# Now say: "free-code, what does this function do?"
+# Agent captures screen, sees the code, answers out loud.</code></pre>
+
+            <h3>4. Transcribe meeting notes</h3>
+            <p>Use push-to-talk to record summaries without typing:</p>
+            <pre><code>/voice
+# Press PTT hotkey, speak notes, release
+# Transcript appears in editor for review before sending</code></pre>
+
+            <h3>5. Fully private local mode</h3>
+            <p>No API calls, all processing on your machine:</p>
+            <pre><code>/vision config sttBackend whisper-cpp
+/vision config ttsBackend espeak   # or 'say' on macOS
+/vision config captureBackend portal  # or 'scrot' on X11
+
+# Now all /see, /voice, and live mode use local backends only</code></pre>
+          </div>
+        </section>
+
+        <!-- Troubleshooting -->
+        <section class="card" aria-labelledby="vm-troubleshooting">
+          <div class="card-header">
+            <h2 id="vm-troubleshooting">Troubleshooting</h2>
+            <p>Common issues and fixes.</p>
+          </div>
+          <div class="card-body">
+            <h3>"No capture backend available"</h3>
+            <p>Install at least one screen capture tool. Check what's available:</p>
+            <pre><code>/vision backends</code></pre>
+            <p>On Wayland, install <code>xdg-desktop-portal-gnome</code>. On X11, install <code>scrot</code>.</p>
+
+            <h3>"No audio recorder found"</h3>
+            <p>Install one of: <code>pw-record</code>, <code>arecord</code>, <code>sox</code>, or <code>ffmpeg</code>.</p>
+            <pre><code>which pw-record arecord sox ffmpeg</code></pre>
+
+            <h3>"Could not resize the screenshot (Photon unavailable)"</h3>
+            <p>The Photon WASM asset is missing. Reinstall free-code or check <code>packages/coding-agent/assets/photon_rs_bg.wasm</code>.</p>
+
+            <h3>Live mode doesn't activate on speech</h3>
+            <p>Check wake word configuration:</p>
+            <pre><code>/vision config liveWakeWord</code></pre>
+            <p>Make sure you say the exact wake word at the start of your utterance. Try:</p>
+            <pre><code>/vision config liveWakeWord "hey,oye,freecode"</code></pre>
+            <p>This allows any of those three to activate.</p>
+
+            <h3>Images are too large / too expensive</h3>
+            <p>Reduce max dimension or JPEG quality:</p>
+            <pre><code>/vision config captureMaxWidth 1200
+/vision config captureJpegQuality 75</code></pre>
+
+            <h3>STT transcribes incorrectly</h3>
+            <p>Set the correct language explicitly:</p>
+            <pre><code>/vision config language es   # for Spanish
+/vision config language en   # for English</code></pre>
+
+            <h3>TTS speaks too slowly / wrong voice</h3>
+            <p>Change voice (OpenAI TTS):</p>
+            <pre><code>/vision config ttsVoice nova   # or alloy, echo, fable, onyx, shimmer</code></pre>
+          </div>
+        </section>
+
+        <p class="footer">
+          <a href="capabilities.html">All capabilities →</a> &nbsp;·&nbsp;
+          <a href="installation.html#install-vision">Installation →</a> &nbsp;·&nbsp;
+          <a href="commands.html">Commands →</a>
+        </p>
+        <p class="footer-credit">Powered by CX — developed by Pablo Castañeda</p>
+      </div>
+    </div>
+    <script src="assets/theme.js" defer></script>
+  </body>
+</html>

@@ -108,7 +108,7 @@ In the editor: `@` for files, `!command` / `!!command` for bash (see README and 
 
 ---
 
-## pi packages
+## free-code packages
 
 | Command | Description |
 |---------|-------------|

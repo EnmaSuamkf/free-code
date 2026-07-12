@@ -393,5 +393,8 @@ export {
 // Clipboard utilities
 export { copyToClipboard } from "./utils/clipboard.js";
 export { parseFrontmatter, stripFrontmatter } from "./utils/frontmatter.js";
+// Image utilities (reused by the vision extension for screen-capture downscaling)
+export { type ImageResizeOptions, type ResizedImage, resizeImage } from "./utils/image-resize.js";
+export { loadPhoton } from "./utils/photon.js";
 // Shell utilities
 export { getShellConfig } from "./utils/shell.js";
