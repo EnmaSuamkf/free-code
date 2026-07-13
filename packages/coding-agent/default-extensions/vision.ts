@@ -214,6 +214,12 @@ export default function visionExtension(pi: ExtensionAPI): void {
 		}
 		ctx.ui.setStatus("vision", undefined);
 
+		// Reject Whisper hallucinations (silence/noise).
+		if (isLikelyHallucination(text)) {
+			ctx.ui.notify("No speech detected (hallucination filtered).", "warning");
+			return;
+		}
+
 		// Ignore empty or noise-only transcriptions (punctuation, spaces).
 		const cleaned = text.replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ]/g, "");
 		if (!cleaned || cleaned.length < 2) {
@@ -254,7 +260,11 @@ export default function visionExtension(pi: ExtensionAPI): void {
 	async function liveTurn(ctx: ExtensionContext): Promise<void> {
 		if (!live.active) return;
 		if (live.busy) return;
-		ctx.ui.notify(`🎤 Listening (say "${getCfg().liveWakeWord || "anything"}" to activate)...`, "info");
+		const wake = getCfg().liveWakeWord?.trim();
+		// Handle empty or quote-only values (from config parsing)
+		const isEmpty = !wake || wake === '""' || wake === "''";
+		const msg = isEmpty ? "🎤 Listening..." : `🎤 Listening (say "${wake}" to activate)...`;
+		ctx.ui.notify(msg, "info");
 		const cfg = getCfg();
 		live.busy = true;
 		setLiveStatus(ctx);
@@ -285,6 +295,15 @@ export default function visionExtension(pi: ExtensionAPI): void {
 		try {
 			text = await transcribe(record.wavPath, resolveSttOpts(cfg));
 			ctx.ui.notify(`[DEBUG] Transcribed: "${text}"`, "info");
+
+			// Reject common Whisper hallucinations (silence/noise transcribed as "Thank you.", etc.)
+			if (isLikelyHallucination(text)) {
+				ctx.ui.notify(`[DEBUG] Ignored hallucination: "${text}"`, "info");
+				live.busy = false;
+				setLiveStatus(ctx);
+				void liveTurn(ctx);
+				return;
+			}
 		} catch (err) {
 			ctx.ui.notify(err instanceof Error ? err.message : String(err), "error");
 			cleanupRecord(record);
@@ -401,9 +420,10 @@ export default function visionExtension(pi: ExtensionAPI): void {
 		live.busy = false; // Ensure clean state
 		pi.appendEntry("vision-live-state", { active: true, startedAt: Date.now() });
 		setLiveStatus(ctx);
-		const wakeMsg = getCfg().liveWakeWord
-			? ` Say "${getCfg().liveWakeWord}" to activate.`
-			: " Say something.";
+		const cfg = getCfg();
+		const wake = cfg.liveWakeWord?.trim();
+		const isEmpty = !wake || wake === '""' || wake === "''";
+		const wakeMsg = isEmpty ? " Say something." : ` Say "${wake}" to activate.`;
 		ctx.ui.notify(`Vision live mode on.${wakeMsg} /vision live off to stop.`, "info");
 		setTimeout(() => void liveTurn(ctx), 500); // Delay to ensure UI updates
 	}
@@ -586,6 +606,11 @@ export default function visionExtension(pi: ExtensionAPI): void {
 							cleanupRecord(record);
 						}
 						ctx.ui.setStatus("vision", undefined);
+						// Reject Whisper hallucinations (silence/noise).
+						if (isLikelyHallucination(text)) {
+							ctx.ui.notify("No speech detected (hallucination filtered).", "warning");
+							return;
+						}
 						// Ignore empty or noise-only transcriptions (punctuation, spaces).
 						const cleaned = text.replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ]/g, "");
 						if (!cleaned || cleaned.length < 2) {
@@ -632,6 +657,29 @@ function normalizeForWake(text: string): string {
 }
 
 /**
+ * Common Whisper hallucinations on silence/noise.
+ * These are rejected automatically to avoid processing background noise.
+ */
+const WHISPER_HALLUCINATIONS = [
+	"thank you",
+	"thanks for watching",
+	"bye",
+	"goodbye",
+	"see you",
+	"gracias",
+	"hasta luego",
+	"adiós",
+	"ciao",
+	"merci",
+	"danke",
+];
+
+function isLikelyHallucination(text: string): boolean {
+	const lower = text.toLowerCase().trim();
+	return WHISPER_HALLUCINATIONS.some(h => lower === h || lower === `${h}.`);
+}
+
+/**
  * Detect if the user's utterance requests vision (screen capture).
  * Checks for keywords like "qué ves", "mira", "pantalla", "describe", etc.
  */
@@ -654,16 +702,25 @@ function needsVision(text: string): boolean {
 // --- helpers --------------------------------------------------------------
 
 function parseConfigValue(key: keyof VisionConfig, raw: string): unknown {
+	// Handle empty string literal cases
+	if (!raw || raw === '""' || raw === "''") {
+		return "";
+	}
+	// Strip surrounding quotes repeatedly
+	let val = raw;
+	while (val.length >= 2 && ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'")))) {
+		val = val.slice(1, -1);
+	}
 	switch (key) {
 		case "captureInteractive":
 		case "liveSpeak":
 		case "liveIndicator":
-			return raw === "true" || raw === "1";
+			return val === "true" || val === "1";
 		case "captureMaxWidth":
 		case "captureJpegQuality":
-			return Number.parseInt(raw, 10);
+			return Number.parseInt(val, 10);
 		default:
-			return raw;
+			return val;
 	}
 }
 

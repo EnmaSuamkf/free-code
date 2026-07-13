@@ -449,6 +449,66 @@
               <strong>system dependencies</strong> for the backends you want to use.
             </p>
 
+            <h3>Quick Start</h3>
+            <p>Choose one setup path based on your preference:</p>
+
+            <div class="callout tip">
+              <strong>Option A: Groq (Fastest, Free)</strong>
+              <p>Groq's Whisper API is 10-20x faster than OpenAI (~200-500ms vs. 1-3s) and has a generous free tier.</p>
+              <ol>
+                <li>Get a free API key: <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a></li>
+                <li>Add to <code>~/.free-code/agent/.env</code>:
+                  <pre><code>echo 'GROQ_API_KEY=gsk_...' >> ~/.free-code/agent/.env</code></pre>
+                </li>
+                <li>Configure STT backend and model:
+                  <pre><code>/vision config sttBackend groq
+/vision config sttModel whisper-large-v3-turbo</code></pre>
+                </li>
+                <li>Restart free-code</li>
+                <li>Test: <code>/vision backends</code> should show <code>✓ groq</code></li>
+              </ol>
+            </div>
+
+            <div class="callout info">
+              <strong>Option B: OpenAI (Good Quality)</strong>
+              <p>Uses OpenAI Whisper-1 for STT and tts-1 for speech. One API key for both.</p>
+              <ol>
+                <li>Add to <code>~/.free-code/agent/.env</code>:
+                  <pre><code>echo 'OPENAI_API_KEY=sk-...' >> ~/.free-code/agent/.env</code></pre>
+                </li>
+                <li>Restart free-code</li>
+                <li>Test: <code>/vision backends</code> should show <code>✓ openai</code> for STT and TTS</li>
+              </ol>
+              <p><em>Note:</em> STT backend is <code>auto</code> by default, which uses OpenAI if the key is set.</p>
+            </div>
+
+            <div class="callout warn">
+              <strong>Option C: Local whisper.cpp (Offline, Private)</strong>
+              <p>Fully private, no API costs, but requires compilation and GPU/CPU resources.</p>
+              <ol>
+                <li>Install dependencies:
+                  <pre><code>sudo apt install cmake build-essential</code></pre>
+                </li>
+                <li>Clone and build:
+                  <pre><code>git clone https://github.com/ggerganov/whisper.cpp
+cd whisper.cpp
+make</code></pre>
+                </li>
+                <li>Download a model:
+                  <pre><code>bash ./models/download-ggml-model.sh base</code></pre>
+                  <p><em>Models:</em> <code>tiny</code> (fastest, least accurate), <code>base</code> (balanced), <code>small</code>, <code>medium</code>, <code>large</code> (slowest, most accurate)</p>
+                </li>
+                <li>Install the binary:
+                  <pre><code>sudo ln -sf $(pwd)/build/bin/main /usr/local/bin/whisper</code></pre>
+                </li>
+                <li>Configure STT:
+                  <pre><code>/vision config sttBackend whisper-cpp</code></pre>
+                </li>
+                <li>Restart free-code</li>
+                <li>Test: <code>/vision backends</code> should show <code>✓ whisper-cpp</code></li>
+              </ol>
+            </div>
+
             <h3>Screen capture</h3>
             <p>Pick one (or install multiple; <code>auto</code> will choose the best available):</p>
             <ul>
