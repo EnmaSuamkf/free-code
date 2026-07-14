@@ -124,6 +124,9 @@ const RPC_WEBVIEW_SLASH_ALLOWLIST = new Set([
   "codeGraph-symbols",
   "codeGraph-callers",
   "codeGraph-context",
+  "vision",
+  "see",
+  "voice",
 ]);
 
 const DEFAULT_RAG_BASE = "http://localhost:8085";

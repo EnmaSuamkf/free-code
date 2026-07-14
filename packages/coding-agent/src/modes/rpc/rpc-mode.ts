@@ -65,6 +65,9 @@ const RPC_GET_COMMANDS_ALLOWLIST = new Set([
 	"codeGraph-symbols",
 	"codeGraph-callers",
 	"codeGraph-context",
+	"vision",
+	"see",
+	"voice",
 ]);
 
 // Re-export types for consumers
