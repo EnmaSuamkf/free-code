@@ -252,11 +252,13 @@ export default function visionExtension(pi: ExtensionAPI): void {
 		live.ttsAbort = undefined;
 	}
 
-	async function liveTurn(ctx: ExtensionContext): Promise<void> {
+	async function liveTurn(ctx: ExtensionContext, skipListeningNotify = false): Promise<void> {
 		if (!live.active) return;
 		if (live.busy) return;
 		const _liveWakeWord = getCfg().liveWakeWord;
-		ctx.ui.notify(_liveWakeWord ? `🎤 Listening (say "${_liveWakeWord}" to activate)...` : "🎤 Listening...", "info");
+		if (!skipListeningNotify) {
+			ctx.ui.notify(_liveWakeWord ? `🎤 Listening (say "${_liveWakeWord}" to activate)...` : "🎤 Listening...", "info");
+		}
 		const cfg = getCfg();
 		live.busy = true;
 		setLiveStatus(ctx);
@@ -286,7 +288,9 @@ export default function visionExtension(pi: ExtensionAPI): void {
 		let text: string;
 		try {
 			text = await transcribe(record.wavPath, resolveSttOpts(cfg));
-			ctx.ui.notify(`[DEBUG] Transcribed: "${text}"`, "info");
+			if (ctx.ui.hasInteractiveUI) {
+				ctx.ui.notify(`[DEBUG] Transcribed: "${text}"`, "info");
+			}
 		} catch (err) {
 			ctx.ui.notify(err instanceof Error ? err.message : String(err), "error");
 			cleanupRecord(record);
@@ -300,20 +304,24 @@ export default function visionExtension(pi: ExtensionAPI): void {
 		// Ignore empty transcriptions, noise, or just punctuation.
 		const cleaned = text.replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ]/g, "");
 		if (!cleaned || cleaned.length < 2) {
-			ctx.ui.notify(`[DEBUG] Ignored (too short): "${text}"`, "info");
+			if (ctx.ui.hasInteractiveUI) {
+				ctx.ui.notify(`[DEBUG] Ignored (too short): "${text}"`, "info");
+			}
 			live.busy = false;
 			setLiveStatus(ctx);
-			void liveTurn(ctx);
+			void liveTurn(ctx, true);
 			return;
 		}
 
 		// Ignore known Whisper hallucinations ("Thank you", "Thanks", etc.)
 		// that it produces on silence or low-energy audio.
 		if (isWhisperHallucination(text)) {
-			ctx.ui.notify(`[DEBUG] Ignored (hallucination): "${text}"`, "info");
+			if (ctx.ui.hasInteractiveUI) {
+				ctx.ui.notify(`[DEBUG] Ignored (hallucination): "${text}"`, "info");
+			}
 			live.busy = false;
 			setLiveStatus(ctx);
-			void liveTurn(ctx);
+			void liveTurn(ctx, true);
 			return;
 		}
 
@@ -341,24 +349,30 @@ export default function visionExtension(pi: ExtensionAPI): void {
 			}
 			if (!matched) {
 				// No wake word detected — ignore and continue listening.
-				ctx.ui.notify(
-					`[DEBUG] No wake word. Got: "${normalized}", expected: ${wakeWords.join(", ")}`,
-					"info",
-				);
+				if (ctx.ui.hasInteractiveUI) {
+					ctx.ui.notify(
+						`[DEBUG] No wake word. Got: "${normalized}", expected: ${wakeWords.join(", ")}`,
+						"info",
+					);
+				}
 				live.busy = false;
 				setLiveStatus(ctx);
-				void liveTurn(ctx);
+				void liveTurn(ctx, true);
 				return;
 			}
 			if (!text) {
 				// Only wake word, no actual command — acknowledge and continue.
-				ctx.ui.notify("[DEBUG] Wake word only, no command", "info");
+				if (ctx.ui.hasInteractiveUI) {
+					ctx.ui.notify("[DEBUG] Wake word only, no command", "info");
+				}
 				live.busy = false;
 				setLiveStatus(ctx);
-				void liveTurn(ctx);
+				void liveTurn(ctx, true);
 				return;
 			}
-			ctx.ui.notify(`[DEBUG] Wake word matched! Command: "${text}"`, "info");
+			if (ctx.ui.hasInteractiveUI) {
+				ctx.ui.notify(`[DEBUG] Wake word matched! Command: "${text}"`, "info");
+			}
 		}
 
 		// Capture a fresh frame only if the user asks for vision (or liveAlwaysCapture is on).
