@@ -373,7 +373,7 @@
                   <tr><td><code>voiceCommandDuration</code></td><td><code>6000</code></td><td>Max recording duration for <code>/voice</code> command (ms)</td></tr>
                   <tr><td><code>liveTurnMaxMs</code></td><td><code>8000</code></td><td>Max recording duration per live-mode turn (ms)</td></tr>
                   <tr><td><code>liveAlwaysCapture</code></td><td><code>false</code></td><td>Capture screen on every utterance (ignore keyword detection)</td></tr>
-                  <tr><td><code>liveWakeWord</code></td><td><code>"freecode"</code></td><td>Wake word to activate processing (comma-separated for multiple)</td></tr>
+                  <tr><td><code>liveWakeWord</code></td><td><code>"freecode"</code></td><td>Wake word to activate processing (comma-separated for multiple, empty string to disable)</td></tr>
                   <tr><td><code>liveSpeak</code></td><td><code>true</code></td><td>Speak assistant responses in live mode</td></tr>
                   <tr><td><code>liveIndicator</code></td><td><code>true</code></td><td>Show status indicator when live mode is active</td></tr>
                 </tbody>
@@ -585,6 +585,8 @@ sudo apt install espeak
             <p>Make sure you say the exact wake word at the start of your utterance. Try:</p>
             <pre><code>/vision config liveWakeWord "hey,oye,freecode"</code></pre>
             <p>This allows any of those three to activate.</p>
+            <p><strong>To disable wake word detection</strong> (process all speech without requiring a specific word):</p>
+            <pre><code>/vision config liveWakeWord ""</code></pre>
 
             <h3>Images are too large / too expensive</h3>
             <p>Reduce max dimension or JPEG quality:</p>

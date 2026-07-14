@@ -42,6 +42,7 @@ import {
 	listSttBackends,
 	recordMicrophone,
 	transcribe,
+	isWhisperHallucination,
 	type RecordResult,
 } from "./lib/vision/stt.ts";
 import { listTtsBackends, speak, stopTts } from "./lib/vision/tts.ts";
@@ -254,7 +255,8 @@ export default function visionExtension(pi: ExtensionAPI): void {
 	async function liveTurn(ctx: ExtensionContext): Promise<void> {
 		if (!live.active) return;
 		if (live.busy) return;
-		ctx.ui.notify(`🎤 Listening (say "${getCfg().liveWakeWord || "anything"}" to activate)...`, "info");
+		const _liveWakeWord = getCfg().liveWakeWord;
+		ctx.ui.notify(_liveWakeWord ? `🎤 Listening (say "${_liveWakeWord}" to activate)...` : "🎤 Listening...", "info");
 		const cfg = getCfg();
 		live.busy = true;
 		setLiveStatus(ctx);
@@ -301,7 +303,16 @@ export default function visionExtension(pi: ExtensionAPI): void {
 			ctx.ui.notify(`[DEBUG] Ignored (too short): "${text}"`, "info");
 			live.busy = false;
 			setLiveStatus(ctx);
-			// Continue listening for the next utterance.
+			void liveTurn(ctx);
+			return;
+		}
+
+		// Ignore known Whisper hallucinations ("Thank you", "Thanks", etc.)
+		// that it produces on silence or low-energy audio.
+		if (isWhisperHallucination(text)) {
+			ctx.ui.notify(`[DEBUG] Ignored (hallucination): "${text}"`, "info");
+			live.busy = false;
+			setLiveStatus(ctx);
 			void liveTurn(ctx);
 			return;
 		}
@@ -500,7 +511,12 @@ export default function visionExtension(pi: ExtensionAPI): void {
 
 			if (sub === "config") {
 				const key = rest[0];
-				const value = rest[1];
+				const hasValue = rest.length > 1;
+				let value = rest.slice(1).join(" ");
+				// Strip surrounding quotes if present
+				if (value && ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'")))) {
+					value = value.slice(1, -1);
+				}
 				if (!key) {
 					ctx.ui.notify(
 						`Config:\n${Object.entries(cfg)
@@ -510,7 +526,7 @@ export default function visionExtension(pi: ExtensionAPI): void {
 					);
 					return;
 				}
-				if (!value) {
+				if (!hasValue) {
 					ctx.ui.notify(`${key} = ${JSON.stringify((cfg as unknown as Record<string, unknown>)[key])}`, "info");
 					return;
 				}

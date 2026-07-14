@@ -215,6 +215,48 @@ const BACKENDS: SttBackendDef[] = [
 	},
 ];
 
+/**
+ * Well-known Whisper hallucinations produced on silence or low-energy audio.
+ * Compared case-insensitively after stripping punctuation and trimming.
+ */
+const WHISPER_HALLUCINATIONS = new Set([
+	"thank you",
+	"thanks",
+	"you",
+	"bye",
+	"goodbye",
+	"please",
+	"uh",
+	"um",
+	"hmm",
+	"hm",
+	"ah",
+	"oh",
+	"okay",
+	"right",
+	"i see",
+	"i know",
+	"of course",
+	"all right",
+	"alright",
+	"great",
+	"good",
+	"very good",
+	"well done",
+	"wow",
+	"oh my god",
+	"oh wow",
+	"so",
+]);
+
+export function isWhisperHallucination(text: string): boolean {
+	const normalized = text
+		.toLowerCase()
+		.replace(/[^a-z\u00e1\u00e9\u00ed\u00f3\u00fa\u00f1 ]/g, "")
+		.trim();
+	return WHISPER_HALLUCINATIONS.has(normalized);
+}
+
 /** Transcribe a WAV file to text. */
 export async function transcribe(wavPath: string, opts: TranscribeOptions): Promise<string> {
 	let candidates = BACKENDS;

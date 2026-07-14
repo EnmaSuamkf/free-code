@@ -4,6 +4,7 @@
 
 ### Fixed
 
+- Vision `/vision config` command now correctly handles empty string values (e.g., `/vision config liveWakeWord ""` to disable wake word detection) by stripping surrounding quotes and using the full remaining argument instead of only the first token after the key.
 - Gemini `/gemini ask` + bundled `gemini-browser` skill: write into Gemini's prompt with click-to-focus + `type` (real keystrokes) instead of `fill`, which set an internal value while leaving the contenteditable editor visually empty so the Send button never appeared; send by clicking `[data-mat-icon-name="send"]` and never by pressing Return/Enter (Enter does not submit reliably and left the text in the input).
 - `/gemini open` now uses `navigate` (reuses the current tab) instead of `open` (which left an extra blank tab over CDP).
 - `browse-command.ts`, `gemini-command.ts`, and the VS Code CDP attach prompt now state that the CDP connection does not persist between calls: every `agent_browser` call must include `--cdp http://127.0.0.1:9222` and sessionMode `"fresh"`, and a blank/about:blank snapshot is recovered with `tab list` / `tab <id>` before retrying.
