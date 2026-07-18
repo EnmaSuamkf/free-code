@@ -111,8 +111,16 @@ export default function visionExtension(pi: ExtensionAPI): void {
 	const live: LiveState = { active: false, busy: false };
 
 	function resolveSttOpts(cfg: VisionConfig) {
-		const apiKey =
-			cfg.sttBackend === "groq" ? process.env.GROQ_API_KEY : process.env.OPENAI_API_KEY;
+		// In auto mode, prefer Groq over OpenAI (BACKENDS order in stt.ts)
+		let apiKey: string | undefined;
+		if (cfg.sttBackend === "groq") {
+			apiKey = process.env.GROQ_API_KEY;
+		} else if (cfg.sttBackend === "openai") {
+			apiKey = process.env.OPENAI_API_KEY;
+		} else {
+			// auto mode: try Groq first (matches BACKENDS order), then OpenAI
+			apiKey = process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY;
+		}
 		return {
 			backend: cfg.sttBackend,
 			language: cfg.language,
