@@ -46,6 +46,7 @@ import {
 	type RecordResult,
 } from "./lib/vision/stt.ts";
 import { listTtsBackends, speak, stopTts } from "./lib/vision/tts.ts";
+import { recordWithVAD, cleanupVadRecord, type VadRecordResult } from "./lib/vision/vad.ts";
 
 const VISION_SUBCOMMANDS = ["live", "status", "backends", "config"] as const;
 void VISION_SUBCOMMANDS;
@@ -110,8 +111,16 @@ export default function visionExtension(pi: ExtensionAPI): void {
 	const live: LiveState = { active: false, busy: false };
 
 	function resolveSttOpts(cfg: VisionConfig) {
-		const apiKey =
-			cfg.sttBackend === "groq" ? process.env.GROQ_API_KEY : process.env.OPENAI_API_KEY;
+		// In auto mode, prefer Groq over OpenAI (BACKENDS order in stt.ts)
+		let apiKey: string | undefined;
+		if (cfg.sttBackend === "groq") {
+			apiKey = process.env.GROQ_API_KEY;
+		} else if (cfg.sttBackend === "openai") {
+			apiKey = process.env.OPENAI_API_KEY;
+		} else {
+			// auto mode: try Groq first (matches BACKENDS order), then OpenAI
+			apiKey = process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY;
+		}
 		return {
 			backend: cfg.sttBackend,
 			language: cfg.language,
@@ -265,40 +274,63 @@ export default function visionExtension(pi: ExtensionAPI): void {
 
 		const controller = new AbortController();
 		live.captureAbort = controller;
-		let record;
-		try {
-			record = await recordMicrophone(controller.signal);
-		} catch (err) {
-			ctx.ui.notify(
-				`Live mode recording failed: ${err instanceof Error ? err.message : String(err)}`,
-				"error",
-			);
-			live.busy = false;
-			setLiveStatus(ctx);
-			return;
-		}
 
-		// Record up to liveTurnMaxMs; the PTT shortcut can abort sooner.
-		await Promise.race([
-			new Promise<void>((r) => setTimeout(r, cfg.liveTurnMaxMs)),
-			new Promise<void>((r) => controller.signal.addEventListener("abort", () => r(), { once: true })),
-		]);
-		await record.stop();
+		// --- Record with VAD or fixed timer ---
+		let wavPath: string;
+		if (cfg.liveVad) {
+			// VAD mode: keep recording while voice is detected, stop after silence.
+			let vadResult: VadRecordResult;
+			try {
+				vadResult = await recordWithVAD(controller.signal, {
+					silenceMs: cfg.liveSilenceMs,
+					maxDurationMs: cfg.liveTurnMaxMs > 0 ? cfg.liveTurnMaxMs : 60000,
+					energyThreshold: cfg.liveEnergyThreshold,
+				});
+			} catch (err) {
+				ctx.ui.notify(
+					`Live mode recording failed: ${err instanceof Error ? err.message : String(err)}`,
+					"error",
+				);
+				live.busy = false;
+				setLiveStatus(ctx);
+				return;
+			}
+			// Wait for VAD to auto-stop (silence) or manual abort.
+			await vadResult.done;
+			wavPath = vadResult.wavPath;
+		} else {
+			// Legacy fixed-timer mode.
+			let record: RecordResult;
+			try {
+				record = await recordMicrophone(controller.signal);
+			} catch (err) {
+				ctx.ui.notify(
+					`Live mode recording failed: ${err instanceof Error ? err.message : String(err)}`,
+					"error",
+				);
+				live.busy = false;
+				setLiveStatus(ctx);
+				return;
+			}
+			await Promise.race([
+				new Promise<void>((r) => setTimeout(r, cfg.liveTurnMaxMs)),
+				new Promise<void>((r) => controller.signal.addEventListener("abort", () => r(), { once: true })),
+			]);
+			await record.stop();
+			wavPath = record.wavPath;
+		}
 
 		let text: string;
 		try {
-			text = await transcribe(record.wavPath, resolveSttOpts(cfg));
+			text = await transcribe(wavPath, resolveSttOpts(cfg));
 			if (ctx.ui.hasInteractiveUI) {
 				ctx.ui.notify(`[DEBUG] Transcribed: "${text}"`, "info");
 			}
 		} catch (err) {
 			ctx.ui.notify(err instanceof Error ? err.message : String(err), "error");
-			cleanupRecord(record);
 			live.busy = false;
 			setLiveStatus(ctx);
 			return;
-		} finally {
-			cleanupRecord(record);
 		}
 
 		// Ignore empty transcriptions, noise, or just punctuation.
@@ -496,6 +528,7 @@ export default function visionExtension(pi: ExtensionAPI): void {
 						`Vision live: ${live.active ? "on" : "off"}`,
 						`capture: ${cfg.captureBackend} | stt: ${cfg.sttBackend} | tts: ${cfg.ttsBackend}`,
 						`language: ${cfg.language} | voice-mode: ${cfg.voiceMode}`,
+						`VAD: ${cfg.liveVad ? `on (silence: ${cfg.liveSilenceMs}ms, threshold: ${cfg.liveEnergyThreshold})` : `off (fixed: ${cfg.liveTurnMaxMs}ms)`}`,
 						`session: ${isWaylandSession() ? "Wayland" : "X11/other"}`,
 					].join("\n"),
 					"info",
