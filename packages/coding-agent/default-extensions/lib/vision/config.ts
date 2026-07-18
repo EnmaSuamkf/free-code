@@ -55,6 +55,12 @@ export interface VisionConfig {
 	liveAlwaysCapture: boolean;
 	/** Wake word to activate live mode listening (empty = no wake word, always process). */
 	liveWakeWord: string;
+	/** Voice Activity Detection for live mode. */
+	liveVad: boolean;
+	/** Silence duration threshold in milliseconds for live mode. */
+	liveSilenceMs: number;
+	/** Energy threshold for voice detection in live mode. */
+	liveEnergyThreshold: number;
 }
 
 export const DEFAULT_VISION_CONFIG: VisionConfig = {
@@ -75,7 +81,10 @@ export const DEFAULT_VISION_CONFIG: VisionConfig = {
 	voiceCommandDuration: 6000,
 	liveTurnMaxMs: 8000,
 	liveAlwaysCapture: false,
-	liveWakeWord: "freecode",
+	liveWakeWord: "auto",
+	liveVad: true,
+	liveSilenceMs: 2000,
+	liveEnergyThreshold: 0.015,
 };
 
 const ENV_MAP: Partial<Record<keyof VisionConfig, string>> = {
