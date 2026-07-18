@@ -55,11 +55,11 @@ export interface VisionConfig {
 	liveAlwaysCapture: boolean;
 	/** Wake word to activate live mode listening (empty = no wake word, always process). */
 	liveWakeWord: string;
-	/** Use Voice Activity Detection in live mode: stop recording after silence instead of a fixed timer. */
+	/** Voice Activity Detection for live mode. */
 	liveVad: boolean;
-	/** VAD: milliseconds of silence before auto-stopping. Default: 2000 */
+	/** Silence duration threshold in milliseconds for live mode. */
 	liveSilenceMs: number;
-	/** VAD: RMS energy threshold (0–1) to consider as voice. Default: 0.015 */
+	/** Energy threshold for voice detection in live mode. */
 	liveEnergyThreshold: number;
 }
 
@@ -81,7 +81,7 @@ export const DEFAULT_VISION_CONFIG: VisionConfig = {
 	voiceCommandDuration: 6000,
 	liveTurnMaxMs: 8000,
 	liveAlwaysCapture: false,
-	liveWakeWord: "freecode",
+	liveWakeWord: "auto",
 	liveVad: true,
 	liveSilenceMs: 2000,
 	liveEnergyThreshold: 0.015,
