@@ -106,6 +106,9 @@ const ENV_MAP: Partial<Record<keyof VisionConfig, string>> = {
 	liveTurnMaxMs: "VISION_LIVE_TURN_MAX_MS",
 	liveAlwaysCapture: "VISION_LIVE_ALWAYS_CAPTURE",
 	liveWakeWord: "VISION_LIVE_WAKE_WORD",
+	liveVad: "VISION_LIVE_VAD",
+	liveSilenceMs: "VISION_LIVE_SILENCE_MS",
+	liveEnergyThreshold: "VISION_LIVE_ENERGY_THRESHOLD",
 };
 
 export function visionConfigPath(agentDir?: string): string {
@@ -123,12 +126,16 @@ function parseValue(key: keyof VisionConfig, raw: string): unknown {
 		case "liveSpeak":
 		case "liveIndicator":
 		case "liveAlwaysCapture":
+		case "liveVad":
 			return raw === "true" || raw === "1";
 		case "captureMaxWidth":
 		case "captureJpegQuality":
 		case "voiceCommandDuration":
 		case "liveTurnMaxMs":
+		case "liveSilenceMs":
 			return Number.parseInt(raw, 10);
+		case "liveEnergyThreshold":
+			return Number.parseFloat(raw);
 		default:
 			return raw;
 	}
@@ -141,7 +148,8 @@ function coerce(key: keyof VisionConfig, value: unknown): VisionConfig[keyof Vis
 		key === "captureInteractive" ||
 		key === "liveSpeak" ||
 		key === "liveIndicator" ||
-		key === "liveAlwaysCapture"
+		key === "liveAlwaysCapture" ||
+		key === "liveVad"
 	) {
 		if (typeof value === "boolean") return value as boolean;
 		return parseValue(key, str) as boolean;
@@ -150,8 +158,13 @@ function coerce(key: keyof VisionConfig, value: unknown): VisionConfig[keyof Vis
 		key === "captureMaxWidth" ||
 		key === "captureJpegQuality" ||
 		key === "voiceCommandDuration" ||
-		key === "liveTurnMaxMs"
+		key === "liveTurnMaxMs" ||
+		key === "liveSilenceMs"
 	) {
+		if (typeof value === "number") return value as number;
+		return parseValue(key, str) as number;
+	}
+	if (key === "liveEnergyThreshold") {
 		if (typeof value === "number") return value as number;
 		return parseValue(key, str) as number;
 	}

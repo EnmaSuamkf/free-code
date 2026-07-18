@@ -197,16 +197,26 @@ interface SttBackendDef {
 
 const BACKENDS: SttBackendDef[] = [
 	{
-		id: "openai",
-		available: (opts) => Boolean(opts.apiKey),
-		transcribe: (wavPath, opts) =>
-			transcribeViaOpenAi(wavPath, opts, "https://api.openai.com/v1/audio/transcriptions"),
+		id: "groq",
+		available: (opts) => {
+			if (opts.backend === "auto") return Boolean(process.env.GROQ_API_KEY);
+			return Boolean(opts.apiKey);
+		},
+		transcribe: (wavPath, opts) => {
+			const apiKey = opts.backend === "auto" ? process.env.GROQ_API_KEY : opts.apiKey;
+			return transcribeViaOpenAi(wavPath, { ...opts, apiKey }, "https://api.groq.com/openai/v1/audio/transcriptions");
+		},
 	},
 	{
-		id: "groq",
-		available: (opts) => Boolean(opts.apiKey),
-		transcribe: (wavPath, opts) =>
-			transcribeViaOpenAi(wavPath, opts, "https://api.groq.com/openai/v1/audio/transcriptions"),
+		id: "openai",
+		available: (opts) => {
+			if (opts.backend === "auto") return Boolean(process.env.OPENAI_API_KEY);
+			return Boolean(opts.apiKey);
+		},
+		transcribe: (wavPath, opts) => {
+			const apiKey = opts.backend === "auto" ? process.env.OPENAI_API_KEY : opts.apiKey;
+			return transcribeViaOpenAi(wavPath, { ...opts, apiKey }, "https://api.openai.com/v1/audio/transcriptions");
+		},
 	},
 	{
 		id: "whisper-cpp",
@@ -275,7 +285,16 @@ export async function transcribe(wavPath: string, opts: TranscribeOptions): Prom
 	let lastError: Error | undefined;
 	for (const backend of available) {
 		try {
-			return await backend.transcribe(wavPath, opts);
+			// Auto-adjust model based on backend in auto mode
+			const adjustedOpts = { ...opts };
+			if (opts.backend === "auto") {
+				if (backend.id === "groq") {
+					adjustedOpts.model = "whisper-large-v3";
+				} else if (backend.id === "openai") {
+					adjustedOpts.model = "whisper-1";
+				}
+			}
+			return await backend.transcribe(wavPath, adjustedOpts);
 		} catch (err) {
 			lastError = err instanceof Error ? err : new Error(String(err));
 			continue;
@@ -337,8 +356,8 @@ export function listSttBackends(opts: {
 	groqKey?: string;
 }): SttBackendInfo[] {
 	return [
-		{ id: "openai", available: Boolean(opts.openaiKey), label: "OpenAI Whisper API" },
-		{ id: "groq", available: Boolean(opts.groqKey), label: "Groq Whisper API" },
+		{ id: "groq", available: Boolean(opts.groqKey), label: "Groq Whisper API (whisper-large-v3)" },
+		{ id: "openai", available: Boolean(opts.openaiKey), label: "OpenAI Whisper API (whisper-1)" },
 		{
 			id: "whisper-cpp",
 			available: commandAvailable("whisper") || commandAvailable("whisper-cpp"),
