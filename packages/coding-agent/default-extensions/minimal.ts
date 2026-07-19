@@ -75,7 +75,9 @@ export default function (pi: ExtensionAPI) {
 					const usage = ctx.getContextUsage();
 					const pctRaw = usage?.percent;
 					const pct = pctRaw !== null && pctRaw !== undefined ? pctRaw : 0;
-					const filled = Math.round(pct / 10) || 1;
+					// Clamp to [0, 10]: context usage can exceed 100% (e.g. 105%), which would
+					// make `10 - filled` negative and crash String.repeat with RangeError.
+					const filled = Math.max(0, Math.min(10, Math.round(pct / 10))) || 1;
 					const model = ctx.model?.id || "no-model";
 
 					const l2Left =

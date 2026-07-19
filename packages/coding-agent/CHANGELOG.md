@@ -4,6 +4,7 @@
 
 ### Fixed
 
+- Bundled `default-extensions/minimal.ts` footer: clamp the context-bar `filled` count to `[0, 10]` so context usage above 100% (e.g. 105%) no longer makes `10 - filled` negative and crashes `"-".repeat(...)` with `RangeError: Invalid count value` during render; the numeric percent still shows the true over-budget value.
 - Vision `/vision config` command now correctly handles empty string values (e.g., `/vision config liveWakeWord ""` to disable wake word detection) by stripping surrounding quotes and using the full remaining argument instead of only the first token after the key.
 - Gemini `/gemini ask` + bundled `gemini-browser` skill: write into Gemini's prompt with click-to-focus + `type` (real keystrokes) instead of `fill`, which set an internal value while leaving the contenteditable editor visually empty so the Send button never appeared; send by clicking `[data-mat-icon-name="send"]` and never by pressing Return/Enter (Enter does not submit reliably and left the text in the input).
 - `/gemini open` now uses `navigate` (reuses the current tab) instead of `open` (which left an extra blank tab over CDP).
