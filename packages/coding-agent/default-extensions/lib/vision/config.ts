@@ -79,7 +79,7 @@ export const DEFAULT_VISION_CONFIG: VisionConfig = {
 	liveIndicator: true,
 	shortcut: "ctrl+alt+v",
 	voiceCommandDuration: 6000,
-	liveTurnMaxMs: 8000,
+	liveTurnMaxMs: 60000,
 	liveAlwaysCapture: false,
 	liveWakeWord: "auto",
 	liveVad: true,
