@@ -38,6 +38,7 @@
 - Built-in theme JSON files are synced from the package into `~/.free-code/agent/themes/bundled/` (or `themes/bundled` under the active agent dir) whenever built-in themes load, so theme pickers and paths refer to the user config tree instead of the repo install path.
 - `docs/keybindings.md` and `docs/terminal-setup.md`: document that integrated-terminal `sendSequence` for Shift+Enter must use `"\u001b[13;2u"` in `args.text`, not `"\u001b\r"`.
 - `default-extensions/theme-toggle.ts`: `Ctrl+Shift+T` cycles through every installed theme; `/appearance` command removed (use `/pick-theme` for interactive selection with live preview).
+- Vision live-mode default `liveTurnMaxMs` raised from `8000` to `60000` (60 s) in `DEFAULT_VISION_CONFIG` (`default-extensions/lib/vision/config.ts`): each hands-free turn can now run up to a minute before the safety-net cut, matching the internal VAD cap; VAD silence-stop (`liveSilenceMs`, default 2000 ms) is unchanged. `web-docs/vision-mode.html` default table updated. Existing users with a persisted `~/.free-code/agent/vision.json` keep their stored value; unset or new installs get 60 s.
 - `default-extensions/startup-theme-picker.ts`: theme is only chosen via `/pick-theme` (no startup confirm dialog).
 - RAG `rag-manager` (TUI + examples): `/rag addFile` and `/rag addGroup` copy one file per call without requiring `<stem>.knowledge.md` next to primaries; selecting a KB ignores `GET /discover` **404** (older `free-code-rag`) instead of showing a warning.
 
