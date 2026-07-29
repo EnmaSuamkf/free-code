@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Lint, typecheck & installer syntax
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      # --ignore-scripts skips native/optional postinstall hooks (canvas, keytar,
+      # koffi, husky) that are not needed for lint/typecheck and are the main
+      # source of flakiness on hosted runners. esbuild and tsgo resolve their
+      # platform binaries through optional dependencies, so they still work.
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund --ignore-scripts
+
+      # Runs `biome check --error-on-warnings .` (WITHOUT `--write`, unlike the
+      # local `npm run check`, so CI never mutates the checkout), `tsgo --noEmit`
+      # over packages/*/src and packages/*/test, and the esbuild browser smoke
+      # bundle.
+      #
+      # Deliberately NOT run here: `cd packages/web-ui && npm run check`. Its
+      # tsconfig resolves @free/pi-ai, @free/pi-agent-core and @free/pi-tui to
+      # ../<pkg>/dist/index.d.ts, which only exist after a full `npm run build`,
+      # so it cannot pass on a clean checkout without building the whole
+      # monorepo. Biome linting/formatting of packages/web-ui/src and
+      # packages/web-ui/example IS already covered by the root biome run
+      # (see the `files.includes` globs in biome.json).
+      - name: Lint, typecheck and browser smoke bundle
+        run: npm run check:ci
+
+      - name: Shell syntax check for installer scripts
+        run: |
+          set -euo pipefail
+          for f in installation/*.sh installation/*.command; do
+            echo "bash -n $f"
+            bash -n "$f"
+          done

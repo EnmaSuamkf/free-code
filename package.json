@@ -18,6 +18,7 @@
 		"start": "node scripts/start-free-code.mjs",
 		"load:mcps": "node scripts/reset-mcp-cache.mjs",
 		"check": "biome check --write --error-on-warnings . && tsgo --noEmit && npm run check:browser-smoke && cd packages/web-ui && npm run check",
+		"check:ci": "biome check --error-on-warnings . && tsgo --noEmit && npm run check:browser-smoke",
 		"check:browser-smoke": "node scripts/check-browser-smoke.mjs",
 		"profile:tui": "node scripts/profile-coding-agent-node.mjs --mode tui",
 		"profile:rpc": "node scripts/profile-coding-agent-node.mjs --mode rpc",
