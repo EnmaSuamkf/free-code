@@ -1,5 +1,8 @@
 # macOS Installation
 
+> The full, platform-neutral install guide is **[installation.md](installation.md)** (CLI / plugin /
+> RAG tracks, with verification and troubleshooting). This page covers only the macOS-specific bits.
+
 ## Main installation
 
 The recommended way to install free-code on macOS is via the installation script included in the repository.
@@ -18,10 +21,15 @@ The script automatically installs everything needed:
 | Colima | Installs it via Homebrew |
 | Node.js (LTS) | Installs nvm and the latest LTS version; sets it as default |
 | Dependencies | `npm install` at the repo root |
+| Build | `npm run build` — required, `dist/` is not committed |
 | `free-code` CLI | `npm install -g ./packages/coding-agent` |
 | `agent-browser` | `npm install -g agent-browser` |
+| RAG environment | Creates `free-code-rag/.venv` and installs its Python dependencies |
 | FreeCodeMac.app | Copies the `.app` bundle to `/Applications` |
 | Launch | Runs `free-code` on completion |
+
+Prefer to skip Homebrew and Colima? Use `installation/install-free-code-mac_2.command`,
+which performs the same steps minus those two.
 
 ---
 
@@ -100,4 +108,4 @@ After installing, reload the editor:
 Cmd+Shift+P → Developer: Reload Window
 ```
 
-For more details on plugin configuration and usage see [vscode-cursor-plugin-guide.md](vscode-cursor-plugin-guide.md).
+For more details on plugin configuration and usage see [installation.md — Track B](installation.md#track-b--vs-code--cursor-plugin-rpc).

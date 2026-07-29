@@ -62,8 +62,8 @@ To test free-code's TUI in a controlled terminal environment:
 # Create tmux session with specific dimensions
 tmux new-session -d -s free-code-test -x 80 -y 24
 
-# Start free-code from source (see repo README: ./pi-test.sh, CLI name: free-code)
-tmux send-keys -t free-code-test "cd /path/to/free-code && ./pi-test.sh" Enter
+# Start free-code from source (launcher: ./free-code-test.sh, CLI name: free-code)
+tmux send-keys -t free-code-test "cd /path/to/free-code && ./free-code-test.sh" Enter
 
 # Wait for startup, then capture output
 sleep 3 && tmux capture-pane -t free-code-test -p

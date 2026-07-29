@@ -2,20 +2,24 @@
 
 How to generate the free-code distributable artifacts locally.
 
+> Just want to **install and use** free-code? Go to **[installation.md](installation.md)** instead.
+> This page is for developers rebuilding the `.app` and `.vsix` from source.
+
 ---
 
 ## Quick Reference
 
 ### FreeCodeMac (.app)
 
+Run these from the **repo root** — `package-free-code-macos-app.sh` lives in the
+root `scripts/` folder and runs `swift build` itself:
+
 ```bash
 npm install
 npm run build
-cd apps/free-code-macos
-swift build -c release
-./scripts/package-free-code-macos-app.sh          # → dist/FreeCodeMac.app
-./scripts/package-free-code-macos-app.sh --pkg    # → dist/FreeCodeMac.pkg
-cp -R dist/FreeCodeMac.app /Applications/
+./scripts/package-free-code-macos-app.sh          # → apps/free-code-macos/dist/FreeCodeMac.app
+./scripts/package-free-code-macos-app.sh --pkg    # also → apps/free-code-macos/dist/FreeCodeMac.pkg
+cp -R apps/free-code-macos/dist/FreeCodeMac.app /Applications/
 ```
 
 ### VS Code / Cursor plugin (.vsix)
@@ -52,7 +56,7 @@ xcode-select --install
 ## Initial setup
 
 ```bash
-git clone https://github.com/badlogic/free-code.git
+git clone https://github.com/EnmaSuamkf/free-code.git
 cd free-code
 npm install
 ```

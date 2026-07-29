@@ -461,7 +461,7 @@ In **Cursor**: **Cursor** menu → **Settings...** → **Settings** (`⌘,`), se
 
 **Option B — Launch Cursor/VS Code from a shell** where you already ran the `export`s (or your shell profile sets them).
 
-UI-focused plugin reference: [vscode-plugin.md](vscode-plugin.md).
+UI-focused plugin reference: [installation.md — Track B](installation.md#track-b--vs-code--cursor-plugin-rpc).
 
 #### Vertex auth and env at a glance
 

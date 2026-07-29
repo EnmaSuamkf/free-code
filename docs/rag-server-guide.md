@@ -2,29 +2,38 @@
 
 Local knowledge base system for free-code. Index your documents, GitHub repos, and files so the agent can search them during conversations.
 
+For installing and starting the server, see **[installation.md — Track C](installation.md#track-c--rag-server)**.
 For agent-side behavior and HTTP emulation map, see [`packages/coding-agent/skills/rag/SKILL.md`](../packages/coding-agent/skills/rag/SKILL.md).
 
 ---
 
 ## Quick Start
 
-```bash
-# 1. Start the RAG server (default port 8085)
-free-code-rag
+The server is normally **started automatically** by `free-code` (it needs
+`free-code-rag/.venv`, which the installer scripts create). There is no
+`free-code-rag` executable. To start it yourself:
 
-# 2. Create a knowledge base
+```bash
+cd free-code-rag && make start      # runs .venv/bin/python main.py on port 8085
+curl http://localhost:8085/health   # verify
+```
+
+Then, inside a free-code session:
+
+```
+# 1. Create a knowledge base
 /rag-kb create my-kb
 
-# 3. Select it
+# 2. Select it
 /rag-kb use my-kb
 
-# 4. Add documents
+# 3. Add documents
 /rag addFile /path/to/doc.md
 /rag addGroup /path/to/folder
 /rag addGithubUrl https://github.com/org/repo docs/
 /rag addDrive https://docs.google.com/document/d/...
 
-# 5. Search
+# 4. Search
 /rag search "how does authentication work?"
 ```
 
@@ -223,9 +232,16 @@ Example `sources.json`:
 | Environment variable | Default | Description |
 |---|---|---|
 | `FREE_CODE_RAG_SERVER_URL` | `http://localhost:8085` | RAG server base URL |
+| `FREE_CODE_RAG_SERVER_AUTO` | `1` | Set to `0`/`false`/`no` to disable auto-start of the Python server |
+| `FREE_CODE_RAG_SERVER_DIR` | *(auto-detected)* | Directory containing `main.py` and `requirements.txt` |
 | `FREE_CODE_RAG_MAX_CHUNKS` | `3` | Max chunks returned per query |
 | `FREE_CODE_RAG_MAX_CHARS` | `3000` | Max total characters returned per query |
-| `FAISS_PERSIST_DIR` | `~/.free-code/faiss_store` | Override FAISS index directory |
+| `FAISS_PERSIST_DIR` | `~/.free-code/faiss_store` | Override FAISS index directory (server side) |
+| `PORT` / `HOST` | `8085` / `0.0.0.0` | Server listen port and bind address (`main.py`) |
+
+Auto-start resolves the project directory in this order: `FREE_CODE_RAG_SERVER_DIR`,
+then a one-line absolute path in `~/.free-code/agent/rag-server-dir`, then a
+`free-code-rag/` folder next to the free-code checkout.
 
 ---
 

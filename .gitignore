@@ -52,3 +52,6 @@ free-code-rag/.pytest_cache/
 
 
 features/
+
+# Vendored third-party checkout (whisper.cpp upstream sources), not part of this repo
+whisper.cpp/

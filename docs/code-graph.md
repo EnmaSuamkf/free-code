@@ -153,5 +153,5 @@ Adding `.code-graph/` to `.gitignore` is recommended to avoid committing the ind
 | Topic | File |
 |-------|------|
 | Commands reference | [commands-reference.md](commands-reference.md) |
-| Extensions | [extensions.md](extensions.md) |
+| Extensions | [extensions.md](../packages/coding-agent/docs/extensions.md) |
 | Built-in tools | [commands-reference.md#model-and-tools-cli](commands-reference.md) |

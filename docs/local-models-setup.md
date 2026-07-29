@@ -521,4 +521,4 @@ Para restaurar: copia este bloque en `~/.free-code/agent/models.json`.
 
 ---
 
-See also: [free-code-local-setup.md](free-code-local-setup.md) for broader configuration options.
+See also: [advanced-configuration.md](advanced-configuration.md) for broader configuration options.

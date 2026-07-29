@@ -131,9 +131,14 @@
             </p>
 
             <h3>Start the server</h3>
-            <p>The knowledge base is served by a small local server (default port 8085). Start it, then create and select a knowledge base:</p>
-            <pre><code># 1. Start the RAG server (keep it running)
-free-code-rag            # default http://localhost:8085
+            <p>
+              The knowledge base is served by a small local Python server (default port 8085).
+              <code>free-code</code> normally starts it for you — it just needs
+              <code>free-code-rag/.venv</code>, which the installer scripts create. There is no
+              <code>free-code-rag</code> command; to run it by hand:
+            </p>
+            <pre><code># 1. Start the RAG server by hand (keep it running)
+cd free-code-rag &amp;&amp; make start   # default http://localhost:8085
 
 # 2. In a free-code session, create and select a knowledge base
 /rag-kb create my-docs

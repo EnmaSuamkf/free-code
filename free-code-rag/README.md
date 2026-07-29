@@ -4,14 +4,63 @@ Local RAG server that indexes documents (PDF, DOCX, TXT, MD) from `~/.free-code/
 
 ---
 
+## Prerequisites
+
+| Requirement | Notes |
+|---|---|
+| Python 3.10+ | 3.12 is what the Docker image uses |
+| `python3-venv` | Debian/Ubuntu: `sudo apt-get install python3-venv` |
+| ~3 GB free disk | `torch` + `sentence-transformers` wheels |
+| Network access | First run downloads the `all-MiniLM-L6-v2` embedding model from Hugging Face |
+
+---
+
 ## Quick Start
 
+Install into a **virtual environment**. A bare `pip3 install` fails with
+`error: externally-managed-environment` (PEP 668) on Debian/Ubuntu and on
+Homebrew Python:
+
 ```bash
-pip3 install -r requirements.txt
-python3 main.py
+cd free-code-rag
+make venv     # creates .venv and installs requirements.txt
+make start    # runs .venv/bin/python main.py
+```
+
+Equivalent by hand:
+
+```bash
+python3 -m venv .venv
+./.venv/bin/python -m pip install --upgrade pip
+./.venv/bin/python -m pip install -r requirements.txt
+./.venv/bin/python main.py
 ```
 
 The server starts on **`localhost:8085`**. API docs at http://localhost:8085/docs
+
+Verify it is up:
+
+```bash
+curl http://localhost:8085/health
+```
+
+> **You usually do not need to start this by hand.** When `free-code` starts, it
+> auto-launches this server if it finds `free-code-rag/` next to the checkout and
+> nothing is already listening on the RAG URL. It prefers `.venv/bin/python`, so
+> creating the venv above is what makes auto-start reliable. Set
+> `FREE_CODE_RAG_SERVER_AUTO=0` to disable auto-start.
+
+### Configuration
+
+| Variable | Default | Description |
+|---|---|---|
+| `HOST` | `0.0.0.0` | Bind address (`main.py`) |
+| `PORT` | `8085` | Listen port (`main.py`) |
+| `RELOAD` | `false` | uvicorn auto-reload |
+| `FAISS_PERSIST_DIR` | `~/.free-code/faiss_store` | Vector index location (`src/api.py`) |
+
+The client side (`free-code`) is pointed at this server with
+`FREE_CODE_RAG_SERVER_URL` (default `http://localhost:8085`).
 
 ---
 
@@ -122,7 +171,7 @@ cp my-docs/*.pdf ~/.free-code/knowledgeBase/team-docs/
 ### 2. Start the server
 
 ```bash
-python3 main.py
+make start
 ```
 
 The server loads existing per-KB indexes on startup.
@@ -149,7 +198,12 @@ curl "http://localhost:8085/query?text=your+question+here&kb=team-docs"
 make docker-dev
 ```
 
-The Docker setup mounts `~/.free-code/knowledgeBase` and `faiss_store/` from the host.
+The Docker setup mounts `~/.free-code/knowledgeBase` and `faiss_store/` from the host
+and publishes port 8085.
+
+Behind a corporate TLS-inspecting proxy the image build fails on `pip install` with a
+certificate error. See the comment block at the bottom of `docker-compose.dev.yml` for
+the `CA_BUNDLE` override that supplies your CA bundle.
 
 ---
 
