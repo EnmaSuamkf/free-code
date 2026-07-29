@@ -107,6 +107,7 @@
                 <tbody>
                   <tr><td>Node.js (LTS)</td><td>nvm + latest LTS; set as default</td></tr>
                   <tr><td>Dependencies</td><td><code>npm install</code> at repo root</td></tr>
+                  <tr><td>Build</td><td><code>npm run build</code> — required, <code>dist/</code> is not committed</td></tr>
                   <tr><td>free-code CLI</td><td><code>npm install -g ./packages/coding-agent</code></td></tr>
                   <tr><td>agent-browser</td><td><code>npm install -g agent-browser</code></td></tr>
                   <tr><td>RAG (optional)</td><td>Python venv for the local knowledge-base server</td></tr>
@@ -165,8 +166,10 @@ export ANTHROPIC_API_KEY=sk-...</code></pre>
                   <tr><td>Colima</td><td>Container runtime (via Homebrew)</td></tr>
                   <tr><td>Node.js (LTS)</td><td>nvm + latest LTS; set as default</td></tr>
                   <tr><td>Dependencies</td><td><code>npm install</code> at repo root</td></tr>
+                  <tr><td>Build</td><td><code>npm run build</code> — required, <code>dist/</code> is not committed</td></tr>
                   <tr><td>free-code CLI</td><td><code>npm install -g ./packages/coding-agent</code></td></tr>
                   <tr><td>agent-browser</td><td><code>npm install -g agent-browser</code></td></tr>
+                  <tr><td>RAG (optional)</td><td>Python venv for the local knowledge-base server</td></tr>
                   <tr><td>FreeCodeMac.app</td><td>Copies the <code>.app</code> bundle to <code>/Applications</code></td></tr>
                 </tbody>
               </table>
@@ -207,9 +210,19 @@ export GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json
               clicking a few buttons. Follow the steps below exactly — you don't need any command line.
             </div>
 
+            <div class="callout warning">
+              <strong>Install the CLI first.</strong><br />
+              The plugin ships only the user interface. It runs the agent by spawning the
+              <code>free-code</code> CLI as a child process with <code>--mode rpc</code> and talking to
+              it over stdio (no network port involved). If the CLI is not installed and built, the
+              chat panel will fail with <code>spawn free-code ENOENT</code>.
+            </div>
+
             <h3>What you need first</h3>
             <ul>
-              <li>VS Code <em>or</em> Cursor installed on your computer.</li>
+              <li>The <strong>CLI installed</strong> — run the installer script for your platform, or
+                <code>npm install &amp;&amp; npm run build &amp;&amp; npm install -g ./packages/coding-agent</code>.</li>
+              <li>VS Code <em>or</em> Cursor <strong>1.90.0 or newer</strong>.</li>
               <li>The <strong>free-code folder</strong> you downloaded (the same one where the install script lives). Inside it there is a plugin file at:
                 <br /><code>packages/vscode-free-code/vscode-free-code-0.66.1.vsix</code>
                 <br />A <code>.vsix</code> file is just the packaged plugin.
@@ -250,6 +263,35 @@ code --install-extension packages/vscode-free-code/vscode-free-code-0.66.1.vsix
 
 # Cursor
 cursor --install-extension packages/vscode-free-code/vscode-free-code-0.66.1.vsix</code></pre>
+
+            <h3>If the chat panel doesn't answer</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Symptom</th><th>Fix</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><code>spawn free-code ENOENT</code></td>
+                    <td>The editor's PATH has no <code>free-code</code> (GUI apps don't inherit your shell
+                      profile). Set <strong>Free Code: Executable path</strong> to an absolute path such as
+                      <code>/abs/path/to/repo/packages/coding-agent/dist/cli.js</code>.</td>
+                  </tr>
+                  <tr>
+                    <td><code>Unknown command: get_tool_picker_state</code></td>
+                    <td>The plugin reached an older <code>free-code</code> on PATH. Run
+                      <code>npm run build</code> in the monorepo, then <strong>Developer: Reload Window</strong>.</td>
+                  </tr>
+                  <tr>
+                    <td>API keys work in the terminal but not in the editor</td>
+                    <td>Put them in the <code>free-code.env</code> setting.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              Executable resolution order: the <code>free-code.executablePath</code> setting (if it is an
+              existing <code>.js</code> path), then the workspace's
+              <code>packages/coding-agent/dist/cli.js</code>, then <code>free-code</code> on PATH.
+            </p>
           </div>
         </section>
 
@@ -265,11 +307,22 @@ cursor --install-extension packages/vscode-free-code/vscode-free-code-0.66.1.vsi
 nvm install --lts
 nvm use --lts</code></pre>
 
-            <h3>2. Install the CLI</h3>
-            <pre><code>npm install -g ./packages/coding-agent</code></pre>
+            <h3>2. Build the workspace, then install the CLI</h3>
+            <pre><code># from the repository root
+npm install
+npm run build                            # REQUIRED — dist/ is not committed
+npm install -g ./packages/coding-agent</code></pre>
+            <div class="callout warning">
+              <strong><code>npm run build</code> is not optional.</strong><br />
+              The <code>free-code</code> binary is <code>packages/coding-agent/dist/cli.js</code>.
+              <code>dist/</code> is git-ignored and the package has no <code>prepare</code> script, so
+              <code>npm install -g</code> will not build it for you. Skip the build and
+              <code>free-code</code> points at a file that does not exist.
+            </div>
 
             <h3>3. Verify</h3>
-            <pre><code>free-code --version</code></pre>
+            <pre><code>ls packages/coding-agent/dist/cli.js   # must exist
+free-code -v</code></pre>
 
             <h3>4. Start</h3>
             <pre><code>free-code                              # interactive
@@ -285,12 +338,17 @@ cat README.md | free-code -p "Summarize"  # pipe input</code></pre>
             <p>Adds symbol indexing and call graph navigation to the agent.</p>
           </div>
           <div class="card-body">
-            <pre><code># From the repository root
-npm install -g ./packages/code-graph</code></pre>
+            <div class="callout info">
+              <strong>Nothing to install.</strong><br />
+              <code>@free/code-graph</code> is a library dependency of
+              <code>packages/coding-agent</code>, not a standalone command — it has no
+              <code>bin</code>. <code>npm run build</code> plus
+              <code>npm install -g ./packages/coding-agent</code> already bundles it.
+            </div>
 
             <p>
-              Once installed, the <code>code_index</code>, <code>code_symbols</code>,
-              <code>code_callers</code>, and <code>code_context</code> tools become available
+              The <code>code_index</code>, <code>code_symbols</code>,
+              <code>code_callers</code>, and <code>code_context</code> tools are available
               automatically in every session.
             </p>
 

@@ -68,6 +68,12 @@ macOS / VS Code / Cursor / CLI, and interactive demos.
 
 ### Install
 
+→ **[docs/installation.md](docs/installation.md) is the authoritative install guide.** It has three
+separate tracks — **CLI**, **VS Code / Cursor plugin (RPC)**, and **RAG server** — each with
+Prerequisites → Install → Verify → Troubleshooting.
+
+Requirements: Git and **Node.js 20+** (Python 3.10+ only if you want RAG).
+
 ```bash
 # Linux — installs the CLI
 bash ./installation/install-free-code-linux.sh
@@ -82,8 +88,13 @@ On macOS you can also double-click `install-free-code-mac.command` in Finder.
 
 ```bash
 npm install
+npm run build                            # required — dist/ is not committed
 npm install -g ./packages/coding-agent
 ```
+
+> `npm run build` is **not** optional. The `free-code` binary is `packages/coding-agent/dist/cli.js`,
+> `dist/` is git-ignored, and the package has no `prepare` script — so `npm install -g` will not
+> build it for you.
 
 ### Start a session
 
@@ -92,7 +103,7 @@ free-code
 ```
 
 On macOS you can also open the **FreeCodeMac** desktop app from `/Applications`. Want the editor
-plugin? See [Install the VS Code / Cursor plugin](web-docs/installation.html).
+plugin? See [Track B — VS Code / Cursor plugin](docs/installation.md#track-b--vs-code--cursor-plugin-rpc).
 
 ---
 
@@ -135,7 +146,9 @@ The full documentation site lives in **`web-docs/`** (open `web-docs/index.html`
 
 | Topic | Web docs | Guide |
 | --- | --- | --- |
-| Installation (all platforms) | [installation](web-docs/installation.html) | [setup-guide-all-platforms.md](docs/setup-guide-all-platforms.md) · [mac-installation.md](docs/mac-installation.md) |
+| **Installation (CLI / plugin / RAG)** | [installation](web-docs/installation.html) | **[installation.md](docs/installation.md)** |
+| Installation — macOS specifics | [installation](web-docs/installation.html) | [mac-installation.md](docs/mac-installation.md) |
+| Building `.app` / `.vsix` from source | — | [setup-guide-all-platforms.md](docs/setup-guide-all-platforms.md) |
 | Commands & shortcuts | [commands](web-docs/commands.html) | [commands-reference.md](docs/commands-reference.md) |
 | Code graph | [code graph](web-docs/code-graph.html) | [code-graph.md](docs/code-graph.md) |
 | RAG knowledge base | [rag](web-docs/rag.html) | [rag-server-guide.md](docs/rag-server-guide.md) |

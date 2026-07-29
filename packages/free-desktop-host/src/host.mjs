@@ -7354,7 +7354,7 @@ function rpcToolPickerErrorMessage(error) {
     base.includes("Unknown command: get_skill_picker_state") ||
     base.includes("Unknown command: set_skill_picker")
   ) {
-    return `${base}\n\nIf you develop in this monorepo, run \`npm run build\` so \`packages/coding-agent/dist/cli.js\` exists; the extension prefers that over an older \`free-code\` on your PATH. Or point **Free Code: Executable path** at a current build (see docs/free-code-local-setup.md).`;
+    return `${base}\n\nIf you develop in this monorepo, run \`npm run build\` so \`packages/coding-agent/dist/cli.js\` exists; the extension prefers that over an older \`free-code\` on your PATH. Or point **Free Code: Executable path** at a current build (see docs/installation.md).`;
   }
   return base;
 }

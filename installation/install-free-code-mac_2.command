@@ -6,11 +6,16 @@
 # Steps:
 #   1. Install nvm + Node (latest LTS), set as nvm default
 #   2. npm install (repo dependencies)
-#   3. npm install -g ./packages/coding-agent
-#   4. npm install -g agent-browser
-#   5. Create free-code-rag/.venv and install Python dependencies
-#   6. Copy FreeCodeMac.app -> /Applications
-#   7. Launch free-code
+#   3. npm run build (compiles packages/coding-agent/dist — required, see below)
+#   4. npm install -g ./packages/coding-agent
+#   5. npm install -g agent-browser
+#   6. Create free-code-rag/.venv and install Python dependencies
+#   7. Copy FreeCodeMac.app -> /Applications
+#   8. Launch free-code
+#
+# Why step 3 is mandatory: packages/coding-agent declares bin `free-code` ->
+# `dist/cli.js`, and `dist/` is git-ignored (never committed). The package has no
+# `prepare` script, so `npm install -g ./packages/coding-agent` does NOT build it.
 #
 # To skip launching at the end:
 #   INSTALL_FREE_CODE_NO_LAUNCH=1 bash installation/install-free-code-mac_2.command
@@ -30,6 +35,15 @@ FAILED_STEPS=()
 
 has_cmd() { command -v "$1" >/dev/null 2>&1; }
 die()      { echo "Error: $*" >&2; exit 1; }
+
+# free-code requires Node 20+ (see "engines" in package.json).
+REQUIRED_NODE_MAJOR=20
+check_node_version() {
+  has_cmd node || return 1
+  local major
+  major="$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 0)"
+  [[ "${major}" -ge "${REQUIRED_NODE_MAJOR}" ]]
+}
 
 run_optional() {
   local label="$1"; shift
@@ -127,6 +141,12 @@ main() {
     FAILED_STEPS+=("Node.js not available")
   fi
 
+  if has_cmd node && ! check_node_version; then
+    echo "Warning: Node $(node --version) is older than the required v${REQUIRED_NODE_MAJOR}." >&2
+    echo "         The build and the free-code CLI will fail. Upgrade Node and rerun." >&2
+    FAILED_STEPS+=("Node.js older than v${REQUIRED_NODE_MAJOR}")
+  fi
+
   # ── 2. Repo dependencies ───────────────────────────────────────────────────
   echo "==> npm install (repo dependencies)"
   if has_cmd npm; then
@@ -137,6 +157,25 @@ main() {
   else
     echo "Warning: npm not found; skipping repo dependency install." >&2
     FAILED_STEPS+=("npm not available")
+  fi
+
+  # ── 2b. Build the workspace ────────────────────────────────────────────────
+  # Mandatory: packages/coding-agent/dist is git-ignored and the package has no
+  # `prepare` script, so the global install below would link a missing dist/cli.js.
+  echo "==> npm run build (compiles packages/coding-agent/dist)"
+  if has_cmd npm; then
+    if ! (cd "${REPO_ROOT}" && npm run build); then
+      echo "Warning: npm run build failed; 'free-code' will not work until this succeeds." >&2
+      FAILED_STEPS+=("npm run build (repo root)")
+    fi
+  else
+    echo "Warning: npm not found; skipping build." >&2
+  fi
+
+  if [[ ! -f "${REPO_ROOT}/packages/coding-agent/dist/cli.js" ]]; then
+    echo "Warning: ${REPO_ROOT}/packages/coding-agent/dist/cli.js is missing after the build." >&2
+    echo "         The global 'free-code' command and the VS Code plugin will not work." >&2
+    FAILED_STEPS+=("packages/coding-agent/dist/cli.js not built")
   fi
 
   # ── 3. Install coding-agent globally ──────────────────────────────────────
@@ -200,9 +239,14 @@ main() {
 
   # ── 7. Launch free-code ───────────────────────────────────────────────────
   if [[ -z "${INSTALL_FREE_CODE_NO_LAUNCH:-}" ]]; then
-    echo "==> Launching free-code"
-    cd "${REPO_ROOT}"
-    exec free-code
+    if has_cmd free-code; then
+      echo "==> Launching free-code"
+      cd "${REPO_ROOT}"
+      exec free-code
+    else
+      echo "Warning: 'free-code' command not found on PATH." >&2
+      echo "         Open a new terminal (so nvm/npm global bin is on PATH) and run: free-code" >&2
+    fi
   fi
 }
 

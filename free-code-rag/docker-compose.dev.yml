@@ -3,22 +3,36 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      secrets:
-        - ca-cert
-    env_file:
-      - .env
     environment:
-      SSL_CERT_FILE: "/etc/ssl/certs/netskope.pem"
-      REQUESTS_CA_BUNDLE: "/etc/ssl/certs/netskope.pem"
       PORT: "8085"
     volumes:
       - ./faiss_store:/app/faiss_store
       - ~/.free-code/knowledgeBase:/root/.free-code/knowledgeBase
-      - ${NODE_EXTRA_CA_CERTS:-/Users/pablo.castaneda/Documents/netskope-cert-bundle.pem}:/etc/ssl/certs/netskope.pem:ro
     ports:
       - "8085:8085"
     command: python main.py
 
-secrets:
-  ca-cert:
-    file: ${NODE_EXTRA_CA_CERTS:-/Users/pablo.castaneda/Documents/netskope-cert-bundle.pem}
+# ─────────────────────────────────────────────────────────────────────────────
+# Behind a corporate TLS-inspecting proxy (Netskope, Zscaler, …)?
+# `pip install` inside the image will fail with a certificate error. Point
+# CA_BUNDLE at your CA bundle and add an override file:
+#
+#   CA_BUNDLE=/absolute/path/to/ca-bundle.pem \
+#     docker compose -f docker-compose.dev.yml -f docker-compose.ca.yml up rag-server
+#
+# docker-compose.ca.yml:
+#
+#   services:
+#     rag-server:
+#       build:
+#         secrets:
+#           - ca-cert
+#       environment:
+#         SSL_CERT_FILE: "/etc/ssl/certs/corporate-ca.pem"
+#         REQUESTS_CA_BUNDLE: "/etc/ssl/certs/corporate-ca.pem"
+#       volumes:
+#         - ${CA_BUNDLE}:/etc/ssl/certs/corporate-ca.pem:ro
+#   secrets:
+#     ca-cert:
+#       file: ${CA_BUNDLE}
+# ─────────────────────────────────────────────────────────────────────────────

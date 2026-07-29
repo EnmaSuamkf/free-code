@@ -14,7 +14,7 @@ free-code [options] [@files...] [messages...]
 | Initial message | `free-code "your question"` |
 | Help / version | `free-code -h` · `free-code -v` |
 
-Configuration directory: defaults to `~/.free-code/agent` (env var `FREE_CODE_CODING_AGENT_DIR`; legacy `PI_CODING_AGENT_DIR`). Much older documentation references `~/.pi/agent/`; effective behavior depends on your environment. See [settings.md](settings.md).
+Configuration directory: defaults to `~/.free-code/agent` (env var `FREE_CODE_CODING_AGENT_DIR`; legacy `PI_CODING_AGENT_DIR`). Much older documentation references `~/.pi/agent/`; effective behavior depends on your environment. See [settings.md](../packages/coding-agent/docs/settings.md).
 
 ---
 
@@ -60,13 +60,13 @@ Type `/` in the editor to open the command menu. Extensions can add more; skills
 | `/codeGraph-context <name> [--file partial-path]` | Source code and callees of a symbol |
 | `/quit` | Quit |
 
-More context: [session.md](session.md), [tree.md](tree.md), [compaction.md](compaction.md), [code-graph.md](code-graph.md).
+More context: [session.md](../packages/coding-agent/docs/session.md), [tree.md](../packages/coding-agent/docs/tree.md), [compaction.md](../packages/coding-agent/docs/compaction.md), [code-graph.md](code-graph.md).
 
 ---
 
 ## Keyboard shortcuts (summary)
 
-Customization: `keybindings.json` (see [keybindings.md](keybindings.md)). After editing, run `/reload`.
+Customization: `keybindings.json` (see [keybindings.md](../packages/coding-agent/docs/keybindings.md)). After editing, run `/reload`.
 
 | Key | Action |
 |-----|--------|
@@ -80,7 +80,7 @@ Customization: `keybindings.json` (see [keybindings.md](keybindings.md)). After 
 | Ctrl+O | Collapse / expand tool output |
 | Ctrl+T | Collapse / expand thinking blocks |
 
-In the editor: `@` for files, `!command` / `!!command` for bash (see README and [keybindings.md](keybindings.md)).
+In the editor: `@` for files, `!command` / `!!command` for bash (see README and [keybindings.md](../packages/coding-agent/docs/keybindings.md)).
 
 ---
 
@@ -118,7 +118,7 @@ In the editor: `@` for files, `!command` / `!!command` for bash (see README and 
 | `free-code list` | List installed packages |
 | `free-code config` | Enable or disable package resources |
 
-Typical sources: `npm:@scope/package`, `git:...`, URL. See [packages.md](packages.md).
+Typical sources: `npm:@scope/package`, `git:...`, URL. See [packages.md](../packages/coding-agent/docs/packages.md).
 
 ---
 
@@ -126,10 +126,10 @@ Typical sources: `npm:@scope/package`, `git:...`, URL. See [packages.md](package
 
 | Mode | How | Documentation |
 |------|-----|----------------|
-| Interactive | (default) | README, [tui.md](tui.md) |
+| Interactive | (default) | README, [tui.md](../packages/coding-agent/docs/tui.md) |
 | Print | `-p`, `--print` | Single response and exit; accepts piped stdin |
-| JSON line-by-line | `--mode json` | [json.md](json.md) (replace `pi` with `free-code` in examples) |
-| RPC | `--mode rpc` | [rpc.md](rpc.md) |
+| JSON line-by-line | `--mode json` | [json.md](../packages/coding-agent/docs/json.md) (replace `pi` with `free-code` in examples) |
+| RPC | `--mode rpc` | [rpc.md](../packages/coding-agent/docs/rpc.md) |
 | Export session | `--export <input.jsonl> [output]` | HTML if output does not end in `.md`; **Markdown** if the second arg is `*.md` (no second arg: default name next to the session) |
 
 Export examples from the terminal (without opening the TUI):
@@ -206,7 +206,7 @@ free-code -p @screenshot.png "What is in the image?"
 | `PI_CACHE_RETENTION` | `long` for extended prompt cache (provider-dependent) |
 | `VISUAL`, `EDITOR` | External editor (e.g. Ctrl+G) |
 
-API keys per provider: see [providers.md](providers.md).
+API keys per provider: see [providers.md](../packages/coding-agent/docs/providers.md).
 
 ---
 
@@ -214,15 +214,15 @@ API keys per provider: see [providers.md](providers.md).
 
 | Topic | File |
 |-------|------|
-| Full settings | [settings.md](settings.md) |
-| Providers and models | [providers.md](providers.md), [models.md](models.md) |
-| Skills | [skills.md](skills.md) |
-| Extensions | [extensions.md](extensions.md) |
-| Prompt templates | [prompt-templates.md](prompt-templates.md) |
-| Themes | [themes.md](themes.md) |
-| Embedded SDK | [sdk.md](sdk.md) |
-| VS Code / Cursor plugin (chat export, settings) | [vscode-plugin.md](vscode-plugin.md) |
+| Full settings | [settings.md](../packages/coding-agent/docs/settings.md) |
+| Providers and models | [providers.md](../packages/coding-agent/docs/providers.md), [models.md](../packages/coding-agent/docs/models.md) |
+| Skills | [skills.md](../packages/coding-agent/docs/skills.md) |
+| Extensions | [extensions.md](../packages/coding-agent/docs/extensions.md) |
+| Prompt templates | [prompt-templates.md](../packages/coding-agent/docs/prompt-templates.md) |
+| Themes | [themes.md](../packages/coding-agent/docs/themes.md) |
+| Embedded SDK | [sdk.md](../packages/coding-agent/docs/sdk.md) |
+| VS Code / Cursor plugin (chat export, settings) | [installation.md — Track B](installation.md#track-b--vs-code--cursor-plugin-rpc) |
 | Code graph (symbol and call index) | [code-graph.md](code-graph.md) |
-| Terminal / tmux / Windows | [terminal-setup.md](terminal-setup.md), [tmux.md](tmux.md), [windows.md](windows.md) |
+| Terminal / tmux / Windows | [terminal-setup.md](../packages/coding-agent/docs/terminal-setup.md), [tmux.md](../packages/coding-agent/docs/tmux.md), [windows.md](../packages/coding-agent/docs/windows.md) |
 
 The broader CLI reference is in the **CLI Reference** section of [README.md](../README.md).

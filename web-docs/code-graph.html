@@ -404,14 +404,20 @@
         <section class="card" aria-labelledby="cg-install">
           <div class="card-header">
             <h2 id="cg-install">Installation</h2>
-            <p>The code graph is a separate package installed once at the global level.</p>
+            <p>Nothing to install separately — it ships with the CLI.</p>
           </div>
           <div class="card-body">
-            <pre><code># From the repository root
-npm install -g ./packages/code-graph</code></pre>
+            <div class="callout info">
+              <strong>Included with free-code.</strong><br />
+              <code>@free/code-graph</code> is a library dependency of
+              <code>packages/coding-agent</code> and has no <code>bin</code> of its own, so there is
+              no global install for it. Installing the CLI
+              (<code>npm run build</code> + <code>npm install -g ./packages/coding-agent</code>)
+              is all you need.
+            </div>
 
             <p>
-              Once installed, the four code graph tools (<code>code_index</code>,
+              The four code graph tools (<code>code_index</code>,
               <code>code_symbols</code>, <code>code_callers</code>, <code>code_context</code>)
               and their <code>/codeGraph-*</code> slash commands appear automatically in every
               free-code session. No configuration needed.

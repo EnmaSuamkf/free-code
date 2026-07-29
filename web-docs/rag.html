@@ -228,8 +228,18 @@
           </div>
           <div class="card-body">
             <h3>Start the server</h3>
-            <pre><code># Keep this running (default http://localhost:8085)
-free-code-rag</code></pre>
+            <div class="callout info">
+              <strong>Usually automatic.</strong> <code>free-code</code> starts this server itself when
+              it finds <code>free-code-rag/</code> and nothing is listening yet. It needs
+              <code>free-code-rag/.venv</code>, which the installer scripts create. There is
+              <strong>no <code>free-code-rag</code> command</strong>.
+            </div>
+            <pre><code># One-time setup (or use the installer script)
+cd free-code-rag &amp;&amp; make venv
+
+# Start it by hand (default http://localhost:8085)
+make start
+curl http://localhost:8085/health   # verify</code></pre>
 
             <h3>Quick start in a session</h3>
             <pre><code>/rag-kb create my-docs     # create a knowledge base
