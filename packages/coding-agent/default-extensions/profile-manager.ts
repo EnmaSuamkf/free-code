@@ -2,6 +2,13 @@
  * User profiles: `/profile` and a single startup profile picker (when UI is available).
  *
  * Persists to ~/.free-code/agent/profiles.json (see `getProfilesPath()`).
+ *
+ * `FREE_CODE_STARTUP_PROFILE=<id>` in the environment skips the picker and applies
+ * that profile directly (unknown ids fall back to the default profile) — for
+ * terminals spawned programmatically, e.g. target's "Open conversation", where a
+ * blocking select would stop on a prompt before the conversation paints. The
+ * forced choice is not persisted as `activeProfile`: it's the spawner's, not the
+ * user's "last used".
  */
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
@@ -507,6 +514,18 @@ export default function profileManagerExtension(pi: ExtensionAPI) {
 		ensureProfilesFileOnDisk();
 		let file = readUserProfilesFile();
 		setProfileFooterStatus(ctx, file);
+
+		const forcedProfile = process.env.FREE_CODE_STARTUP_PROFILE?.trim();
+		if (forcedProfile) {
+			const id = file.profiles[forcedProfile] ? forcedProfile : DEFAULT_PROFILE_ID;
+			setProfileFooterStatus(ctx, { ...file, activeProfile: id });
+			const ar = await applyFromFile(pi, ctx, file, id);
+			applyProfileRagKb(file.profiles[id] ?? defaultSerializedProfile());
+			const w = formatProfileApplyWarnings(ar);
+			if (w) ctx.ui.notify(`Profile "${id}" applied (${w})`, "warning");
+			else ctx.ui.notify(`Profile "${id}" applied`, "info");
+			return;
+		}
 
 		if (ctx.hasUI) {
 			const ids = Object.keys(file.profiles).sort((a, b) => {
