@@ -1,7 +1,14 @@
 /**
- * User profiles: `/profile`; startup always applies the default profile (no picker).
+ * User profiles: `/profile` and a single startup profile picker (when UI is available).
  *
  * Persists to ~/.free-code/agent/profiles.json (see `getProfilesPath()`).
+ *
+ * `FREE_CODE_STARTUP_PROFILE=<id>` in the environment skips the picker and applies
+ * that profile directly (unknown ids fall back to the default profile) — for
+ * terminals spawned programmatically, e.g. target's "Open conversation", where a
+ * blocking select would stop on a prompt before the conversation paints. The
+ * forced choice is not persisted as `activeProfile`: it's the spawner's, not the
+ * user's "last used".
  */
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
@@ -508,24 +515,55 @@ export default function profileManagerExtension(pi: ExtensionAPI) {
 		let file = readUserProfilesFile();
 		setProfileFooterStatus(ctx, file);
 
-		// Startup always forces the default profile, interactive or headless.
-		// No picker: a blocking select stops scripted terminals (e.g. the hub's
-		// "Open conversation") on a prompt before the conversation paints. And a
-		// headless spawned run (an awb workflow step) must not silently inherit
-		// whatever profile a previous session persisted — both entry points
-		// start from the same known state. Switching profiles mid-session is
-		// what `/profile use` is for.
-		file.activeProfile = DEFAULT_PROFILE_ID;
-		writeUserProfilesFile(file);
-		setProfileFooterStatus(ctx, file);
-		const ar = await applyFromFile(pi, ctx, file, DEFAULT_PROFILE_ID);
-		applyProfileRagKb(file.profiles[DEFAULT_PROFILE_ID]);
-		const w = formatProfileApplyWarnings(ar);
-		if (ctx.hasUI) {
-			if (w) ctx.ui.notify(`Using default profile (${w})`, "warning");
-			else ctx.ui.notify("Using default profile (empty optional resources).", "info");
-		} else if (w) {
-			ctx.ui.notify(`Startup profile: ${w}`, "warning");
+		const forcedProfile = process.env.FREE_CODE_STARTUP_PROFILE?.trim();
+		if (forcedProfile) {
+			const id = file.profiles[forcedProfile] ? forcedProfile : DEFAULT_PROFILE_ID;
+			setProfileFooterStatus(ctx, { ...file, activeProfile: id });
+			const ar = await applyFromFile(pi, ctx, file, id);
+			applyProfileRagKb(file.profiles[id] ?? defaultSerializedProfile());
+			const w = formatProfileApplyWarnings(ar);
+			if (w) ctx.ui.notify(`Profile "${id}" applied (${w})`, "warning");
+			else ctx.ui.notify(`Profile "${id}" applied`, "info");
+			return;
 		}
+
+		if (ctx.hasUI) {
+			const ids = Object.keys(file.profiles).sort((a, b) => {
+				if (a === DEFAULT_PROFILE_ID) return -1;
+				if (b === DEFAULT_PROFILE_ID) return 1;
+				return a.localeCompare(b);
+			});
+			const items = ids.map((id) => {
+				const mark = id === file.activeProfile ? " (last used)" : "";
+				return `${id}${mark}`;
+			});
+			const picked = await ctx.ui.select("Select session profile", items);
+			if (!picked) {
+				file.activeProfile = DEFAULT_PROFILE_ID;
+				writeUserProfilesFile(file);
+				setProfileFooterStatus(ctx, file);
+				const ar = await applyFromFile(pi, ctx, file, DEFAULT_PROFILE_ID);
+				applyProfileRagKb(file.profiles[DEFAULT_PROFILE_ID]);
+				const w = formatProfileApplyWarnings(ar);
+				if (w) ctx.ui.notify(`Using default profile (${w})`, "warning");
+				else ctx.ui.notify("Using default profile (empty optional resources).", "info");
+				return;
+			}
+			const id = picked.replace(/\s+\(last used\)$/, "");
+			const applyResult = await applyFromFile(pi, ctx, file, id);
+			applyProfileRagKb(file.profiles[id]);
+			file.activeProfile = id;
+			writeUserProfilesFile(file);
+			setProfileFooterStatus(ctx, file);
+			const w = formatProfileApplyWarnings(applyResult);
+			if (w) ctx.ui.notify(`Profile "${id}" applied (${w})`, "warning");
+			else ctx.ui.notify(`Profile "${id}" applied`, "info");
+			return;
+		}
+
+		const headlessResult = await applyFromFile(pi, ctx, file, file.activeProfile);
+		applyProfileRagKb(file.profiles[file.activeProfile] ?? defaultSerializedProfile());
+		const w = formatProfileApplyWarnings(headlessResult);
+		if (w) ctx.ui.notify(`Startup profile: ${w}`, "warning");
 	});
 }
